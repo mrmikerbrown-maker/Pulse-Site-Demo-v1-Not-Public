@@ -1,8 +1,8 @@
 {
- "generated": "2026-10-13T08:26:14Z",
+ "generated": "2026-10-13T09:47:30Z",
  "history_last_date": "2026-10-08",
  "vols": {
-  "vix": 15.48,
+  "vix": 15.36,
   "gvz": 22.48,
   "move": 98.5,
   "eurusd": 4.66,
@@ -114,6 +114,18 @@
     "n": 24
    }
   }
+ },
+ "pricing": {
+  "meeting": "2026-10-28",
+  "cut": 0,
+  "hike": 0.18,
+  "hold": 0.82,
+  "net_bp": 4.5,
+  "effr": 3.88,
+  "contract": "ZQX26.CBT",
+  "price": 96.07499694824219,
+  "asof": "2026-10-13",
+  "source": "30-day fed funds futures via Yahoo (delayed); 25bp steps assumed"
  },
  "next_event": {
   "date": "2026-10-28",
