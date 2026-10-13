@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fed Scenario Planner</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f6f7f9;--card:#fff;--text:#14181f;--muted:#667085;--line:#e3e6eb;--up:#0f9d58;--down:#d93025;--accent:#2563eb}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1218;--card:#181c25;--text:#e8ebf0;--muted:#8b93a3;--line:#2a303c;--up:#34d399;--down:#f87171;--accent:#60a5fa}}
+:root[data-theme="dark"]{--bg:#0f1218;--card:#181c25;--text:#e8ebf0;--muted:#8b93a3;--line:#2a303c;--up:#34d399;--down:#f87171;--accent:#60a5fa}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.4}
+.wrap{max-width:1000px;margin:0 auto;padding:20px 16px 32px}
+h1{font-size:20px;margin:0 0 4px}h2{font-size:14px;margin:0 0 10px}
+.sub,.n{color:var(--muted);font-size:12px}.sub{font-size:13px;margin:0 0 12px}.n{margin-top:8px}
+.warn{background:rgba(217,119,6,.12);border:1px solid rgba(217,119,6,.4);border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:12px}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+label{display:block;font-size:12px;color:var(--muted)}label small{display:block;font-size:11px;opacity:.85}
+input[type=number],select{width:100%;margin-top:4px;font:inherit;font-size:14px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.pv{font-size:22px;font-weight:700}
+button{font:inherit;font-size:13px;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text);cursor:pointer}
+button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.info{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.info span{color:var(--muted)}.info b{color:var(--text)}
+summary{cursor:pointer;font-size:14px;font-weight:600}details .g{margin-top:12px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:760px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left;white-space:nowrap}
+th{font-size:12px;color:var(--muted);font-weight:600}
+td small{display:block;font-size:10px;color:var(--muted)}
+tr.s td{color:var(--muted);font-size:12px}tr.e td{font-weight:700;border-top:2px solid var(--line)}
+.rm textarea{width:100%;min-height:70px;margin-top:4px;font:inherit;font-size:14px;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);resize:vertical}
+.res{margin-top:12px;font-size:13px}.res b{font-size:15px}.res div{margin-top:4px}
+tr.u td{background:rgba(37,99,235,.10);font-weight:600}
+.w{width:60px!important;display:inline-block;margin:0!important;padding:3px 5px!important;font-size:12px!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Fed scenario planner</h1>
+<p class="sub">End-of-day planning tool. Enter the cut and hike odds priced in and see how each Fed scenario could play out across assets, sized to current volatility and calibrated on recent history.</p>
+<div class="warn"><b>Read this first.</b> Sensitivities come from about three years of daily data; FOMC-day estimates rest on only 24 events, so treat them as rough. Scenario sizes are assumptions. FX vols are realised, not implied. A planning aid, not a forecast or trading advice.</div>
+
+<div class="card">
+ <div class="g">
+  <div><label>Chance of a cut at the next meeting<small>auto from fed funds futures when available, else enter from FedWatch</small></label><div class="pv" id="pcv"></div><input type="range" id="pc" min="0" max="100" step="5" value="60"></div>
+  <div><label>Chance of a hike at the next meeting<small>auto from fed funds futures when available, else enter from FedWatch</small></label><div class="pv" id="phv"></div><input type="range" id="ph" min="0" max="100" step="5" value="0"></div>
+  <div><label>Event<small>sets the typical move size</small></label><select id="bump"></select></div>
+ </div>
+ <div class="n" id="pnet"></div>
+ <div class="info" id="info"></div>
+</div>
+
+<div class="card rm">
+ <h2>Type a Fed remark</h2>
+ <label>What did (or might) the Chair say?<small>Claude reads it against the current rate pricing and suggests where it sits on the dovish-to-hawkish scale. It is a suggestion, and it cannot know how the market will actually take it.</small></label>
+ <textarea id="rtxt" placeholder="e.g. Chair says the September CPI report did not show much progress on inflation"></textarea>
+ <div class="row" style="margin-top:8px"><button id="rbtn" class="on">Read the remark</button><span class="n" id="rmnote" style="margin:0"></span></div>
+ <div class="res" id="rout"></div>
+ <div style="margin-top:12px"><label>Your reading <small>drag to adjust; this drives the highlighted row in the matrix</small></label><div class="row"><span class="n" style="margin:0">Dovish</span><input type="range" id="rz" min="-2" max="2" step="0.05" value="0" style="flex:1;min-width:160px"><span class="n" style="margin:0">Hawkish</span><b id="rzv" style="min-width:150px;text-align:right"></b></div></div>
+</div>
+
+<div class="card">
+<h2>Scenario matrix</h2>
+<div class="tw"><table id="tb"></table></div>
+<div class="n" id="asy"></div>
+<div class="n">Typical move = vol ÷ √252 × event multiplier. Each scenario moves the 2yr yield by a set number of typical moves; other assets follow using their measured sensitivity per 10bp of 2yr move. σ under each number compares the move with a typical event-day move. "Hit rate" is how often the asset moved the expected way on days when the 2yr moved 3bp or more; "±" is one standard error on the sensitivity.</div>
+</div>
+
+<div class="card"><details><summary>Advanced: override anything</summary>
+ <div class="g">
+  <div><label>Stock regime<small id="rg"></small></label><div class="row"><button id="mr">Rates</button><button id="mg">Growth</button></div></div>
+  <div><label>Sensitivity basis<small>S&amp;P always uses the chosen regime</small></label><select id="basis"><option value="blend">Blend (weights each estimate by its precision)</option><option value="all">All days</option><option value="fomc">FOMC days only</option></select></div>
+  <div><label>VIX</label><input type="number" id="vix" step="0.1"></div>
+  <div><label>MOVE (bp)</label><input type="number" id="move" step="1"></div>
+  <div><label>GVZ</label><input type="number" id="gvz" step="0.1"></div>
+  <div><label>EURUSD vol %<small>realised; swap in implied if you have it</small></label><input type="number" id="eu" step="0.1"></div>
+  <div><label>GBPUSD vol %</label><input type="number" id="gb" step="0.1"></div>
+  <div><label>USDJPY vol %</label><input type="number" id="jp" step="0.1"></div>
+ </div>
+ <div class="row" style="margin-top:12px"><button id="rw">Reset scenario weights to auto</button><span class="n" style="margin:0">Weights start from the cut and hike odds (more weight on the dovish side when cuts are priced, on the hawkish side when hikes are) and are normalised to 100%.</span></div>
+</details></div>
+</div>
+
+<script>
+var EMB={"generated":"2026-10-13T08:26:14Z","history_last_date":"2026-10-08","vols":{"vix":15.48,"gvz":22.48,"move":98.5,"eurusd":4.66,"gbpusd":5.19,"usdjpy":11.03},"regime":{"name":"rates","corr60":-0.267},"bump_fomc":1.22,"betas_per_10bp":{"eurusd":{"all":{"b":-0.215,"r2":0.08,"hit":0.662,"n":658},"fomc":{"b":-0.153,"r2":0.053,"hit":0.632,"n":24}},"gbpusd":{"all":{"b":-0.174,"r2":0.05,"hit":0.639,"n":658},"fomc":{"b":-0.139,"r2":0.065,"hit":0.579,"n":24}},"usdjpy":{"all":{"b":0.283,"r2":0.074,"hit":0.624,"n":658},"fomc":{"b":-0.022,"r2":0.001,"hit":0.474,"n":24}},"spx":{"all":{"b":0.052,"r2":0.001,"hit":0.422,"n":658},"fomc":{"b":-0.649,"r2":0.312,"hit":0.842,"n":24},"rates":{"b":-0.122,"r2":0.006,"hit":0.619,"n":346},"growth":{"b":0.453,"r2":0.048,"hit":0.481,"n":252}},"gold":{"all":{"b":-0.479,"r2":0.04,"hit":0.611,"n":658},"fomc":{"b":-0.12,"r2":0.009,"hit":0.632,"n":24}},"y10":{"all":{"b":7.719,"r2":0.66,"hit":0.887,"n":658},"fomc":{"b":6.541,"r2":0.78,"hit":0.947,"n":24}}},"next_event":{"date":"2026-10-28","type":"FOMC decision"}};
+var have=false,lbl="Your scenario",SMP=null,D=EMB,src="built-in snapshot",mode="rates",custom=false,$=function(i){return document.getElementById(i)};
+var SC=[["Very dovish",-1.5],["Dovish",-.75],["No change",0],["Hawkish",.75],["Very hawkish",1.5]];
+function g(i){return +$(i).value}
+function auto(p){var d=.15+.35*p,h=.15+.35*(1-p);return[d/3,2*d/3,.35,2*h/3,h/3].map(function(x){return Math.round(x*100)})}
+function f(a,x){if(Math.abs(x)<(a.bp?.05:.005))x=0;var s=x>0?"+":x<0?"−":"";return s+Math.abs(x).toFixed(a.bp?1:2)+(a.bp?" bp":"%")}
+function bg(x,r){if(Math.abs(x)<1e-9)return"";var o=Math.min(.35,Math.abs(r)/2*.35);return"background:"+(x>0?"rgba(15,157,88,":"rgba(217,48,37,")+o.toFixed(2)+")"}
+function pick(a){
+ var b=D.betas_per_10bp[a],bs=$("basis").value,all=a==="spx"?(b[mode]||b.all):b.all,fo=b.fomc;
+ if(!all||!fo)return all||fo;
+ if(bs==="all")return all;if(bs==="fomc")return fo;
+ var ea=se(all),ef=se(fo);if(!ea||!ef)return{b:(all.b+fo.b)/2,r2:all.r2,hit:all.hit,n:all.n};var wa=1/(ea*ea),wf=1/(ef*ef);return{b:(wa*all.b+wf*fo.b)/(wa+wf),r2:all.r2,hit:all.hit,n:all.n};
+}
+function se(s){return s&&s.n>2&&s.r2>0?Math.abs(s.b)*Math.sqrt((1-s.r2)/(s.r2*(s.n-2))):null}
+function nx(){return (g("pc")-g("ph"))/100}
+function pe(){return (1+nx())/2}
+function fillW(p){var w=auto(p);SC.forEach(function(c,i){var e=$("w"+i);if(e)e.value=w[i]})}
+function calc(){
+ var p=pe(),bump=g("bump"),sq=Math.sqrt(252);
+ var pc=g("pc"),ph=g("ph"),net=25*(ph-pc)/100;$("pcv").textContent=pc+"%";$("phv").textContent=ph+"%";$("pnet").textContent="Hold: "+(100-pc-ph)+"% · net expected move at the next meeting: "+(net>0?"+":net<0?"−":"")+Math.abs(net).toFixed(1)+" bp";$("mr").className=mode==="rates"?"on":"";$("mg").className=mode==="growth"?"on":"";
+ var A=[{n:"EURUSD",v:g("eu"),k:"eurusd"},{n:"GBPUSD",v:g("gb"),k:"gbpusd"},{n:"USDJPY",v:g("jp"),k:"usdjpy"},{n:"S&P 500",v:g("vix"),k:"spx"},{n:"US 2yr",v:g("move"),bp:1,k:"y2"},{n:"US 10yr",v:g("move"),bp:1,k:"y10"},{n:"Gold",v:g("gvz"),k:"gold"}];
+ A.forEach(function(a){a.s=a.v/sq*bump;a.st=a.k==="y2"?{b:10}:pick(a.k);a.b=a.st.b});
+ var s2=A[4].s,h='<tr><th>Scenario</th><th>Weight %</th>'+A.map(function(a){return"<th>"+a.n+"</th>"}).join("")+"</tr>";
+ h+='<tr class="s"><td>Typical event move (±1σ)</td><td></td>'+A.map(function(a){return"<td>±"+a.s.toFixed(a.bp?1:2)+(a.bp?" bp":"%")+"</td>"}).join("")+"</tr>";
+ h+='<tr class="s"><td>Sensitivity per 10bp of 2yr</td><td></td>'+A.map(function(a){var e=se(a.st);return"<td>"+f(a,a.b)+(e?"<small>±"+e.toFixed(a.bp?1:2)+"</small>":"")+"</td>"}).join("")+"</tr>";
+ h+='<tr class="s"><td>Hit rate</td><td></td>'+A.map(function(a){return"<td>"+(a.st.hit==null?"–":Math.round(a.st.hit*100)+"%")+"</td>"}).join("")+"</tr>";
+ if(have){var zu=g("rz"),su=zu===0?0:zu*s2*(zu>0?.5+p:1.5-p);h+='<tr class="u"><td>'+lbl+'</td><td></td>'+A.map(function(a){var x=a.b*su/10,r=x/a.s;return'<td style="'+bg(x,r)+'">'+(zu===0?"–":f(a,x)+"<small>"+(r>0?"+":r<0?"−":"")+Math.abs(r).toFixed(1)+"σ</small>")+"</td>"}).join("")+"</tr>"}
+ var W=SC.map(function(c,i){var e=$("w"+i);return e?+e.value:auto(p)[i]}),tot=W.reduce(function(x,y){return x+y},0)||1,ex=A.map(function(){return 0});
+ SC.forEach(function(c,i){
+  var z=c[1],shift=z===0?0:z*s2*(z>0?.5+p:1.5-p);
+  h+="<tr><td>"+c[0]+'</td><td><input class="w" type="number" id="w'+i+'" value="'+W[i]+'" min="0" step="5"></td>';
+  A.forEach(function(a,k){var x=a.b*shift/10,r=x/a.s;ex[k]+=x*W[i]/tot;h+='<td style="'+bg(x,r)+'">'+(z===0?"–":f(a,x)+"<small>"+(r>0?"+":r<0?"−":"")+Math.abs(r).toFixed(1)+"σ</small>")+"</td>"});
+  h+="</tr>";
+ });
+ h+='<tr class="e"><td>Probability-weighted</td><td></td>'+A.map(function(a,k){return"<td>"+f(a,ex[k])+"</td>"}).join("")+"</tr>";
+ var act=document.activeElement&&document.activeElement.id,pos=act&&$(act)&&$(act).selectionStart;
+ $("tb").innerHTML=h;
+ SC.forEach(function(c,i){$("w"+i).addEventListener("input",function(){custom=true;calc()})});
+ if(act&&/^w\d$/.test(act)){var el=$(act);el.focus();try{el.setSelectionRange(pos,pos)}catch(e){}}
+ var lean=nx();$("asy").textContent="Pricing leans "+(lean>.05?"towards cuts":lean<-.05?"towards hikes":"neutral")+", so hawkish scenarios are weighted ×"+(.5+p).toFixed(2)+" and dovish ×"+(1.5-p).toFixed(2)+": the more the pricing leans dovish, the more room for a hawkish surprise and the less for a dovish one, and the reverse when it leans towards hikes.";
+}
+function zdesc(z){var a=Math.abs(z);if(a<.15)return"In line with what is priced";return(a<.6?"Slightly ":a<1.2?"Moderately ":"Strongly ")+(z>0?"hawkish":"dovish")+" ("+(z>0?"+":"−")+a.toFixed(2)+")"}
+var ERR={not_granted:"Claude access was declined for this page.",rate_limited:"Too many requests or a usage limit was hit. Try again later.",invalid_json:"Claude's reply could not be read. Try again.",sampling_disabled:"Claude is not available for this account."};
+function remarkSetup(){
+ $("rz").addEventListener("input",function(){have=true;lbl="Your scenario";$("rzv").textContent=zdesc(g("rz"));calc()});
+ $("rzv").textContent=zdesc(0);
+ if(!(window.claude&&window.claude.use)){$("rbtn").disabled=true;$("rmnote").textContent="Remark reading only works inside claude.ai. You can still set the scenario with the slider.";return}
+ window.claude.use("sample").then(function(s){SMP=s;if(!s){$("rbtn").disabled=true;$("rmnote").textContent="Remark reading is not available here. You can still set the scenario with the slider."}}).catch(function(){$("rbtn").disabled=true});
+ $("rbtn").onclick=async function(){
+  var t=$("rtxt").value.trim();if(!t||!SMP)return;
+  var ne=D.next_event,pr=g("pc")+"% cut, "+(100-g("pc")-g("ph"))+"% hold, "+g("ph")+"% hike";
+  var q="You are helping a rates and FX trader plan around a Federal Reserve event. Read the remark below and judge how hawkish or dovish it is RELATIVE TO WHAT THE MARKET HAS ALREADY PRICED, using only the text and the context given. Do not assume facts you were not given.\n\nContext: market-implied probabilities for the next FOMC meeting are: "+pr+". Next event: "+(ne?ne.type+" on "+ne.date:"unknown")+". Stocks currently trade in a '"+mode+"' regime.\n\nRemark: \"\"\""+t+"\"\"\"\n\nScale for z: 0 = no change to expectations. +0.75 = mildly hawkish surprise (fewer or later cuts). +1.5 = strongly hawkish. Negative values are dovish (more or sooner cuts). Allowed range -2 to +2. If the remark just repeats the established stance, keep z near 0. If it is ambiguous or you lack context, lower your confidence and keep |z| small.\n\nReply with JSON only, no other text: {\"z\": number, \"label\": \"2-4 words\", \"vs_priced\": \"one sentence on how this reads against the priced-in rate expectations\", \"confidence\": \"low\"|\"medium\"|\"high\", \"reasoning\": \"at most two sentences\"}";
+  $("rbtn").disabled=true;$("rout").textContent="Thinking…";
+  try{
+   var j=await SMP.json(q,{cache:false});
+   var z=Math.max(-2,Math.min(2,+j.z||0));
+   $("rz").value=z;have=true;lbl=(j.label||"Your scenario");$("rzv").textContent=zdesc(z);
+   var el=$("rout");el.innerHTML="";
+   function ln(h){var d=document.createElement("div");d.innerHTML=h;el.appendChild(d)}
+   function esc(x){return String(x==null?"":x).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})}
+   ln("<b>"+esc(j.label)+"</b> · confidence "+esc(j.confidence));
+   ln(esc(j.vs_priced));ln('<span class="n">'+esc(j.reasoning)+"</span>");
+   calc();
+  }catch(e){$("rout").textContent=ERR[e&&e.code]||"Could not read the remark right now."}
+  finally{$("rbtn").disabled=false}
+ };
+}
+function setup(){
+ var v=D.vols;$("vix").value=v.vix;$("move").value=v.move;$("gvz").value=v.gvz;$("eu").value=v.eurusd;$("gb").value=v.gbpusd;$("jp").value=v.usdjpy;
+ var pr=D.pricing,prs="manual entry";
+ if(pr){var c5=Math.round(pr.cut*20)*5,h5=Math.round(pr.hike*20)*5;$("pc").value=c5;$("ph").value=Math.min(h5,100-c5);prs="fed funds futures, "+pr.contract.replace(".CBT","")+" ("+pr.asof+")"}
+ var b=D.bump_fomc||1.3,m=$("bump");
+ m.innerHTML='<option value="1">Ordinary day (×1.00)</option><option value="'+(1+(b-1)/2).toFixed(2)+'">Fed speech (×'+(1+(b-1)/2).toFixed(2)+')</option><option value="'+b+'" selected>FOMC decision (×'+b.toFixed(2)+')</option>';
+ mode=D.regime.name;$("rg").textContent="auto: "+D.regime.name+" (60-day stock/yield correlation "+D.regime.corr60+")";
+ var ne=D.next_event,d=ne&&new Date(ne.date+"T00:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"});
+ $("info").innerHTML='<div><span>Next event</span><br><b>'+(ne?ne.type+" · "+d:"–")+'</b></div><div><span>Stock regime (auto)</span><br><b>'+D.regime.name+'</b></div><div><span>History to</span><br><b>'+D.history_last_date+'</b></div><div><span>Rate pricing</span><br><b>'+prs+'</b></div><div><span>Data</span><br><b>'+src+'</b></div>';
+ ["pc","ph","bump","basis","vix","move","gvz","eu","gb","jp"].forEach(function(i){$(i).addEventListener("input",function(){if(i==="pc"&&g("pc")+g("ph")>100)$("ph").value=100-g("pc");if(i==="ph"&&g("pc")+g("ph")>100)$("pc").value=100-g("ph");if((i==="pc"||i==="ph")&&!custom)fillW(pe());calc()})});
+ $("mr").onclick=function(){mode="rates";calc()};$("mg").onclick=function(){mode="growth";calc()};
+ $("rw").onclick=function(){custom=false;fillW(pe());calc()};
+ remarkSetup();
+ calc();
+}
+fetch("data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){D=j;src="live ("+j.generated.slice(0,10)+")"}).catch(function(){}).then(setup);
+</script>
+</body>
+</html>
