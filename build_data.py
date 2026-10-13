@@ -1,7 +1,7 @@
 """Builds data.json for the Fed scenario planner.
 Fetches ~3y of daily history, then computes: latest vols, stock-bond regime,
 betas per 10bp of 2yr move (all days / FOMC days), hit rates and an event bump."""
-import io, json, time, datetime as dt
+import io, json, time, calendar, datetime as dt
 import numpy as np, pandas as pd, requests
 
 UA = {"User-Agent": "Mozilla/5.0"}
@@ -30,8 +30,8 @@ def fetch(url, params=None, tries=3, timeout=60):
     raise last
 
 
-def get_yahoo(tk):
-    r = fetch(f"https://query1.finance.yahoo.com/v8/finance/chart/{tk}", {"range": "3y", "interval": "1d"})
+def get_yahoo(tk, rng="3y"):
+    r = fetch(f"https://query1.finance.yahoo.com/v8/finance/chart/{tk}", {"range": rng, "interval": "1d"})
     j = r.json()["chart"]["result"][0]
     s = pd.Series(j["indicators"]["quote"][0]["close"],
                   index=pd.to_datetime(j["timestamp"], unit="s").normalize(), dtype=float).dropna()
@@ -62,14 +62,54 @@ def get_treasury():
 
 def get_yields():
     try:
-        fr = {k: get_fred(s) for k, s in FRED.items()}
-        print("Yields: FRED ok")
-        return fr["y2"], fr["y10"]
+        y2, y10 = get_treasury()
+        print("Yields: Treasury ok, last", y2.index[-1].date())
+        return y2, y10
     except Exception as e:
-        print("Yields: FRED failed, trying Treasury:", repr(e)[:150])
-    y2, y10 = get_treasury()
-    print("Yields: Treasury ok")
-    return y2, y10
+        print("Yields: Treasury failed, trying FRED:", repr(e)[:150])
+    fr = {k: get_fred(s) for k, s in FRED.items()}
+    print("Yields: FRED ok")
+    return fr["y2"], fr["y10"]
+
+
+MCODE = "FGHJKMNQUVXZ"
+
+
+def zq_price(year, month):
+    tk = f"ZQ{MCODE[month - 1]}{str(year)[2:]}.CBT"
+    s = get_yahoo(tk, "1mo")
+    return float(s.iloc[-1]), str(s.index[-1].date()), tk
+
+
+def get_effr():
+    r = fetch("https://markets.newyorkfed.org/api/rates/unsecured/effr/last/1.json")
+    return float(r.json()["refRates"][0]["percentRate"])
+
+
+def rate_pricing(today):
+    """Cut/hold/hike odds for the next FOMC decision from 30-day fed funds futures (100 - price = avg EFFR)."""
+    nxt = [d for d in FOMC if d >= today]
+    if not nxt:
+        return None
+    dec = dt.date.fromisoformat(nxt[0])
+    after = dt.date.fromisoformat(nxt[1]) if len(nxt) > 1 else None
+    r0 = get_effr()
+    n, d = calendar.monthrange(dec.year, dec.month)[1], dec.day   # new rate applies from day d+1
+    if n - d <= 7:                      # late-month meeting: the next month's contract is the cleaner read
+        ny, nm = (dec.year + 1, 1) if dec.month == 12 else (dec.year, dec.month + 1)
+        if after and (after.year, after.month) == (ny, nm):
+            return None
+        p, asof, tk = zq_price(ny, nm)
+        r1 = 100 - p
+    else:
+        p, asof, tk = zq_price(dec.year, dec.month)
+        r1 = (n * (100 - p) - d * r0) / (n - d)
+    delta = (r1 - r0) * 100
+    cut, hike = min(1, max(0, -delta / 25)), min(1, max(0, delta / 25))
+    return {"meeting": dec.isoformat(), "cut": round(cut, 3), "hike": round(hike, 3),
+            "hold": round(1 - cut - hike, 3), "net_bp": round(delta, 1), "effr": r0,
+            "contract": tk, "price": p, "asof": asof,
+            "source": "30-day fed funds futures via Yahoo (delayed); 25bp steps assumed"}
 
 
 def stats(y, x, mask, scale=10):
@@ -94,6 +134,7 @@ def compute(px, y2, y10):
     r["y2"] = d["y2"].diff() * 100                  # bp
     r["y10"] = d["y10"].diff() * 100                # bp
     r = r.dropna()
+    print("Joined rows:", len(r), "from", r.index[0].date(), "to", r.index[-1].date())
     fomc = r.index.isin(pd.to_datetime(FOMC))
     corr = r["spx"].rolling(60).corr(r["y2"])
     prior = corr.shift(1)                           # regime known before the day
@@ -124,6 +165,12 @@ def main():
     y2, y10 = get_yields()
     betas, bump, real, cur, last = compute(px, y2, y10)
     today = dt.date.today().isoformat()
+    try:
+        pricing = rate_pricing(today)
+        print("Pricing:", pricing)
+    except Exception as e:
+        pricing = None
+        print("Pricing FAILED (page falls back to manual sliders):", repr(e)[:200])
     nxt = next((x for x in FOMC if x >= today), None)
     out = {
         "generated": dt.datetime.utcnow().isoformat(timespec="seconds") + "Z",
@@ -136,6 +183,7 @@ def main():
         "regime": {"name": "rates" if cur < 0 else "growth", "corr60": round(cur, 3)},
         "bump_fomc": round(bump, 2),
         "betas_per_10bp": betas,
+        "pricing": pricing,
         "next_event": {"date": nxt, "type": "FOMC decision"} if nxt else None,
     }
     with open("data.json", "w") as f:
