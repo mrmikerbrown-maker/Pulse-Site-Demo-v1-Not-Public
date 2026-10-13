@@ -1,7 +1,7 @@
 """Builds data.json for the Fed scenario planner.
 Fetches ~3y of daily history, then computes: latest vols, stock-bond regime,
 betas per 10bp of 2yr move (all days / FOMC days), hit rates and an event bump."""
-import io, json, datetime as dt
+import io, json, time, datetime as dt
 import numpy as np, pandas as pd, requests
 
 UA = {"User-Agent": "Mozilla/5.0"}
@@ -17,10 +17,21 @@ FOMC = ["2023-11-01", "2023-12-13", "2024-01-31", "2024-03-20", "2024-05-01", "2
 ASSETS = ["eurusd", "gbpusd", "usdjpy", "spx", "gold", "y10"]
 
 
+def fetch(url, params=None, tries=3, timeout=60):
+    last = None
+    for i in range(tries):
+        try:
+            r = requests.get(url, params=params, headers=UA, timeout=timeout)
+            r.raise_for_status()
+            return r
+        except Exception as e:
+            last = e
+            time.sleep(3 * (i + 1))
+    raise last
+
+
 def get_yahoo(tk):
-    r = requests.get(f"https://query1.finance.yahoo.com/v8/finance/chart/{tk}",
-                     params={"range": "3y", "interval": "1d"}, headers=UA, timeout=30)
-    r.raise_for_status()
+    r = fetch(f"https://query1.finance.yahoo.com/v8/finance/chart/{tk}", {"range": "3y", "interval": "1d"})
     j = r.json()["chart"]["result"][0]
     s = pd.Series(j["indicators"]["quote"][0]["close"],
                   index=pd.to_datetime(j["timestamp"], unit="s").normalize(), dtype=float).dropna()
@@ -28,14 +39,37 @@ def get_yahoo(tk):
 
 
 def get_fred(sid):
-    r = requests.get("https://fred.stlouisfed.org/graph/fredgraph.csv",
-                     params={"id": sid, "cosd": "2023-09-01"}, headers=UA, timeout=30)
-    r.raise_for_status()
+    r = fetch("https://fred.stlouisfed.org/graph/fredgraph.csv", {"id": sid, "cosd": "2023-09-01"}, tries=2, timeout=25)
     df = pd.read_csv(io.StringIO(r.text))
     df.columns = ["d", "v"]
     df["v"] = pd.to_numeric(df["v"], errors="coerce")
     df = df.dropna()
     return pd.Series(df["v"].values, index=pd.to_datetime(df["d"]))
+
+
+def get_treasury():
+    """Fallback: US Treasury's own daily par yield curve (same data FRED republishes)."""
+    frames = []
+    for yr in range(2023, dt.date.today().year + 1):
+        r = fetch(f"https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/{yr}/all",
+                  {"type": "daily_treasury_yield_curve", "field_tdr_date_value": yr, "page": "", "_format": "csv"})
+        frames.append(pd.read_csv(io.StringIO(r.text))[["Date", "2 Yr", "10 Yr"]])
+    df = pd.concat(frames)
+    df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%Y")
+    df = df.dropna().sort_values("Date").set_index("Date")
+    return df["2 Yr"].astype(float), df["10 Yr"].astype(float)
+
+
+def get_yields():
+    try:
+        fr = {k: get_fred(s) for k, s in FRED.items()}
+        print("Yields: FRED ok")
+        return fr["y2"], fr["y10"]
+    except Exception as e:
+        print("Yields: FRED failed, trying Treasury:", repr(e)[:150])
+    y2, y10 = get_treasury()
+    print("Yields: Treasury ok")
+    return y2, y10
 
 
 def stats(y, x, mask, scale=10):
@@ -80,9 +114,15 @@ def compute(px, y2, y10):
 
 
 def main():
-    px = {k: get_yahoo(t) for k, t in YAHOO.items()}
-    fr = {k: get_fred(s) for k, s in FRED.items()}
-    betas, bump, real, cur, last = compute(px, fr["y2"], fr["y10"])
+    px = {}
+    for k, t in YAHOO.items():
+        try:
+            px[k] = get_yahoo(t)
+            print(f"Yahoo ok: {k} ({t}) last {px[k].index[-1].date()}")
+        except Exception as e:
+            raise SystemExit(f"Yahoo FAILED for {k} ({t}): {e!r}")
+    y2, y10 = get_yields()
+    betas, bump, real, cur, last = compute(px, y2, y10)
     today = dt.date.today().isoformat()
     nxt = next((x for x in FOMC if x >= today), None)
     out = {
