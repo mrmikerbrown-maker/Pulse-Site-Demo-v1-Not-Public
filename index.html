@@ -63,7 +63,7 @@ svg text{fill:var(--text2);font-family:inherit}
 <section>
   <h2>Where the move came from</h2>
   <p id="fall-p"></p>
-  <div class="ctl"><div class="tabs" role="group" aria-label="Group by"><button class="chip" data-m="sector" aria-pressed="true">By sector</button><button class="chip" data-m="stock" aria-pressed="false">By stock</button></div><div class="tabs" id="fall-n" role="group" aria-label="Number of stocks"><button class="chip" data-n="10" aria-pressed="false">10 stocks</button><button class="chip" data-n="15" aria-pressed="true">15 stocks</button><button class="chip" data-n="20" aria-pressed="false">20 stocks</button></div></div>
+  <div class="ctl"><div class="tabs" role="group" aria-label="Group by"><button class="chip" data-m="sector" aria-pressed="true">By sector</button><button class="chip" data-m="stock" aria-pressed="false">By stock</button></div><div class="tabs" id="fall-n" hidden role="group" aria-label="Number of stocks"><button class="chip" data-n="10" aria-pressed="false">10 stocks</button><button class="chip" data-n="15" aria-pressed="true">15 stocks</button><button class="chip" data-n="20" aria-pressed="false">20 stocks</button></div></div>
   <p class="hint" id="swipe" hidden>Swipe the chart sideways to see all of it.</p><div class="scrollx"><svg id="fall" role="img" aria-label="Waterfall of the index move"></svg></div>
 </section>
 <section>
@@ -136,12 +136,12 @@ function fallSteps(ix,narrow){const d=DATA[ix],dj=ix==="DOW",st=[];
       if(open.has(ix+s.n)){const shown=s.top.reduce((a,t)=>a+t[1],0);
         s.top.forEach(t=>{const r=ALLR[ix].find(q=>q[0]===t[0]);st.push({n:t[0],v:t[1],k:"sub",r})});
         if(s.cnt>s.top.length)st.push({n:`Other ${s.cnt-s.top.length} in sector`,v:s.v-shown,k:"subg"})}});
-    if(Math.abs(S.resid)>=GAP_MIN)st.push({n:narrow?"Estimate gap":"Estimate gap (weights)",v:S.resid,k:"gap"});
+    if(showGap(S.resid,d.pts))st.push({n:narrow?"Estimate gap":"Estimate gap (weights)",v:S.resid,k:"gap"});
   }else{const big=[...ALLR[ix]].sort((a,b)=>Math.abs(b[4])-Math.abs(a[4])),pick=big.slice(0,fallN),others=big.slice(fallN);
     order(pick.map(r=>({n:r[0],v:r[4],k:"stock",r}))).forEach(g=>st.push(g));
     const shown=st.reduce((a,g)=>a+g.v,0),oth=others.reduce((a,r)=>a+r[4],0),gap=d.pts-shown-oth;
     st.push({n:`Other ${others.length} stocks`,v:dj?d.pts-shown:oth,k:"group"});
-    if(!dj&&Math.abs(gap)>=GAP_MIN)st.push({n:narrow?"Estimate gap":"Estimate gap (weights)",v:gap,k:"gap"})}
+    if(!dj&&showGap(gap,d.pts))st.push({n:narrow?"Estimate gap":"Estimate gap (weights)",v:gap,k:"gap"})}
   let run=0;st.forEach(g=>{g.a=run;run+=g.v;g.b=run});st.push({n:"Index move",v:d.pts,a:0,b:d.pts,k:"total"});return st}
 function fall(ix){const svg=document.getElementById("fall");svg.innerHTML="";const d=DATA[ix];
   document.getElementById("fall-n").hidden=fallMode!=="stock";
@@ -173,7 +173,7 @@ const TXT={
   mapH:{SPX:"Market map of the top 50",NDX:"Market map of the top 50",DOW:"Market map of all 30"},
   mapP:{SPX:"Each box is sized by the stock's weight in the index and coloured by its % move on the day. Brighter means a bigger move.",DOW:"The Dow is price-weighted, so each box is sized by the stock's share price and coloured by its % move on the day. Brighter means a bigger move."},
   fallP:{SPX:"How the index got from yesterday's close to today's move, sector by sector or stock by stock: the risers first, then the fallers. Click a sector (marked +) to open up its biggest movers. The blue bar is the overall move."},
-  note:{SPX:'Top 25 weights from SPY and QQQ holdings, names 26 to 50 from market caps, both rolled forward daily; the rest of the index is weighted by market cap. Sectors are GICS. "Estimate gap" is the difference between the index\'s real move and the sum of its stocks, shown when it is above half a point. Prices from Google Finance, delayed about 15 to 20 minutes.',DOW:"Each stock's points = its $ change ÷ the Dow divisor. A $1 move in any Dow stock moves the index by about 6 points. Prices are delayed by about 15 to 20 minutes."}};
+  note:{SPX:'Top 25 weights from SPY and QQQ holdings, names 26 to 50 from market caps, both rolled forward daily; the rest of the index is weighted by market cap. Sectors are GICS. "Estimate gap" is the difference between the index\'s real move and the sum of its stocks, shown only when it is big enough to see on the chart. Prices from Google Finance, delayed about 15 to 20 minutes.',DOW:"Each stock's points = its $ change ÷ the Dow divisor. A $1 move in any Dow stock moves the index by about 6 points. Prices are delayed by about 15 to 20 minutes."}};
 const tx=(k,ix)=>TXT[k][ix]||TXT[k].SPX;
 function draw(){if(!DATA)return;["map-h","map-p","fall-p","note"].forEach((id,i)=>document.getElementById(id).textContent=tx(["mapH","mapP","fallP","note"][i],cur));strip(cur);map(cur);fall(cur);
   ["SPX","NDX","DOW"].forEach(k=>document.getElementById("t-"+k).setAttribute("aria-pressed",k===cur))}
@@ -183,7 +183,9 @@ document.querySelectorAll("[data-n]").forEach(b=>b.addEventListener("click",()=>
 let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(draw,150)});
 // Live data: the "Web" tab of the Index Contribution Tracker sheet, published to the web as CSV.
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSE9500jiKFvBw_k0q2m8CPaZ3VbZNv0uIYCe-QSnXpbASoqvwr2RW2hocHl5NVQejXIfVe4CdhX67h/pub?gid=454467433&single=true&output=csv";
-const REFRESH_MS=60000,GAP_MIN=0.5;
+const REFRESH_MS=60000;
+// The estimate-gap column only shows when it is visible at chart scale: over 1 pt and over 2% of the move.
+const showGap=(gap,move)=>Math.abs(gap)>Math.max(1,0.02*Math.abs(move));
 const SECN={IT:"Info Tech",HC:"Health Care",FIN:"Financials",CD:"Consumer Discretionary",CS:"Consumer Staples",IND:"Industrials",MAT:"Materials",EN:"Energy",UT:"Utilities",RE:"Real Estate",COM:"Communication Services"};
 let DATA=null,ALLR={},SECT={},META={};
 function parseCSV(t){const out=[];let row=[],f="",q=false;
