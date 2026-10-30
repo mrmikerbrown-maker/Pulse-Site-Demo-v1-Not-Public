@@ -63,7 +63,7 @@ svg text{fill:var(--text2);font-family:inherit}
 <section>
   <h2>Where the move came from</h2>
   <p id="fall-p"></p>
-  <div class="ctl"><div class="tabs" role="group" aria-label="Group by"><button class="chip" data-m="sector" aria-pressed="true">By sector</button><button class="chip" data-m="stock" aria-pressed="false">By stock</button></div><div class="tabs" id="fall-n" hidden role="group" aria-label="Number of stocks"><button class="chip" data-n="10" aria-pressed="false">10 stocks</button><button class="chip" data-n="15" aria-pressed="true">15 stocks</button><button class="chip" data-n="20" aria-pressed="false">20 stocks</button></div></div>
+  <div class="ctl"><div class="tabs" role="group" aria-label="Group by"><button class="chip" data-m="sector" aria-pressed="true">By sector</button><button class="chip" data-m="stock" aria-pressed="false">By stock</button></div><div class="tabs" id="fall-n" hidden role="group" aria-label="Number of stocks"><button class="chip" data-n="10" aria-pressed="true">Top 10 by weight</button><button class="chip" data-n="20" id="n2" aria-pressed="false">Top 20 by weight</button></div></div>
   <p class="hint" id="swipe" hidden>Swipe the chart sideways to see all of it.</p><div class="scrollx"><svg id="fall" role="img" aria-label="Waterfall of the index move"></svg></div>
 </section>
 <section>
@@ -92,8 +92,8 @@ const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim
 function niceTicks(lo,hi,n=5){const span=hi-lo,step0=span/n,mag=Math.pow(10,Math.floor(Math.log10(step0)));
   const step=[1,2,2.5,5,10].map(m=>m*mag).find(s=>span/s<=n)||10*mag;const t=[];for(let v=Math.ceil(lo/step)*step;v<=hi+1e-9;v+=step)t.push(+v.toFixed(6));return t}
 
-function strip(ix){const d=DATA[ix];const top=d.rows.reduce((s,r)=>s+r[4],0);
-  const cells=ix==="DOW"?[["Level",d.close.toLocaleString("en-GB",{minimumFractionDigits:2})],["Day % chg",fmtPct(d.pct)],["Day pts chg",fmtP(d.pts)],["Sum of all 30 (pts)",fmtP(top)],["Dow divisor",d.divisor.toFixed(4)]]:[["Level",d.close.toLocaleString("en-GB",{minimumFractionDigits:2})],["Day % chg",fmtPct(d.pct)],["Day pts chg",fmtP(d.pts)],["Top 50 (pts)",fmtP(top)],["Rest of index (pts)",fmtP(d.pts-top)]];
+function strip(ix){const d=DATA[ix];
+  const cells=[["Level",d.close.toLocaleString("en-GB",{minimumFractionDigits:2})],["Day % chg",fmtPct(d.pct)],["Day pts chg",fmtP(d.pts)]];
   document.getElementById("strip").innerHTML=cells.map(([k,v])=>`<div><div class="k">${k}</div><div class="v">${v}</div></div>`).join("")}
 
 function bars(ix){const svg=document.getElementById("bars");svg.innerHTML="";
@@ -127,7 +127,7 @@ function map(ix){const svg=document.getElementById("map");svg.innerHTML="";const
       const g=el("text",{x:o.x+o.w/2,y:o.y+o.h/2,"text-anchor":"middle","font-size":fs,"font-weight":700,"pointer-events":"none",style:`fill:${t>0.45?"#06060A":"#FFFFFF"}`},svg);g.textContent=r[0];
       if(o.h>fs*2.6){const g2=el("text",{x:o.x+o.w/2,y:o.y+o.h/2+fs*1.05,"text-anchor":"middle","font-size":fs*0.7,"pointer-events":"none",style:`fill:${t>0.45?"#06060A":"#FFFFFF"}`},svg);g2.textContent=fmtPct(r[3],1)}}})}
 
-let fallN=15,fallMode="sector";const open=new Set();
+let fallN=10,fallMode="sector";const open=new Set();
 const SHORT={"Consumer Discretionary":"Cons. Discretionary","Communication Services":"Comm. Services","Consumer Staples":"Cons. Staples"};
 function fallSteps(ix,narrow){const d=DATA[ix],dj=ix==="DOW",st=[];
   const order=a=>[...a.filter(g=>g.v>=0).sort((x,y)=>y.v-x.v),...a.filter(g=>g.v<0).sort((x,y)=>x.v-y.v)];
@@ -137,16 +137,16 @@ function fallSteps(ix,narrow){const d=DATA[ix],dj=ix==="DOW",st=[];
         s.top.forEach(t=>{const r=ALLR[ix].find(q=>q[0]===t[0]);st.push({n:t[0],v:t[1],k:"sub",r})});
         if(s.cnt>s.top.length)st.push({n:`Other ${s.cnt-s.top.length} in sector`,v:s.v-shown,k:"subg"})}});
     if(showGap(S.resid,d.pts))st.push({n:narrow?"Estimate gap":"Estimate gap (weights)",v:S.resid,k:"gap"});
-  }else{const big=[...ALLR[ix]].sort((a,b)=>Math.abs(b[4])-Math.abs(a[4])),pick=big.slice(0,fallN),others=big.slice(fallN);
+  }else{const n=dj&&fallN===20?ALLR[ix].length:fallN,big=[...ALLR[ix]].sort((a,b)=>b[2]-a[2]),pick=big.slice(0,n),others=big.slice(n);
     order(pick.map(r=>({n:r[0],v:r[4],k:"stock",r}))).forEach(g=>st.push(g));
     const shown=st.reduce((a,g)=>a+g.v,0),oth=others.reduce((a,r)=>a+r[4],0),gap=d.pts-shown-oth;
-    st.push({n:`Other ${others.length} stocks`,v:dj?d.pts-shown:oth,k:"group"});
+    if(others.length)st.push({n:`Other ${others.length} stocks`,v:dj?d.pts-shown:oth,k:"group"});
     if(!dj&&showGap(gap,d.pts))st.push({n:narrow?"Estimate gap":"Estimate gap (weights)",v:gap,k:"gap"})}
   let run=0;st.forEach(g=>{g.a=run;run+=g.v;g.b=run});st.push({n:"Index move",v:d.pts,a:0,b:d.pts,k:"total"});return st}
 function fall(ix){const svg=document.getElementById("fall");svg.innerHTML="";const d=DATA[ix];
   document.getElementById("fall-n").hidden=fallMode!=="stock";
   const box=svg.parentNode.getBoundingClientRect().width||900,narrow=box<600,steps=fallSteps(ix,narrow);
-  const L=narrow?44:56,R=10,top=12,bot=narrow?96:112,minCol=narrow?22:34;
+  const L=narrow?44:56,R=10,top=12,bot=narrow?96:112,minCol=narrow?22:25;
   const W=Math.max(Math.round(box),L+R+steps.length*minCol),H=(narrow?300:360)+bot;
   svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.style.width=W+"px";svg.style.maxWidth="none";document.getElementById("swipe").hidden=W<=Math.round(box)+1;
   const all=steps.flatMap(g=>[g.a,g.b]).concat(0);const ticks=niceTicks(Math.min(...all),Math.max(...all),narrow?5:6);
@@ -172,10 +172,10 @@ let cur="SPX";
 const TXT={
   mapH:{SPX:"Market map of the top 50",NDX:"Market map of the top 50",DOW:"Market map of all 30"},
   mapP:{SPX:"Each box is sized by the stock's weight in the index and coloured by its % move on the day. Brighter means a bigger move.",DOW:"The Dow is price-weighted, so each box is sized by the stock's share price and coloured by its % move on the day. Brighter means a bigger move."},
-  fallP:{SPX:"How the index got from yesterday's close to today's move, sector by sector or stock by stock: the risers first, then the fallers. Click a sector (marked +) to open up its biggest movers. The blue bar is the overall move."},
+  fallP:{SPX:"How the index got from yesterday's close to today's move: the risers first, then the fallers. By sector covers every stock; click a sector (marked +) to open up its biggest movers. By stock shows the largest stocks by index weight. The blue bar is the overall move.",DOW:"How the Dow got from yesterday's close to today's move: the risers first, then the fallers. Click a sector (marked +) to open up its biggest movers. By stock shows the 10 highest-priced stocks, which carry the most weight in the Dow, or all 30. The blue bar is the overall move."},
   note:{SPX:'Top 25 weights from SPY and QQQ holdings, names 26 to 50 from market caps, both rolled forward daily; the rest of the index is weighted by market cap. Sectors are GICS. "Estimate gap" is the difference between the index\'s real move and the sum of its stocks, shown only when it is big enough to see on the chart. Prices from Google Finance, delayed about 15 to 20 minutes.',DOW:"Each stock's points = its $ change ÷ the Dow divisor. A $1 move in any Dow stock moves the index by about 6 points. Prices are delayed by about 15 to 20 minutes."}};
 const tx=(k,ix)=>TXT[k][ix]||TXT[k].SPX;
-function draw(){if(!DATA)return;["map-h","map-p","fall-p","note"].forEach((id,i)=>document.getElementById(id).textContent=tx(["mapH","mapP","fallP","note"][i],cur));strip(cur);map(cur);fall(cur);
+function draw(){if(!DATA)return;document.getElementById("n2").textContent=cur==="DOW"?"All 30":"Top 20 by weight";["map-h","map-p","fall-p","note"].forEach((id,i)=>document.getElementById(id).textContent=tx(["mapH","mapP","fallP","note"][i],cur));strip(cur);map(cur);fall(cur);
   ["SPX","NDX","DOW"].forEach(k=>document.getElementById("t-"+k).setAttribute("aria-pressed",k===cur))}
 ["SPX","NDX","DOW"].forEach(k=>document.getElementById("t-"+k).addEventListener("click",()=>{cur=k;draw()}));
 document.querySelectorAll("[data-m]").forEach(b=>b.addEventListener("click",()=>{fallMode=b.dataset.m;document.querySelectorAll("[data-m]").forEach(c=>c.setAttribute("aria-pressed",c===b));fall(cur)}));
