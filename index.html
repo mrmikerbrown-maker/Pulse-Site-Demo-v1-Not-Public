@@ -63,7 +63,7 @@ svg text{fill:var(--text2);font-family:inherit}
 <section>
   <h2>Where the move came from</h2>
   <p id="fall-p"></p>
-  <div class="ctl"><div class="tabs" role="group" aria-label="Group by"><button class="chip" data-m="sector" aria-pressed="true">By sector</button><button class="chip" data-m="stock" aria-pressed="false">By stock</button></div><div class="tabs" id="fall-n" hidden role="group" aria-label="Number of stocks"><button class="chip" data-n="10" aria-pressed="true">Top 10 by weight</button><button class="chip" data-n="20" id="n2" aria-pressed="false">Top 20 by weight</button></div></div>
+  <div class="ctl"><div class="tabs" role="group" aria-label="Group by"><button class="chip" data-m="sector" aria-pressed="true">By sector</button><button class="chip" data-m="stock" aria-pressed="false">By stock</button></div><div class="tabs" id="fall-n" hidden role="group" aria-label="Number of stocks"><button class="chip" data-n="10" aria-pressed="true">Top 10 by weight</button><button class="chip" data-n="20" id="n2" aria-pressed="false">Top 20 by weight</button><button class="chip" data-n="0" aria-pressed="false">Biggest movers</button></div></div>
   <p class="hint" id="swipe" hidden>Swipe the chart sideways to see all of it.</p><div class="scrollx"><svg id="fall" role="img" aria-label="Waterfall of the index move"></svg></div>
 </section>
 <section>
@@ -137,7 +137,9 @@ function fallSteps(ix,narrow){const d=DATA[ix],dj=ix==="DOW",st=[];
         s.top.forEach(t=>{const r=ALLR[ix].find(q=>q[0]===t[0]);st.push({n:t[0],v:t[1],k:"sub",r})});
         if(s.cnt>s.top.length)st.push({n:`Other ${s.cnt-s.top.length} in sector`,v:s.v-shown,k:"subg"})}});
     if(showGap(S.resid,d.pts))st.push({n:narrow?"Estimate gap":"Estimate gap (weights)",v:S.resid,k:"gap"});
-  }else{const n=dj&&fallN===20?ALLR[ix].length:fallN,big=[...ALLR[ix]].sort((a,b)=>b[2]-a[2]),pick=big.slice(0,n),others=big.slice(n);
+  }else{let pick,others;
+    if(fallN===0){const up=ALLR[ix].filter(r=>r[4]>0).sort((a,b)=>b[4]-a[4]).slice(0,10),dn=ALLR[ix].filter(r=>r[4]<0).sort((a,b)=>a[4]-b[4]).slice(0,10),ch=new Set([...up,...dn]);pick=[...up,...dn];others=ALLR[ix].filter(r=>!ch.has(r))}
+    else{const n=dj&&fallN===20?ALLR[ix].length:fallN,big=[...ALLR[ix]].sort((a,b)=>b[2]-a[2]);pick=big.slice(0,n);others=big.slice(n)}
     order(pick.map(r=>({n:r[0],v:r[4],k:"stock",r}))).forEach(g=>st.push(g));
     const shown=st.reduce((a,g)=>a+g.v,0),oth=others.reduce((a,r)=>a+r[4],0),gap=d.pts-shown-oth;
     if(others.length)st.push({n:`Other ${others.length} stocks`,v:dj?d.pts-shown:oth,k:"group"});
@@ -172,7 +174,7 @@ let cur="SPX";
 const TXT={
   mapH:{SPX:"Market map of the top 50",NDX:"Market map of the top 50",DOW:"Market map of all 30"},
   mapP:{SPX:"Each box is sized by the stock's weight in the index and coloured by its % move on the day. Brighter means a bigger move.",DOW:"The Dow is price-weighted, so each box is sized by the stock's share price and coloured by its % move on the day. Brighter means a bigger move."},
-  fallP:{SPX:"How the index got from yesterday's close to today's move: the risers first, then the fallers. By sector covers every stock; click a sector (marked +) to open up its biggest movers. By stock shows the largest stocks by index weight. The blue bar is the overall move.",DOW:"How the Dow got from yesterday's close to today's move: the risers first, then the fallers. Click a sector (marked +) to open up its biggest movers. By stock shows the 10 highest-priced stocks, which carry the most weight in the Dow, or all 30. The blue bar is the overall move."},
+  fallP:{SPX:"How the index got from yesterday's close to today's move: the risers first, then the fallers. By sector covers every stock; click a sector (marked +) to open up its biggest movers. By stock shows the largest stocks by index weight, or the 10 biggest risers and 10 biggest fallers in points. The blue bar is the overall move.",DOW:"How the Dow got from yesterday's close to today's move: the risers first, then the fallers. Click a sector (marked +) to open up its biggest movers. By stock shows the 10 highest-priced stocks, which carry the most weight in the Dow, all 30, or the 10 biggest risers and fallers in points. The blue bar is the overall move."},
   note:{SPX:'Top 25 weights from SPY and QQQ holdings, names 26 to 50 from market caps, both rolled forward daily; the rest of the index is weighted by market cap. Sectors are GICS. "Estimate gap" is the difference between the index\'s real move and the sum of its stocks, shown only when it is big enough to see on the chart. Prices from Google Finance, delayed about 15 to 20 minutes.',DOW:"Each stock's points = its $ change ÷ the Dow divisor. A $1 move in any Dow stock moves the index by about 6 points. Prices are delayed by about 15 to 20 minutes."}};
 const tx=(k,ix)=>TXT[k][ix]||TXT[k].SPX;
 function draw(){if(!DATA)return;document.getElementById("n2").textContent=cur==="DOW"?"All 30":"Top 20 by weight";["map-h","map-p","fall-p","note"].forEach((id,i)=>document.getElementById(id).textContent=tx(["mapH","mapP","fallP","note"][i],cur));strip(cur);map(cur);fall(cur);
