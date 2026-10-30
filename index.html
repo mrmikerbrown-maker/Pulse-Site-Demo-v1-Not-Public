@@ -182,7 +182,7 @@ document.querySelectorAll("[data-m]").forEach(b=>b.addEventListener("click",()=>
 document.querySelectorAll("[data-n]").forEach(b=>b.addEventListener("click",()=>{fallN=+b.dataset.n;document.querySelectorAll("[data-n]").forEach(c=>c.setAttribute("aria-pressed",c===b));fall(cur)}));
 let rz;addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(draw,150)});
 // Live data: the "Web" tab of the Index Contribution Tracker sheet, published to the web as CSV.
-const CSV_URL="__CSV_URL__";
+const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vSE9500jiKFvBw_k0q2m8CPaZ3VbZNv0uIYCe-QSnXpbASoqvwr2RW2hocHl5NVQejXIfVe4CdhX67h/pub?gid=454467433&single=true&output=csv";
 const REFRESH_MS=60000,GAP_MIN=0.5;
 const SECN={IT:"Info Tech",HC:"Health Care",FIN:"Financials",CD:"Consumer Discretionary",CS:"Consumer Staples",IND:"Industrials",MAT:"Materials",EN:"Energy",UT:"Utilities",RE:"Real Estate",COM:"Communication Services"};
 let DATA=null,ALLR={},SECT={},META={};
