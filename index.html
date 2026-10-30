@@ -64,7 +64,6 @@ svg text{fill:var(--text2);font-family:inherit}
   <h2>Where the move came from</h2>
   <p id="fall-p"></p>
   <div class="ctl"><div class="tabs" role="group" aria-label="Group by"><button class="chip" data-m="sector" aria-pressed="true">By sector</button><button class="chip" data-m="stock" aria-pressed="false">By stock</button></div><div class="tabs" id="fall-n" hidden role="group" aria-label="Number of stocks"><button class="chip" data-n="0" id="n3" aria-pressed="true">Biggest movers</button><button class="chip" data-n="10" aria-pressed="false">Top 10 by weight</button><button class="chip" data-n="20" id="n2" aria-pressed="false">Top 20 by weight</button></div></div>
-  <p id="fall-sum" style="font-size:13px;color:var(--text2);margin:4px 0 0" hidden></p>
   <p class="hint" id="swipe" hidden>Swipe the chart sideways to see all of it.</p><div class="scrollx"><svg id="fall" role="img" aria-label="Waterfall of the index move"></svg></div>
 </section>
 <section>
@@ -144,15 +143,13 @@ function fallSteps(ix,narrow){const d=DATA[ix],dj=ix==="DOW",st=[];
     const n0=effN(ix);if(n0===0){const up=ALLR[ix].filter(r=>r[4]>0).sort((a,b)=>b[4]-a[4]).slice(0,10),dn=ALLR[ix].filter(r=>r[4]<0).sort((a,b)=>a[4]-b[4]).slice(0,10),ch=new Set([...up,...dn]);pick=[...up,...dn];others=ALLR[ix].filter(r=>!ch.has(r))}
     else{const n=dj&&n0===20?ALLR[ix].length:n0,big=[...ALLR[ix]].sort((a,b)=>b[2]-a[2]);pick=big.slice(0,n);others=big.slice(n)}
     order(pick.map(r=>({n:r[0],v:r[4],k:"stock",r}))).forEach(g=>st.push(g));
-    // The rest of the index isn't drawn as a column (it would dwarf the stocks); it's given in the line above the chart.
-    const shown=st.reduce((a,g)=>a+g.v,0);st.rest=others.length?{cnt:others.length,shown,v:d.pts-shown}:null;}
+    const shown=st.reduce((a,g)=>a+g.v,0);
+    if(others.length)st.push({n:`Rest of index (${others.length})`,v:d.pts-shown,k:"rest"});}
   // An open sector's stocks re-walk that sector's own step (from its start to its end); they don't add to the running total.
-  let run=0,sub=0;st.forEach(g=>{if(g.k==="sub"||g.k==="subg"){g.a=sub;sub+=g.v;g.b=sub}else{g.a=run;run+=g.v;g.b=run;sub=g.a}});const rest=st.rest;st.push({n:"Index move",v:d.pts,a:0,b:d.pts,k:"total"});st.rest=rest;return st}
+  let run=0,sub=0;st.forEach(g=>{if(g.k==="sub"||g.k==="subg"){g.a=sub;sub+=g.v;g.b=sub}else{g.a=run;run+=g.v;g.b=run;sub=g.a}});st.push({n:"Index move",v:d.pts,a:0,b:d.pts,k:"total"});return st}
 function fall(ix){const svg=document.getElementById("fall");svg.innerHTML="";const d=DATA[ix];
   document.getElementById("fall-n").hidden=fallMode!=="stock";
   const box=svg.parentNode.getBoundingClientRect().width||900,narrow=box<600,steps=fallSteps(ix,narrow);
-  const sum=document.getElementById("fall-sum");sum.hidden=!steps.rest;
-  if(steps.rest)sum.innerHTML=`These ${steps.length-1} stocks: <b>${fmtP(steps.rest.shown)} pts</b> · Rest of the index (${steps.rest.cnt} stocks): <b>${fmtP(steps.rest.v)} pts</b> · Index move: <b>${fmtP(d.pts)} pts</b>`;
   const L=narrow?44:56,R=10,top=12,bot=narrow?96:112,minCol=narrow?22:25;
   const W=Math.max(Math.round(box),L+R+steps.length*minCol),H=(narrow?300:360)+bot;
   svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.style.width=W+"px";svg.style.maxWidth="none";document.getElementById("swipe").hidden=W<=Math.round(box)+1;
@@ -161,25 +158,27 @@ function fall(ix){const svg=document.getElementById("fall");svg.innerHTML="";con
   ticks.forEach(t=>{el("line",{x1:L,x2:W-R,y1:y(t),y2:y(t),stroke:css("--rule")},svg);const tx=el("text",{x:L-8,y:y(t)+4,"text-anchor":"end",class:"axis"},svg);tx.textContent=fmtP(t).replace(".00","")});
   el("line",{x1:L,x2:W-R,y1:y(0),y2:y(0),stroke:css("--ink"),"stroke-width":1.2},svg);
   const cw=(W-L-R)/steps.length,base=H-bot+12;
+  const pat=el("pattern",{id:"hatch",width:6,height:6,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},el("defs",{},svg));el("rect",{width:6,height:6,fill:css("--muted"),"fill-opacity":0.25},pat);el("line",{x1:0,y1:0,x2:0,y2:6,stroke:css("--muted"),"stroke-width":2.5},pat);
   el("line",{x1:L+cw*(steps.length-1),x2:L+cw*(steps.length-1),y1:top,y2:H-bot+4,stroke:css("--line")},svg);
-  steps.forEach((g,i)=>{const sub=g.k==="sub"||g.k==="subg",faded=g.k==="group"||g.k==="subg"||g.k==="gap";
-    const bw=cw*(sub?0.5:0.66),x=L+i*cw+(cw-bw)/2,cx=L+i*cw+cw/2;
-    const fill=g.k==="total"?css("--accent"):g.k==="gap"?css("--dim"):(g.v>=0?css("--up"):css("--down"));
-    const rc=el("rect",{x,y:y(Math.max(g.a,g.b)),width:bw,height:Math.max(1.5,Math.abs(y(g.a)-y(g.b))),rx:2,fill,"fill-opacity":faded?0.5:sub?0.8:(g.k==="sector"&&open.has(ix+g.n))?0.35:1},svg);
+  steps.forEach((g,i)=>{const sub=g.k==="sub"||g.k==="subg",faded=g.k==="rest"||g.k==="subg";
+    const bw=cw*(sub?0.5:g.k==="rest"?0.4:0.66),x=L+i*cw+(cw-bw)/2,cx=L+i*cw+cw/2;
+    const fill=g.k==="total"?css("--accent"):g.k==="rest"?"url(#hatch)":(g.v>=0?css("--up"):css("--down"));
+    const rc=el("rect",{x,y:y(Math.max(g.a,g.b)),width:bw,height:Math.max(1.5,Math.abs(y(g.a)-y(g.b))),rx:2,fill,stroke:g.k==="rest"?css("--muted"):"none","fill-opacity":g.k==="rest"?1:faded?0.5:sub?0.8:(g.k==="sector"&&open.has(ix+g.n))?0.35:1},svg);
     const name=g.k==="sector"?(SHORT[g.n]||g.n)+(open.has(ix+g.n)?" −":" +"):g.n;
     const lab=el("text",{x:cx+4,y:base,"text-anchor":"end",transform:`rotate(-45 ${cx+4} ${base})`,"font-size":sub?(narrow?10:11):(narrow?11:12),"font-weight":(g.k==="stock"||g.k==="sector"||g.k==="total"||g.k==="sub")?700:400,style:faded?`fill:${css("--muted")}`:sub?`fill:${css("--text2")}`:""},svg);lab.textContent=name;
+    if(g.k==="rest"){const t=el("text",{x:cx,y:y(Math.max(g.a,g.b))-6,"text-anchor":"middle","font-size":11},svg);t.textContent=fmtP(g.v)}
     let info="";if(g.r)info=`${g.r[1]}<br>Weight ${g.r[2].toFixed(2)}% · Move ${fmtPct(g.r[3])}<br>`;
     if(g.k==="sector")info=`${g.cnt} stocks · ${g.w.toFixed(1)}% of the index<br>`;
-    if(g.k==="gap")info="Difference between the index's real move and the sum of our estimated stock weights<br>";
+    if(g.k==="rest")info="Every other stock in the index, added together<br>";
     hover(rc,`<b>${g.n}</b><br>${info}${fmtP(g.v)} pts${g.k==="total"?"":` · running total ${fmtP(g.b)}`}${g.k==="sector"?"<br>Click to "+(open.has(ix+g.n)?"hide":"show")+" its stocks":""}`);
     if(g.k==="sector"){[rc,lab].forEach(n=>{n.style.cursor="pointer";n.addEventListener("click",()=>{const k=ix+g.n;open.has(k)?open.delete(k):open.add(k);tip.hidden=true;fall(ix)})})}
-    if(i<steps.length-2){const nb=steps[i+1],nsub=nb.k==="sub"||nb.k==="subg",nw=cw*(nsub?0.5:0.66),lv=Math.abs(nb.a-g.b)<1e-9?g.b:g.a;el("line",{x1:x+bw,x2:L+(i+1)*cw+(cw-nw)/2,y1:y(lv),y2:y(lv),stroke:css("--muted"),"stroke-dasharray":"2 2"},svg)}});}
+    if(i<steps.length-2||g.k==="rest"){const nb=steps[i+1],nsub=nb.k==="sub"||nb.k==="subg",nw=cw*(nsub?0.5:0.66),lv=nb.k==="total"||Math.abs(nb.a-g.b)<1e-9?g.b:g.a;el("line",{x1:x+bw,x2:L+(i+1)*cw+(cw-nw)/2,y1:y(lv),y2:y(lv),stroke:css("--muted"),"stroke-dasharray":"2 2"},svg)}});}
 
 let cur="SPX";
 const TXT={
   mapH:{SPX:"Market map of the top 50",NDX:"Market map of the top 50",DOW:"Market map of all 30"},
   mapP:{SPX:"Each box is sized by the stock's weight in the index and coloured by its % move on the day. Brighter means a bigger move.",DOW:"The Dow is price-weighted, so each box is sized by the stock's share price and coloured by its % move on the day. Brighter means a bigger move."},
-  fallP:{SPX:"How the index got from yesterday's close to today's move: the risers first, then the fallers. By sector covers every stock; click a sector (marked +) to open up its biggest movers. By stock shows the 10 biggest risers and 10 biggest fallers in points, or the largest stocks by index weight; the line above the chart says how much the rest of the index added. The blue bar is the overall move.",DOW:"How the Dow got from yesterday's close to today's move: the risers first, then the fallers. Click a sector (marked +) to open up its biggest movers. By stock shows the 10 highest-priced stocks, which carry the most weight in the Dow, or all 30. The blue bar is the overall move."},
+  fallP:{SPX:"How the index got from yesterday's close to today's move: the risers first, then the fallers. By sector covers every stock; click a sector (marked +) to open up its biggest movers. By stock shows the 10 biggest risers and 10 biggest fallers in points, or the largest stocks by index weight; the grey column is everything else in the index. The blue bar is the overall move.",DOW:"How the Dow got from yesterday's close to today's move: the risers first, then the fallers. Click a sector (marked +) to open up its biggest movers. By stock shows the 10 highest-priced stocks, which carry the most weight in the Dow, or all 30. The blue bar is the overall move."},
   note:{SPX:'Top 25 weights from SPY and QQQ holdings, names 26 to 50 from market caps, both rolled forward daily; the rest of the index is weighted by market cap. Sectors are GICS. Because weights outside the top 50 are estimates, the stocks can add up to slightly more or less than the index move; in By stock that difference sits in "Rest of the index". Prices from Google Finance, delayed about 15 to 20 minutes.',DOW:"Each stock's points = its $ change ÷ the Dow divisor. A $1 move in any Dow stock moves the index by about 6 points. Prices are delayed by about 15 to 20 minutes."}};
 const tx=(k,ix)=>TXT[k][ix]||TXT[k].SPX;
 function draw(){if(!DATA)return;document.querySelectorAll("[data-n]").forEach(c=>c.setAttribute("aria-pressed",+c.dataset.n===effN(cur)));document.getElementById("n3").hidden=cur==="DOW";document.getElementById("n2").textContent=cur==="DOW"?"All 30":"Top 20 by weight";["map-h","map-p","fall-p","note"].forEach((id,i)=>document.getElementById(id).textContent=tx(["mapH","mapP","fallP","note"][i],cur));strip(cur);map(cur);fall(cur);
