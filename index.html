@@ -135,14 +135,16 @@ function fallSteps(ix,narrow){const d=DATA[ix],dj=ix==="DOW",st=[];
     order(S.sectors.map(s=>({n:s[0],w:s[1],v:s[2],cnt:s[3],top:s[4],k:"sector"}))).forEach(s=>{st.push(s);
       if(open.has(ix+s.n)){const shown=s.top.reduce((a,t)=>a+t[1],0);
         s.top.forEach(t=>{const r=ALLR[ix].find(q=>q[0]===t[0]);st.push({n:t[0],v:t[1],k:"sub",r})});
-        if(s.cnt>s.top.length)st.push({n:`Other ${s.cnt-s.top.length} in sector`,v:s.v-shown,k:"subg"})}});
+        if(s.cnt>s.top.length)st.push({n:`Other ${s.cnt-s.top.length} in sector`,v:s.v-shown,k:"subg"});
+        else st[st.length-1].v+=s.v-shown}});
   }else{let pick,others;
     if(fallN===0){const up=ALLR[ix].filter(r=>r[4]>0).sort((a,b)=>b[4]-a[4]).slice(0,10),dn=ALLR[ix].filter(r=>r[4]<0).sort((a,b)=>a[4]-b[4]).slice(0,10),ch=new Set([...up,...dn]);pick=[...up,...dn];others=ALLR[ix].filter(r=>!ch.has(r))}
     else{const n=dj&&fallN===20?ALLR[ix].length:fallN,big=[...ALLR[ix]].sort((a,b)=>b[2]-a[2]);pick=big.slice(0,n);others=big.slice(n)}
     order(pick.map(r=>({n:r[0],v:r[4],k:"stock",r}))).forEach(g=>st.push(g));
     const shown=st.reduce((a,g)=>a+g.v,0),oth=others.reduce((a,r)=>a+r[4],0);
     if(others.length)st.push({n:`Other ${others.length} stocks`,v:d.pts-shown,k:"group"});}
-  let run=0;st.forEach(g=>{g.a=run;run+=g.v;g.b=run});st.push({n:"Index move",v:d.pts,a:0,b:d.pts,k:"total"});return st}
+  // An open sector's stocks re-walk that sector's own step (from its start to its end); they don't add to the running total.
+  let run=0,sub=0;st.forEach(g=>{if(g.k==="sub"||g.k==="subg"){g.a=sub;sub+=g.v;g.b=sub}else{g.a=run;run+=g.v;g.b=run;sub=g.a}});st.push({n:"Index move",v:d.pts,a:0,b:d.pts,k:"total"});return st}
 function fall(ix){const svg=document.getElementById("fall");svg.innerHTML="";const d=DATA[ix];
   document.getElementById("fall-n").hidden=fallMode!=="stock";
   const box=svg.parentNode.getBoundingClientRect().width||900,narrow=box<600,steps=fallSteps(ix,narrow);
@@ -158,7 +160,7 @@ function fall(ix){const svg=document.getElementById("fall");svg.innerHTML="";con
   steps.forEach((g,i)=>{const sub=g.k==="sub"||g.k==="subg",faded=g.k==="group"||g.k==="subg"||g.k==="gap";
     const bw=cw*(sub?0.5:0.66),x=L+i*cw+(cw-bw)/2,cx=L+i*cw+cw/2;
     const fill=g.k==="total"?css("--accent"):g.k==="gap"?css("--dim"):(g.v>=0?css("--up"):css("--down"));
-    const rc=el("rect",{x,y:y(Math.max(g.a,g.b)),width:bw,height:Math.max(1.5,Math.abs(y(g.a)-y(g.b))),rx:2,fill,"fill-opacity":faded?0.5:sub?0.8:1},svg);
+    const rc=el("rect",{x,y:y(Math.max(g.a,g.b)),width:bw,height:Math.max(1.5,Math.abs(y(g.a)-y(g.b))),rx:2,fill,"fill-opacity":faded?0.5:sub?0.8:(g.k==="sector"&&open.has(ix+g.n))?0.35:1},svg);
     const name=g.k==="sector"?(SHORT[g.n]||g.n)+(open.has(ix+g.n)?" −":" +"):g.n;
     const lab=el("text",{x:cx+4,y:base,"text-anchor":"end",transform:`rotate(-45 ${cx+4} ${base})`,"font-size":sub?(narrow?10:11):(narrow?11:12),"font-weight":(g.k==="stock"||g.k==="sector"||g.k==="total"||g.k==="sub")?700:400,style:faded?`fill:${css("--muted")}`:sub?`fill:${css("--text2")}`:""},svg);lab.textContent=name;
     let info="";if(g.r)info=`${g.r[1]}<br>Weight ${g.r[2].toFixed(2)}% · Move ${fmtPct(g.r[3])}<br>`;
@@ -166,7 +168,7 @@ function fall(ix){const svg=document.getElementById("fall");svg.innerHTML="";con
     if(g.k==="gap")info="Difference between the index's real move and the sum of our estimated stock weights<br>";
     hover(rc,`<b>${g.n}</b><br>${info}${fmtP(g.v)} pts${g.k==="total"?"":` · running total ${fmtP(g.b)}`}${g.k==="sector"?"<br>Click to "+(open.has(ix+g.n)?"hide":"show")+" its stocks":""}`);
     if(g.k==="sector"){[rc,lab].forEach(n=>{n.style.cursor="pointer";n.addEventListener("click",()=>{const k=ix+g.n;open.has(k)?open.delete(k):open.add(k);tip.hidden=true;fall(ix)})})}
-    if(i<steps.length-2){const nb=steps[i+1],nsub=nb.k==="sub"||nb.k==="subg",nw=cw*(nsub?0.5:0.66);el("line",{x1:x+bw,x2:L+(i+1)*cw+(cw-nw)/2,y1:y(g.b),y2:y(g.b),stroke:css("--muted"),"stroke-dasharray":"2 2"},svg)}});}
+    if(i<steps.length-2){const nb=steps[i+1],nsub=nb.k==="sub"||nb.k==="subg",nw=cw*(nsub?0.5:0.66),lv=Math.abs(nb.a-g.b)<1e-9?g.b:g.a;el("line",{x1:x+bw,x2:L+(i+1)*cw+(cw-nw)/2,y1:y(lv),y2:y(lv),stroke:css("--muted"),"stroke-dasharray":"2 2"},svg)}});}
 
 let cur="SPX";
 const TXT={
@@ -205,7 +207,11 @@ function build(rows){const D={},A={SPX:[],NDX:[],DOW:[]},S={};
   for(const ix of ["SPX","NDX","DOW"]){const g={};
     A[ix].forEach(r=>{const s=SECN[r[5]]||"Other";(g[s]=g[s]||{w:0,p:0,l:[]});g[s].w+=r[2];g[s].p+=r[4];g[s].l.push(r)});
     const sectors=Object.entries(g).map(([n,o])=>{o.l.sort((a,b)=>Math.abs(b[4])-Math.abs(a[4]));return[n,o.w,o.p,o.l.length,o.l.slice(0,5).map(r=>[r[0],r[4]])]});
-    S[ix]={sectors,resid:D[ix].pts-sectors.reduce((a,s)=>a+s[2],0)}}
+    // The stocks never add up exactly to the index move (estimated weights, and the index quote can lag the stocks),
+    // so spread the difference across sectors by weight; it lands in each sector's "Other N in sector".
+    const resid=D[ix].pts-sectors.reduce((a,s)=>a+s[2],0),tw=sectors.reduce((a,s)=>a+s[1],0)||1;
+    sectors.forEach(s=>{s[2]+=resid*s[1]/tw});
+    S[ix]={sectors,resid}}
   DATA=D;ALLR=A;SECT=S}
 const status=document.getElementById("status");
 async function load(){
