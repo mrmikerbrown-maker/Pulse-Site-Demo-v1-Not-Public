@@ -178,6 +178,12 @@ function strip(ix){const d=DATA[ix],c=d.pts>=0?"pos":"neg",A=ALLR[ix],up=A.filte
 // One-line summary written from the data: the move, the sector that drove it, and the three stocks that did most.
 const PROSE={"Info Tech":"Tech","Health Care":"Health care","Consumer Discretionary":"Consumer discretionary","Consumer Staples":"Consumer staples","Communication Services":"Communication services","Real Estate":"Real estate"};
 const CLASSCO={GOOGL:"Alphabet",GOOG:"Alphabet",FOXA:"Fox",FOX:"Fox",NWSA:"News Corp",NWS:"News Corp"};
+// Hover line: a stock's (or group's) points as a share of the index's move, e.g. "Apple accounts for 15.2% of the S&P 500's gain this year".
+function share(ix,v,who){const d=DATA[ix];if(Math.abs(d.pct)<0.05||!v)return"";
+  const idx=ix==="DOW"?"the Dow":"the "+NAMES[ix],up=d.pts>0,when=PER!=="d"?PERW[PER]:LIVE?"today":"on the day",pc=Math.abs(v/d.pts*100),f=pc>=10?pc.toFixed(0):pc.toFixed(1);
+  const own=idx.replace(/^the/,"The")+(up?"'s gain ":"'s fall ")+when;
+  return v*d.pts>0?`<br>${who} ${who==="These stocks"?"account":"accounts"} for ${f}% of ${idx}'s ${up?"gain":"fall"} ${when}`
+    :`<br>Went against the move: ${own.charAt(0).toLowerCase()+own.slice(1)} would have been ${f}% bigger without ${who==="These stocks"?"them":"it"}`}
 function headline(ix){const d=DATA[ix],down=d.pts<0,sg=down?-1:1,L=LIVE,pc=Math.abs(d.pct).toFixed(2)+"%";
   const name=ix==="DOW"?"The Dow":"The "+NAMES[ix];
   const P=PER!=="d";
@@ -230,7 +236,7 @@ function map(ix){const svg=document.getElementById("map");svg.innerHTML="";const
     const cells=[];squarify(b.l.map(r=>({r,v:Math.max(r[2],1e-6)})),bx,by+head,bw,bh-head,cells);
     cells.forEach(o=>{const r=o.r,t=Math.min(1,Math.abs(r[3])/SCALE[PER]),fill=mix(neutral,r[3]>=0?up:dn,0.25+0.75*t);
       const rc=el("rect",{x:o.x+0.5,y:o.y+0.5,width:Math.max(0,o.w-1),height:Math.max(0,o.h-1),fill},svg);
-      hover(rc,`<b>${shortName(r)}</b><br>${r[0]} · ${r[1]}<br>${b.n} · weight ${r[2].toFixed(2)}%<br>Move ${fmtPct(r[3])} · ${fmtP(r[4])} index pts<br>Click for its weight in all three indices`);
+      hover(rc,`<b>${shortName(r)}</b><br>${r[0]} · ${r[1]}<br>${b.n} · weight ${r[2].toFixed(2)}%<br>Move ${fmtPct(r[3])} · ${fmtP(r[4])} index pts${share(ix,r[4],shortName(r))}<br>Click for its weight in all three indices`);
       rc.style.cursor="pointer";rc.addEventListener("click",()=>openStock(r[0]));
       if(o.w>30&&o.h>18){const fs=Math.max(9,Math.min(22,Math.min(o.w/(r[0].length*0.68),Math.sqrt(o.w*o.h)/6.5)));if(fs*r[0].length*0.62>o.w-4)return;
         const col=t>0.45?"#06060A":"#FFFFFF",two=o.h>fs*2.5;
@@ -297,7 +303,7 @@ function fall(ix,target,boxW,extra=0){const svg=target||document.getElementById(
     let info="";if(g.r)info=`${g.r[0]} · ${g.r[1]}<br>Weight ${g.r[2].toFixed(2)}% · Move ${fmtPct(g.r[3])}<br>`;
     if(g.k==="sector")info=`${g.cnt} stocks · ${g.w.toFixed(1)}% of the index<br>`;
     if(g.k==="rest")info=(g.info||"Every other stock in the index, added together")+"<br>";
-    const html=`<b>${g.r?shortName(g.r):g.n}</b><br>${info}${fmtP(g.v)} pts${g.k==="total"?"":` · running total ${fmtP(g.b)}`}${g.k==="sector"?"<br>Click to "+(open.has(ix+g.n)?"hide":"show")+" its stocks":g.r?"<br>Click for its weight in all three indices":""}`;
+    const html=`<b>${g.r?shortName(g.r):g.n}</b><br>${info}${fmtP(g.v)} pts${g.k==="total"?"":` · running total ${fmtP(g.b)}`}${g.k==="total"?"":share(ix,g.v,g.r?shortName(g.r):g.k==="sector"?(SHORT[g.n]||g.n):"These stocks")}${g.k==="sector"?"<br>Click to "+(open.has(ix+g.n)?"hide":"show")+" its stocks":g.r?"<br>Click for its weight in all three indices":""}`;
     hits.push([lab,cx+4,x,bw,y(Math.max(g.a,g.b)),Math.abs(y(g.a)-y(g.b)),html,g.r?()=>openStock(g.r[0]):g.k==="sector"?()=>{const k=ix+g.n;open.has(k)?open.delete(k):open.add(k);tip.hidden=true;fall(ix)}:null]);
     if(i<steps.length-2||g.k==="rest"){const nb=steps[i+1],nsub=nb.k==="sub"||nb.k==="subg",nw=cw*(nsub?0.5:0.66),lv=nb.k==="total"||Math.abs(nb.a-g.b)<1e-9?g.b:g.a;el("line",{x1:x+bw,x2:L+(i+1)*cw+(cw-nw)/2,y1:y(lv),y2:y(lv),stroke:css("--muted"),"stroke-dasharray":"2 2"},svg)}});
   // Hover and click targets: the bar (padded so thin bars are easy to hit) and the slanted name under it.
