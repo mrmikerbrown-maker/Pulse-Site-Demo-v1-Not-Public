@@ -374,11 +374,11 @@ function card(){const box=document.getElementById("card");if(!SEL){box.hidden=tr
   box.innerHTML=`<div class="ct"><span class="cs">${esc(SEL)}</span><span class="cn">${esc(r0[1])}</span><button class="x" type="button" id="cx">Close</button><span class="cm">${esc(SECN[r0[5]]||"")} · day move <b class="${r0[3]>=0?"pos":"neg"}">${fmtPct(r0[3])}</b></span></div>
   <div class="tiles">${found.map(([ix,o])=>o?`<div class="tile"><span class="k">${NAMES[ix]}</span><span class="v">${o.r[2].toFixed(2)}%</span><span class="s">#${o.rank} of ${ALLR[ix].length} by weight</span><span class="s">Today <b class="${o.r[4]>=0?"pos":"neg"}">${fmtP(o.r[4])} pts</b></span></div>`
     :`<div class="tile off"><span class="k">${NAMES[ix]}</span><span class="v">Not in the ${ix==="DOW"?"Dow":NAMES[ix]}</span></div>`).join("")}</div>
-  ${found[2][1]?'<p class="wn">The Dow is price-weighted: its weight is the share price as a share of all 30 prices.</p>':""}`;
+  `;
   document.getElementById("cx").addEventListener("click",()=>{SEL=null;q.value="";location.hash="#weights"})}
 const SEC_KEY={rank:o=>o.rank,sym:o=>o.r[0],sec:o=>SECN[o.r[5]]||"",w:o=>-o.r[2],pct:o=>-o.r[3],pts:o=>-o.r[4]};
 function weights(){fillList();const ix=cur;document.getElementById("w-h").textContent=NAMES[ix]+" weights";
-  document.getElementById("w-n").textContent=ix==="DOW"?"Price-weighted: each stock's weight is its share price over the sum of all 30.":`${ALLR[ix].length} stocks · ${ix==="SPX"?(SPYUSED?"from SPY holdings as of the "+new Date(SPYUSED+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short"})+" close":"largest 25 from SPY holdings, the rest estimated from market caps"):"from QQQ holdings, rolled forward daily"}`;
+  document.getElementById("w-n").textContent=ix==="DOW"?"30 stocks · price-weighted":`${ALLR[ix].length} stocks · ${ix==="SPX"?(SPYUSED?"from SPY holdings as of the "+new Date(SPYUSED+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short"})+" close":"largest 25 from SPY holdings, the rest estimated from market caps"):"from QQQ holdings, rolled forward daily"}`;
   card();
   const t=q.value.trim().toUpperCase(),f=SORT.k,key=SEC_KEY[f];
   let list=ranked(ix).filter(o=>!t||o.r[0].includes(t)||o.r[1].toUpperCase().includes(t)||o.r[0]===SEL);
