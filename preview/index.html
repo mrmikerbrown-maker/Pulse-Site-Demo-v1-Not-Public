@@ -178,9 +178,10 @@ function strip(ix){const d=DATA[ix],c=d.pts>=0?"pos":"neg",A=ALLR[ix],up=A.filte
 // One-line summary written from the data: the move, the sector that drove it, and the three stocks that did most.
 const PROSE={"Info Tech":"Tech","Health Care":"Health care","Consumer Discretionary":"Consumer discretionary","Consumer Staples":"Consumer staples","Communication Services":"Communication services","Real Estate":"Real estate"};
 const CLASSCO={GOOGL:"Alphabet",GOOG:"Alphabet",FOXA:"Fox",FOX:"Fox",NWSA:"News Corp",NWS:"News Corp"};
-// Hover: points as a share of the index's move, e.g. "+123.05 pts · 18.0% of the gain". Negative when the stock went against the move.
+// Hover: points as a share of the index's move, e.g. "+123.05 pts · 17.5% of the gain", or "−25.38 pts · cut the gain by 3.6%".
 function share(ix,v){const d=DATA[ix];if(Math.abs(d.pct)<0.05||!v)return"";
-  return` · ${fmtPct(v/d.pts*100,1).replace("+","")} of the ${d.pts>0?"gain":"fall"}`}
+  const pc=Math.abs(v/d.pts*100).toFixed(1)+"%",m=d.pts>0?"gain":"fall";
+  return v*d.pts>0?` · ${pc} of the ${m}`:` · cut the ${m} by ${pc}`}
 function headline(ix){const d=DATA[ix],down=d.pts<0,sg=down?-1:1,L=LIVE,pc=Math.abs(d.pct).toFixed(2)+"%";
   const name=ix==="DOW"?"The Dow":"The "+NAMES[ix];
   const P=PER!=="d";
