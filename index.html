@@ -273,9 +273,10 @@ function fall(ix,target,boxW,extra=0){const svg=target||document.getElementById(
   steps.forEach((g,i)=>{const sub=g.k==="sub"||g.k==="subg",faded=g.k==="rest"||g.k==="subg";
     const bw=cw*(sub?0.5:g.k==="rest"?0.4:0.66),x=L+i*cw+(cw-bw)/2,cx=L+i*cw+cw/2;
     const tc=g.v>=0?css("--up"):css("--down"),fill=g.k==="total"?(TOTSTYLE==="A"?"#E6E8EF":TOTSTYLE==="now"?css("--accent"):tc):g.k==="rest"?`url(#${target?"hatch2":"hatch"})`:(g.v>=0?css("--up"):css("--down"));
-    const rc=el("rect",{x,y:y(Math.max(g.a,g.b)),width:bw,height:Math.max(1.5,Math.abs(y(g.a)-y(g.b))),rx:2,fill,stroke:g.k==="rest"?css("--muted"):g.k==="total"&&TOTSTYLE==="B"?tc:"none","stroke-width":g.k==="total"&&TOTSTYLE==="B"?2:1,"fill-opacity":g.k==="total"&&TOTSTYLE==="B"?0.15:g.k==="rest"?1:faded?0.5:sub?0.8:(g.k==="sector"&&open.has(ix+g.n))?0.35:1},svg);
-    const name=g.k==="total"&&TOTSTYLE!=="now"?`Index move ${fmtP(g.v)}`:g.k==="sector"?(SHORT[g.n]||g.n)+(open.has(ix+g.n)?" −":" +"):g.r?shortName(g.r):g.n;
+    const rc=el("rect",{x,y:y(Math.max(g.a,g.b)),width:bw,height:Math.max(1.5,Math.abs(y(g.a)-y(g.b))),rx:g.k==="total"?0:2,fill,stroke:g.k==="rest"?css("--muted"):"none","stroke-width":g.k==="total"&&TOTSTYLE==="B"?2:1,"fill-opacity":g.k==="total"&&TOTSTYLE==="B"?0.15:g.k==="rest"?1:faded?0.5:sub?0.8:(g.k==="sector"&&open.has(ix+g.n))?0.35:1},svg);
+    const name=g.k==="sector"?(SHORT[g.n]||g.n)+(open.has(ix+g.n)?" −":" +"):g.r?shortName(g.r):g.n;
     const lab=el("text",{x:cx+4,y:base,"text-anchor":"end",transform:`rotate(-45 ${cx+4} ${base})`,"font-size":sub?(narrow?10:11):(narrow?11:12),"font-weight":(g.k==="stock"||g.k==="sector"||g.k==="total"||g.k==="sub")?700:400,style:faded?`fill:${css("--muted")}`:sub?`fill:${css("--text2")}`:""},svg);lab.textContent=name;labs.push([lab,cx+4]);
+    if(g.k==="total"&&TOTSTYLE==="B"){const y0=y(0),y1=y(g.b),i=1;el("path",{d:`M${x+i} ${y0}V${y1+(y1>y0?-i:i)}H${x+bw-i}V${y0}`,fill:"none",stroke:tc,"stroke-width":2,"stroke-linejoin":"miter","pointer-events":"none"},svg)}
     if(g.k==="rest"){const t=el("text",{x:cx,y:y(Math.max(g.a,g.b))-6,"text-anchor":"middle","font-size":11},svg);t.textContent=fmtP(g.v)}
     let info="";if(g.r)info=`${g.r[0]} · ${g.r[1]}<br>Weight ${g.r[2].toFixed(2)}% · Move ${fmtPct(g.r[3])}<br>`;
     if(g.k==="sector")info=`${g.cnt} stocks · ${g.w.toFixed(1)}% of the index<br>`;
