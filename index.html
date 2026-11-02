@@ -68,7 +68,8 @@ svg text{fill:var(--text2);font-family:inherit}
 .sum .lv{font-size:22px;font-weight:700;color:var(--text)}.sum .ch{font-size:18px;font-weight:700}
 .pos{color:var(--up)!important}.neg{color:var(--down)!important}
 .sh{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px;margin-bottom:4px}
-.sh h1{font-size:19px;margin:0}
+.sh h2{font-size:17px;margin:0}
+.bar{align-items:flex-end}.bl{display:flex;flex-direction:column;gap:10px}.bl h1{margin:0;font-size:clamp(24px,4.4vw,32px)}.sum{padding-bottom:4px}
 #v-move,#v-weights{display:flex;flex-direction:column;gap:16px}
 .acts{display:flex;align-items:center;gap:4px 18px;flex-wrap:wrap}
 .how{display:inline-flex;align-items:center;gap:6px;appearance:none;font:inherit;font-size:13px;background:none;border:0;color:var(--accent);cursor:pointer;padding:6px 2px}
@@ -111,16 +112,17 @@ footer{display:flex;flex-direction:column;gap:8px;margin-top:4px}footer .status{
   <p class="badge" id="badge" hidden><i></i><span></span></p>
 </div>
 <div class="bar">
+  <div class="bl"><h1 id="pg-h">Who moved the S&amp;P 500?</h1>
   <div class="tabs" role="group" aria-label="Index">
     <button class="chip" id="t-SPX" aria-pressed="true">S&amp;P 500</button>
     <button class="chip" id="t-NDX" aria-pressed="false">Nasdaq 100</button>
     <button class="chip" id="t-DOW" aria-pressed="false">Dow Jones</button>
-  </div>
+  </div></div>
   <div class="sum" id="strip" aria-live="polite"></div>
 </div>
 <div id="v-move">
 <section>
-  <div class="sh"><h1 id="fall-h">Who moved the S&amp;P 500?</h1><div class="acts"><div class="pop" id="pop"><button class="how" id="how" type="button" aria-expanded="false" aria-controls="howp"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.2v4M8 4.8v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>How to read this</button><div class="popp" id="howp" role="dialog" aria-label="How to read this chart" hidden><p id="fall-p"></p></div></div><button class="dl" id="dl" type="button"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2v8m0 0L4.5 6.5M8 10l3.5-3.5M3 13h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Image</button></div></div>
+  <div class="sh"><h2 id="fall-h">Where the move came from</h2><div class="acts"><div class="pop" id="pop"><button class="how" id="how" type="button" aria-expanded="false" aria-controls="howp"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.2v4M8 4.8v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>How to read this</button><div class="popp" id="howp" role="dialog" aria-label="How to read this chart" hidden><p id="fall-p"></p></div></div><button class="dl" id="dl" type="button"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 2v8m0 0L4.5 6.5M8 10l3.5-3.5M3 13h10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Image</button></div></div>
   <div class="ctl"><div class="seg" role="group" aria-label="Group by"><button data-m="stock" aria-pressed="true">By stock</button><button data-m="sector" aria-pressed="false">By sector</button></div><select class="sel" id="fall-n" aria-label="Which stocks"></select></div>
   <p class="hint" id="swipe" hidden>Swipe the chart sideways to see all of it.</p><div class="scrollx"><svg id="fall" role="img" aria-label="Waterfall of the index move"></svg></div>
 </section>
@@ -132,7 +134,7 @@ footer{display:flex;flex-direction:column;gap:8px;margin-top:4px}footer .status{
 </div>
 <div id="v-weights" hidden>
 <section>
-  <div class="sh"><h1 id="w-h">S&amp;P 500 weights</h1><p class="wn" id="w-n"></p></div>
+  <div class="sh"><h2 id="w-h">S&amp;P 500 weights</h2><p class="wn" id="w-n"></p></div>
   <div class="find"><label for="q" class="vh">Look up a stock</label><input id="q" type="search" list="syms" placeholder="Look up a stock, e.g. AAPL or Apple" autocomplete="off" spellcheck="false" enterkeyhint="search"><datalist id="syms"></datalist></div>
   <div id="card" hidden></div>
   <p class="wn tn">Index pts = how many points the stock added to or took off the index today.</p>
@@ -281,7 +283,7 @@ const TXT={
   fallP:{SPX:"How the index got from yesterday's close to today's move: the risers first, then the fallers. By stock shows the 10 biggest risers and 10 biggest fallers in points, or the largest stocks by index weight; the grey column is everything else in the index. By sector covers every stock; click a sector (marked +) to open up its biggest movers. The blue bar is the overall move.",DOW:"How the Dow got from yesterday's close to today's move: the risers first, then the fallers. By stock shows the 10 highest-priced stocks, which carry the most weight in the Dow, or all 30. In By sector, click a sector (marked +) to open up its biggest movers. The blue bar is the overall move."},
   note:{SPX:'__SPXNOTE__',DOW:"Each stock's points = its $ change ÷ the Dow divisor. A $1 move in any Dow stock moves the index by about 6 points. Prices are delayed by about 15 to 20 minutes."}};
 const tx=(k,ix)=>{const t=TXT[k][ix]||TXT[k].SPX;return t!=="__SPXNOTE__"?t:(SPYUSED?`S&P 500 weights are State Street's SPY holdings as of the ${new Date(SPYUSED+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short"})} close`:"S&P 500 weights for the top 25 come from SPY holdings and the rest are estimated from market caps")+"; Nasdaq 100 weights come from QQQ holdings, rolled forward daily. Sectors are GICS. The stocks can add up to slightly more or less than the index move; in By stock that difference sits in \"Rest of index\". Prices from Google Finance, delayed about 15 to 20 minutes."};
-function draw(){if(!DATA)return;document.getElementById("fall-h").textContent=`Who moved the ${NAMES[cur]}?`;
+function draw(){if(!DATA)return;document.getElementById("pg-h").textContent=VIEW==="weights"?`${NAMES[cur]} weights & stock lookup`:`Who moved the ${NAMES[cur]}?`;
   ["SPX","NDX","DOW"].forEach(k=>document.getElementById("t-"+k).setAttribute("aria-pressed",k===cur));strip(cur);document.getElementById("note").textContent=tx("note",cur);
   if(VIEW==="weights"){weights();return}const fs=document.getElementById("fall-n"),opts=cur==="DOW"?[[10,"Top 10 by weight"],[20,"All 30"]]:[[0,"Biggest movers"],[10,"Top 10 by weight"],[20,"Top 20 by weight"]];
   fs.innerHTML=opts.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");fs.value=String(effN(cur));["map-h","map-p","fall-p"].forEach((id,i)=>document.getElementById(id).textContent=tx(["mapH","mapP","fallP"][i],cur));document.getElementById("map-h").textContent=`Market map · all ${ALLR[cur].length} stocks`;map(cur);fall(cur)}
@@ -427,7 +429,7 @@ function card(){const box=document.getElementById("card");if(!SEL){box.hidden=tr
   `;
   document.getElementById("cx").addEventListener("click",()=>{SEL=null;q.value="";location.hash="#weights"})}
 const SEC_KEY={rank:o=>o.rank,sym:o=>o.r[0],sec:o=>SECN[o.r[5]]||"",w:o=>-o.r[2],pct:o=>-o.r[3],pts:o=>-o.r[4]};
-function weights(){fillList();const ix=cur;document.getElementById("w-h").textContent=NAMES[ix]+" weights";
+function weights(){fillList();const ix=cur;document.getElementById("w-h").textContent="Index weights";
   document.getElementById("w-n").textContent=ix==="DOW"?"30 stocks · price-weighted":`${ALLR[ix].length} stocks · from ${ix==="SPX"?"SPY":"QQQ"} holdings`;
   card();
   const t=q.value.trim().toUpperCase(),f=SORT.k,key=SEC_KEY[f];
