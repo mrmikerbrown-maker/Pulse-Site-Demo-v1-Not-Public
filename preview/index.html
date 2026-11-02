@@ -322,7 +322,7 @@ function fall(ix,target,boxW,extra=0){const svg=target||document.getElementById(
     if(g.k==="rest")info=(g.info||"Every other stock in the index")+"<br>";
     const html=`<b>${g.r?shortName(g.r):g.n}</b>${g.r?" "+(g.r.tick||g.r[0]):""}<br>${info}${fmtP(g.v)} pts${g.k==="total"?"":share(ix,g.v)}${g.k==="sector"?"<br>Click to "+(open.has(ix+g.n)?"hide":"show")+" its stocks":""}`;
     hits.push([lab,cx+4,x,bw,y(Math.max(g.a,g.b)),Math.abs(y(g.a)-y(g.b)),html,g.r?()=>openStock(g.r[0]):g.k==="sector"?()=>{const k=ix+g.n;open.has(k)?open.delete(k):open.add(k);tip.hidden=true;fall(ix)}:null]);
-    if(i<steps.length-2||g.k==="rest"){const nb=steps[i+1],nsub=nb.k==="sub"||nb.k==="subg",nw=cw*(nsub?0.5:0.66),lv=nb.k==="total"||Math.abs(nb.a-g.b)<1e-9?g.b:g.a;el("line",{x1:x+bw,x2:L+(i+1)*cw+(cw-nw)/2,y1:y(lv),y2:y(lv),stroke:css("--muted"),"stroke-dasharray":"2 2"},svg)}});
+    if(i<steps.length-1){const nb=steps[i+1],nsub=nb.k==="sub"||nb.k==="subg",nw=cw*(nsub?0.5:0.66),lv=nb.k==="total"||Math.abs(nb.a-g.b)<1e-9?g.b:g.a;el("line",{x1:x+bw,x2:L+(i+1)*cw+(cw-nw)/2,y1:y(lv),y2:y(lv),stroke:css("--muted"),"stroke-dasharray":"2 2"},svg)}});
   // Hover and click targets: the bar (padded so thin bars are easy to hit) and the slanted name under it.
   if(!target)hits.forEach(([lab,lx,bx,bw,by,bh,html,fn])=>{const pad=Math.max(4,(14-bh)/2),tl=lab.getComputedTextLength();
     const hb=el("rect",{x:bx-2,y:by-pad,width:bw+4,height:bh+pad*2,fill:"#000","fill-opacity":0,"pointer-events":"all"},svg);
