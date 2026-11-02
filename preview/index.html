@@ -196,6 +196,11 @@ const CLASSCO={GOOGL:"Alphabet",GOOG:"Alphabet",FOXA:"Fox",FOX:"Fox",NWSA:"News 
 function share(ix,v){const d=DATA[ix];if(Math.abs(d.pct)<0.05||!v)return"";
   const pc=Math.abs(v/d.pts*100).toFixed(1)+"%",m=d.pts>0?"gain":"fall";
   return v*d.pts>0?` · ${pc} of the ${m}`:` · cut the ${m} by ${pc}`}
+// By stock: two share classes of one company (Alphabet A and C, Fox, News Corp) are drawn as one column.
+function mergeClasses(rows){const out=[],seen={};rows.forEach(r=>{const c=CLASSCO[r[0]];if(!c){out.push(r);return}
+    if(!seen[c]){const m=[r[0],r[1],0,0,0,r[5]];m.label=c;m.ticks=[];m.mv=0;seen[c]=m;out.push(m)}
+    const m=seen[c];m[2]+=r[2];m[4]+=r[4];m.mv+=r[2]*r[3];m.ticks.push(r[0])});
+  Object.values(seen).forEach(m=>{m[3]=m[2]?m.mv/m[2]:0;m.tick=m.ticks.join(" + ")});return out}
 function headline(ix){const d=DATA[ix],down=d.pts<0,sg=down?-1:1,L=LIVE,pc=Math.abs(d.pct).toFixed(2)+"%";
   const name=ix==="DOW"?"The Dow":"The "+NAMES[ix];
   const P=PER!=="d";
@@ -257,7 +262,7 @@ function map(ix){const svg=document.getElementById("map");svg.innerHTML="";const
 
 // Short company names for chart labels; anything not listed gets its legal suffixes stripped.
 const SHORTN={"BRK.B":"Berkshire","MU":"Micron","AMD":"AMD","JNJ":"J&J","AMAT":"Applied Materials","PANW":"Palo Alto","TXN":"Texas Instruments","TMO":"Thermo Fisher","IBM":"IBM","MRVL":"Marvell","VZ":"Verizon","ABT":"Abbott Labs","STX":"Seagate","ISRG":"Intuitive Surgical","IBKR":"Interactive Brkrs","VRTX":"Vertex","COF":"Capital One","BMY":"Bristol-Myers","MPC":"Marathon Pet.","ADP":"ADP","BNY":"BNY","VRT":"Vertiv","CEG":"Constellation","PNC":"PNC","WMB":"Williams","UPS":"UPS","ICE":"ICE","REGN":"Regeneron","RCL":"Royal Caribbean","HOOD":"Robinhood","TRV":"Travelers","MSI":"Motorola","ITW":"Illinois Tool","CL":"Colgate","RSG":"Republic Services","ORLY":"O'Reilly","AEP":"American Electric","APO":"Apollo","APD":"Air Products","AJG":"Gallagher","NXPI":"NXP","OXY":"Occidental","BSX":"Boston Scientific","FANG":"Diamondback","EW":"Edwards","BDX":"Becton Dickinson","HONA":"Honeywell Aero","ROK":"Rockwell","FITB":"Fifth Third","WAB":"Wabtec","VMRK":"Vivmark","FIX":"Comfort Systems","IDXX":"IDEXX","MCHP":"Microchip","AMP":"Ameriprise","ED":"Con Edison","LYV":"Live Nation","PRU":"Prudential","CMG":"Chipotle","EL":"Estee Lauder","MLM":"Martin Marietta","ADM":"ADM","TTWO":"Take-Two","ODFL":"Old Dominion","HIG":"Hartford","CBOE":"Cboe","HBAN":"Huntington","EXR":"Extra Space","RJF":"Raymond James","WTW":"WTW","WST":"West Pharma","PCG":"PG&E","AWK":"American Water","CTSH":"Cognizant","CNP":"CenterPoint","CINF":"Cincinnati Fin.","DGX":"Quest","CFG":"Citizens","EXPD":"Expeditors","Q":"Qnity","ES":"Eversource","CASY":"Casey's","DRI":"Darden","RF":"Regions","PFG":"Principal","SYF":"Synchrony","IFF":"IFF","PKG":"Packaging Corp","TPL":"Texas Pacific","SMCI":"Super Micro","LUV":"Southwest","LYB":"LyondellBasell","SWKS":"Skyworks","JBHT":"J.B. Hunt","BR":"Broadridge","SBAC":"SBA Comms","FIS":"FIS","CHTR":"Charter","IP":"Intl Paper","DD":"DuPont","CRL":"Charles River","HST":"Host Hotels","BEN":"Franklin","SWK":"Stanley B&D","CHRW":"C.H. Robinson","MAA":"Mid-America Apt","DOC":"Healthpeak","PNW":"Pinnacle West","LULU":"Lululemon","HII":"Huntington Ingalls","JKHY":"Jack Henry","UHS":"Universal Health","FRT":"Federal Realty","NCLH":"Norwegian Cruise","ARE":"Alexandria","SPCX":"SpaceX","CCEP":"Coca-Cola EP","ALNY":"Alnylam","AMZN":"Amazon","LLY":"Eli Lilly","MDT":"Medtronic","PEG":"PSEG","PNR":"Pentair","EBAY":"eBay","GOOGL":"Alphabet A","GOOG":"Alphabet C","FOXA":"Fox A","FOX":"Fox B","NWSA":"News Corp A","NWS":"News Corp B","META":"Meta","JPM":"JPMorgan","XOM":"Exxon Mobil","WMT":"Walmart","COST":"Costco","KO":"Coca-Cola","HD":"Home Depot","MA":"Mastercard","V":"Visa","PG":"P&G","BAC":"Bank of America","WFC":"Wells Fargo","GS":"Goldman Sachs","MS":"Morgan Stanley","UNH":"UnitedHealth","CRM":"Salesforce","ORCL":"Oracle","CSCO":"Cisco","MCD":"McDonald's","DIS":"Disney","PEP":"PepsiCo","TMUS":"T-Mobile","GE":"GE Aerospace","CAT":"Caterpillar","RTX":"RTX","HON":"Honeywell","LMT":"Lockheed","NFLX":"Netflix","AVGO":"Broadcom","NVDA":"Nvidia","AAPL":"Apple","MSFT":"Microsoft","TSLA":"Tesla","ABBV":"AbbVie","MRK":"Merck","ACN":"Accenture","GILD":"Gilead","INTC":"Intel","PLTR":"Palantir","SNDK":"SanDisk","CVX":"Chevron","AXP":"AmEx","SHW":"Sherwin-Williams","NKE":"Nike","KHC":"Kraft Heinz","MDLZ":"Mondelez","BKNG":"Booking","SBUX":"Starbucks","ADBE":"Adobe","QCOM":"Qualcomm","INTU":"Intuit","KLAC":"KLA","LRCX":"Lam Research","AMGN":"Amgen","PFE":"Pfizer","CVS":"CVS","T":"AT&T","CMCSA":"Comcast","C":"Citigroup","SCHW":"Schwab","BLK":"BlackRock","SPGI":"S&P Global","NOW":"ServiceNow","UBER":"Uber","ANET":"Arista","CRWD":"CrowdStrike","MMM":"3M","BA":"Boeing","NEE":"NextEra","DHR":"Danaher","SYK":"Stryker","LOW":"Lowe's","TJX":"TJX","DE":"Deere","UNP":"Union Pacific","ETN":"Eaton","PGR":"Progressive","CB":"Chubb","GEV":"GE Vernova","COP":"ConocoPhillips","MO":"Altria","PM":"Philip Morris","CME":"CME","ELV":"Elevance","CI":"Cigna","HCA":"HCA","APH":"Amphenol","ADI":"Analog Devices","KKR":"KKR","BX":"Blackstone","WDC":"Western Digital","DELL":"Dell","ASML":"ASML","ARM":"Arm","PDD":"PDD","MELI":"MercadoLibre","SHOP":"Shopify","ABNB":"Airbnb","DASH":"DoorDash","FTNT":"Fortinet","CDNS":"Cadence","SNPS":"Synopsys","MAR":"Marriott","CTAS":"Cintas","PAYX":"Paychex","CSX":"CSX","ROST":"Ross Stores","PCAR":"Paccar","MNST":"Monster","KDP":"Keurig Dr Pepper","FAST":"Fastenal","WDAY":"Workday","ADSK":"Autodesk","DDOG":"Datadog","CPRT":"Copart","EXC":"Exelon","XEL":"Xcel","BKR":"Baker Hughes","GEHC":"GE HealthCare","DXCM":"Dexcom","BIIB":"Biogen","ON":"ON Semi","CSGP":"CoStar","VRSK":"Verisk","ROP":"Roper","AXON":"Axon","APP":"AppLovin","MSTR":"Strategy","TRI":"Thomson Reuters"};
-const shortName=r=>{if(SHORTN[r[0]])return SHORTN[r[0]];let n=String(r[1]||r[0]).replace(/^The /,"");
+const shortName=r=>{if(r.label)return r.label;if(SHORTN[r[0]])return SHORTN[r[0]];let n=String(r[1]||r[0]).replace(/^The /,"");
   for(let k=0;k<4;k++)n=n.replace(/,?\s+(Inc\.?|Incorporated|Corporation|Corp\.?|Company|Companies|Co\.?|Holdings?|Group|plc\.?|PLC|Ltd\.?|N\.?V\.?|S\.A\.|Limited|LLC|& Co\.?|L\.P\.|SE|AG)$/,"").trim();
   n=n.replace(/,$/,"");return n.length>18?n.slice(0,17).trim()+"…":n||r[0]};
 let fallN=0,fallMode="stock",TOTSTYLE="B";
@@ -273,18 +278,18 @@ function fallSteps(ix,narrow){const d=DATA[ix],dj=ix==="DOW",st=[];
         s.top.forEach(t=>{const r=ALLR[ix].find(q=>q[0]===t[0]);st.push({n:t[0],v:t[1],k:"sub",r})});
         if(s.cnt>s.top.length)st.push({n:`Other ${s.cnt-s.top.length} in sector`,v:s.v-shown,k:"subg"});
         else st[st.length-1].v+=s.v-shown}});
-  }else{let pick,others;
-    const n0=effN(ix);if(n0===0){const up=ALLR[ix].filter(r=>r[4]>0).sort((a,b)=>b[4]-a[4]).slice(0,10),dn=ALLR[ix].filter(r=>r[4]<0).sort((a,b)=>a[4]-b[4]).slice(0,10),ch=new Set([...up,...dn]);pick=[...up,...dn];others=ALLR[ix].filter(r=>!ch.has(r))}
-    else{const n=dj&&n0===20?ALLR[ix].length:n0,big=[...ALLR[ix]].sort((a,b)=>b[2]-a[2]);pick=big.slice(0,n);others=big.slice(n)}
+  }else{let pick,others;const ALL=mergeClasses(ALLR[ix]);
+    const n0=effN(ix);if(n0===0){const up=ALL.filter(r=>r[4]>0).sort((a,b)=>b[4]-a[4]).slice(0,10),dn=ALL.filter(r=>r[4]<0).sort((a,b)=>a[4]-b[4]).slice(0,10),ch=new Set([...up,...dn]);pick=[...up,...dn];others=ALL.filter(r=>!ch.has(r))}
+    else{const n=dj&&n0===20?ALL.length:n0,big=[...ALL].sort((a,b)=>b[2]-a[2]);pick=big.slice(0,n);others=big.slice(n)}
     order(pick.map(r=>({n:r[0],v:r[4],k:"stock",r}))).forEach(g=>st.push(g));
     const shown=st.reduce((a,g)=>a+g.v,0);
     if(others.length){const rest=d.pts-shown;
       if(PER==="d"||dj)st.push({n:`Rest of index (${others.length})`,v:rest,k:"rest"});
-      else{// Longer periods: the rest grouped by sector (the five biggest, then everything else), so the leftover says where it came from.
+      else{// Longer periods: the rest grouped by sector, so the leftover says where it came from.
         const g={},ow=others.reduce((a,r)=>a+r[2],0)||1,raw=others.reduce((a,r)=>a+r[4],0);
         others.forEach(r=>{const s=SECN[r[5]]||"Other";(g[s]=g[s]||{v:0,n:0,w:0});g[s].v+=r[4];g[s].n++;g[s].w+=r[2]});
         Object.values(g).forEach(o=>o.v+=(rest-raw)*o.w/ow);
-        const ch=Object.entries(g).sort((a,b)=>Math.abs(b[1].v)-Math.abs(a[1].v)),top=ch.slice(0,5),rem=ch.slice(5),out=[];
+        const ch=Object.entries(g),top=ch,rem=[],out=[];
         top.sort((a,b)=>b[1].v-a[1].v).forEach(([n,o])=>out.push({n:`Other ${(SECAB[n]||n).toLowerCase()} (${o.n})`,v:o.v,k:"rest",split:1,info:`${o.n} ${SHORT[n]||n} stocks outside the top ${pick.length}`}));
         if(rem.length)out.push({n:`All other (${rem.reduce((a,x)=>a+x[1].n,0)})`,v:rem.reduce((a,x)=>a+x[1].v,0),k:"rest",split:1,info:`${rem.map(x=>SECAB[x[0]]||x[0]).join(", ")}`});
         out.forEach(o=>st.push(o))}}}
@@ -301,20 +306,21 @@ function fall(ix,target,boxW,extra=0){const svg=target||document.getElementById(
   ticks.forEach(t=>{el("line",{x1:L,x2:W-R,y1:y(t),y2:y(t),stroke:css("--rule")},svg);const tx=el("text",{x:L-8,y:y(t)+4,"text-anchor":"end",class:"axis"},svg);tx.textContent=fmtP(t).replace(".00","")});
   el("line",{x1:L,x2:W-R,y1:y(0),y2:y(0),stroke:css("--ink"),"stroke-width":1.2},svg);
   const cw=(W-L-R)/steps.length,base=H-bot+12;
-  const pat=el("pattern",{id:target?"hatch2":"hatch",width:6,height:6,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},el("defs",{},svg));el("rect",{width:6,height:6,fill:css("--muted"),"fill-opacity":0.25},pat);el("line",{x1:0,y1:0,x2:0,y2:6,stroke:css("--muted"),"stroke-width":2.5},pat);
+  // Hatched columns (groups of stocks) take the up/down colour of their move.
+  const defs=el("defs",{},svg);[["U",css("--up")],["D",css("--down")]].forEach(([k,c])=>{const pat=el("pattern",{id:(target?"hatch2":"hatch")+k,width:6,height:6,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},defs);el("rect",{width:6,height:6,fill:c,"fill-opacity":0.12},pat);el("line",{x1:0,y1:0,x2:0,y2:6,stroke:c,"stroke-width":2.5,"stroke-opacity":0.85},pat)});
   el("line",{x1:L+cw*(steps.length-1),x2:L+cw*(steps.length-1),y1:top,y2:H-bot+4,stroke:css("--line")},svg);
   const labs=[],hits=[];
   steps.forEach((g,i)=>{const sub=g.k==="sub"||g.k==="subg",faded=g.k==="rest"||g.k==="subg";
     const bw=cw*(sub?0.5:g.k==="rest"?0.4:0.66),x=L+i*cw+(cw-bw)/2,cx=L+i*cw+cw/2;
-    const tc=g.v>=0?css("--up"):css("--down"),fill=g.k==="total"?(TOTSTYLE==="A"?"#E6E8EF":TOTSTYLE==="now"?css("--accent"):tc):g.k==="rest"?`url(#${target?"hatch2":"hatch"})`:(g.v>=0?css("--up"):css("--down"));
-    const rc=el("rect",{x,y:y(Math.max(g.a,g.b)),width:bw,height:Math.max(1.5,Math.abs(y(g.a)-y(g.b))),rx:g.k==="total"?0:2,fill,stroke:g.k==="rest"?css("--muted"):"none","stroke-width":g.k==="total"&&TOTSTYLE==="B"?2:1,"fill-opacity":g.k==="total"&&TOTSTYLE==="B"?0.15:g.k==="rest"?1:faded?0.5:sub?0.8:(g.k==="sector"&&open.has(ix+g.n))?0.35:1},svg);
+    const tc=g.v>=0?css("--up"):css("--down"),fill=g.k==="total"?(TOTSTYLE==="A"?"#E6E8EF":TOTSTYLE==="now"?css("--accent"):tc):g.k==="rest"?`url(#${target?"hatch2":"hatch"}${g.v>=0?"U":"D"})`:(g.v>=0?css("--up"):css("--down"));
+    const rc=el("rect",{x,y:y(Math.max(g.a,g.b)),width:bw,height:Math.max(1.5,Math.abs(y(g.a)-y(g.b))),rx:g.k==="total"?0:2,fill,stroke:g.k==="rest"?tc:"none","stroke-width":g.k==="total"&&TOTSTYLE==="B"?2:1,"fill-opacity":g.k==="total"&&TOTSTYLE==="B"?0.15:g.k==="rest"?1:faded?0.5:sub?0.8:(g.k==="sector"&&open.has(ix+g.n))?0.35:1},svg);
     const name=g.k==="sector"?(SHORT[g.n]||g.n)+(open.has(ix+g.n)?" −":" +"):g.r?shortName(g.r):g.n;
     const lab=el("text",{x:cx+4,y:base,"text-anchor":"end",transform:`rotate(-45 ${cx+4} ${base})`,"font-size":sub?(narrow?10:11):(narrow?11:12),"font-weight":(g.k==="stock"||g.k==="sector"||g.k==="total"||g.k==="sub")?700:400,style:faded?`fill:${css("--muted")}`:sub?`fill:${css("--text2")}`:""},svg);lab.textContent=name;labs.push([lab,cx+4]);
     if(g.k==="total"&&TOTSTYLE==="B"){const y0=y(0),y1=y(g.b),i=1;el("path",{d:`M${x+i} ${y0}V${y1+(y1>y0?-i:i)}H${x+bw-i}V${y0}`,fill:"none",stroke:tc,"stroke-width":2,"stroke-linejoin":"miter","pointer-events":"none"},svg)}
     let info="";if(g.r)info=`Weight ${g.r[2].toFixed(2)}% · move ${fmtPct(g.r[3])}<br>`;
     if(g.k==="sector")info=`${g.cnt} stocks · ${g.w.toFixed(1)}% of the index<br>`;
     if(g.k==="rest")info=(g.info||"Every other stock in the index")+"<br>";
-    const html=`<b>${g.r?shortName(g.r):g.n}</b>${g.r?" "+g.r[0]:""}<br>${info}${fmtP(g.v)} pts${g.k==="total"?"":share(ix,g.v)}${g.k==="sector"?"<br>Click to "+(open.has(ix+g.n)?"hide":"show")+" its stocks":""}`;
+    const html=`<b>${g.r?shortName(g.r):g.n}</b>${g.r?" "+(g.r.tick||g.r[0]):""}<br>${info}${fmtP(g.v)} pts${g.k==="total"?"":share(ix,g.v)}${g.k==="sector"?"<br>Click to "+(open.has(ix+g.n)?"hide":"show")+" its stocks":""}`;
     hits.push([lab,cx+4,x,bw,y(Math.max(g.a,g.b)),Math.abs(y(g.a)-y(g.b)),html,g.r?()=>openStock(g.r[0]):g.k==="sector"?()=>{const k=ix+g.n;open.has(k)?open.delete(k):open.add(k);tip.hidden=true;fall(ix)}:null]);
     if(i<steps.length-2||g.k==="rest"){const nb=steps[i+1],nsub=nb.k==="sub"||nb.k==="subg",nw=cw*(nsub?0.5:0.66),lv=nb.k==="total"||Math.abs(nb.a-g.b)<1e-9?g.b:g.a;el("line",{x1:x+bw,x2:L+(i+1)*cw+(cw-nw)/2,y1:y(lv),y2:y(lv),stroke:css("--muted"),"stroke-dasharray":"2 2"},svg)}});
   // Hover and click targets: the bar (padded so thin bars are easy to hit) and the slanted name under it.
