@@ -198,9 +198,9 @@ function map(ix){const svg=document.getElementById("map");svg.innerHTML="";const
   blocks.forEach(b=>{const bx=b.x+1.5,by=b.y+1.5,bw=Math.max(0,b.w-3),bh=Math.max(0,b.h-3),head=bw>34&&bh>30?HEAD:0;
     el("rect",{x:bx,y:by,width:bw,height:bh,fill:css("--bg")},svg);
     if(head){const t=el("text",{x:bx+4,y:by+head-4,"font-size":narrow?10:11,"font-weight":700,"pointer-events":"none",style:`fill:${css("--muted")};letter-spacing:.04em`},svg);
-      const nm=(SHORT[b.n]||b.n).toUpperCase(),ss=SECT[ix].sectors.find(q=>q[0]===b.n),sp=ss?ss[2]:b.l.reduce((a,r)=>a+r[4],0);const cap=Math.floor((bw-8)/(narrow?6.2:6.8)),full=nm.length+2+fmtP(sp).length<=cap;
+      const nm=(SHORT[b.n]||b.n).toUpperCase(),ss=SECT[ix].sectors.find(q=>q[0]===b.n),sp=ss?ss[2]:b.l.reduce((a,r)=>a+r[4],0);const cap=Math.floor((bw-8)/(narrow?6.2:6.8)),full=nm.length+6+fmtP(sp).length<=cap;
       t.textContent=nm.length<=cap?nm:nm.slice(0,Math.max(1,cap-1))+"…";
-      if(full){const v=el("tspan",{dx:6,style:`fill:${sp>=0?css("--up"):css("--down")}`},t);v.textContent=fmtP(sp)}}
+      if(full){const v=el("tspan",{dx:6,style:`fill:${sp>=0?css("--up"):css("--down")}`},t);v.textContent=fmtP(sp)+" pts"}}
     const cells=[];squarify(b.l.map(r=>({r,v:Math.max(r[2],1e-6)})),bx,by+head,bw,bh-head,cells);
     cells.forEach(o=>{const r=o.r,t=Math.min(1,Math.abs(r[3])/3),fill=mix(neutral,r[3]>=0?up:dn,0.25+0.75*t);
       const rc=el("rect",{x:o.x+0.5,y:o.y+0.5,width:Math.max(0,o.w-1),height:Math.max(0,o.h-1),fill},svg);
