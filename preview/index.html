@@ -126,7 +126,7 @@ footer{display:flex;flex-direction:column;gap:8px;margin-top:4px}footer .status{
   <div class="sh"><h1 id="w-h">S&amp;P 500 weights</h1><p class="wn" id="w-n"></p></div>
   <div class="find"><label for="q" class="vh">Look up a stock</label><input id="q" type="search" list="syms" placeholder="Look up a stock, e.g. AAPL or Apple" autocomplete="off" spellcheck="false" enterkeyhint="search"><datalist id="syms"></datalist></div>
   <div id="card" hidden></div>
-  <div class="tbl"><table id="wt"><thead><tr><th data-k="rank" class="n" aria-sort="ascending">#</th><th data-k="sym">Stock</th><th data-k="sec" class="hide-s">Sector</th><th data-k="w" class="n">Weight</th><th data-k="pct" class="n">Day</th><th data-k="pts" class="n">Pts</th></tr></thead><tbody></tbody></table></div>
+  <div class="tbl"><table id="wt"><thead><tr><th data-k="rank" class="n" aria-sort="ascending">#</th><th data-k="sym">Stock</th><th data-k="sec" class="hide-s">Sector</th><th data-k="w" class="n">Weight</th><th data-k="pct" class="n">Day</th><th data-k="pts" class="n" title="How many index points this stock added or took off today">Index pts</th></tr></thead><tbody></tbody></table></div>
   <p class="empty" id="w-e" hidden>No stock in this index matches that.</p>
 </section>
 </div>
@@ -378,7 +378,7 @@ function card(){const box=document.getElementById("card");if(!SEL){box.hidden=tr
   document.getElementById("cx").addEventListener("click",()=>{SEL=null;q.value="";location.hash="#weights"})}
 const SEC_KEY={rank:o=>o.rank,sym:o=>o.r[0],sec:o=>SECN[o.r[5]]||"",w:o=>-o.r[2],pct:o=>-o.r[3],pts:o=>-o.r[4]};
 function weights(){fillList();const ix=cur;document.getElementById("w-h").textContent=NAMES[ix]+" weights";
-  document.getElementById("w-n").textContent=ix==="DOW"?"30 stocks · price-weighted":`${ALLR[ix].length} stocks · ${ix==="SPX"?(SPYUSED?"from SPY holdings as of the "+new Date(SPYUSED+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short"})+" close":"largest 25 from SPY holdings, the rest estimated from market caps"):"from QQQ holdings, rolled forward daily"}`;
+  document.getElementById("w-n").textContent=ix==="DOW"?"30 stocks · price-weighted":`${ALLR[ix].length} stocks · from ${ix==="SPX"?"SPY":"QQQ"} holdings`;
   card();
   const t=q.value.trim().toUpperCase(),f=SORT.k,key=SEC_KEY[f];
   let list=ranked(ix).filter(o=>!t||o.r[0].includes(t)||o.r[1].toUpperCase().includes(t)||o.r[0]===SEL);
