@@ -113,7 +113,7 @@ footer{display:flex;flex-direction:column;gap:8px;margin-top:4px}footer .status{
   <p class="badge" id="badge" hidden><i></i><span></span></p>
 </div>
 <div class="bar">
-  <div class="bl"><h1 id="pg-h">Who moved the S&amp;P 500?</h1>
+  <div class="bl"><h1 id="pg-h">Who moved the index?</h1>
   <div class="tabs" role="group" aria-label="Index">
     <button class="chip" id="t-SPX" aria-pressed="true">S&amp;P 500</button>
     <button class="chip" id="t-NDX" aria-pressed="false">Nasdaq 100</button>
@@ -284,7 +284,7 @@ const TXT={
   fallP:{SPX:"How the index got from yesterday's close to today's move: the risers first, then the fallers. By stock shows the 10 biggest risers and 10 biggest fallers in points, or the largest stocks by index weight; the grey column is everything else in the index. By sector covers every stock; click a sector (marked +) to open up its biggest movers. The blue bar is the overall move.",DOW:"How the Dow got from yesterday's close to today's move: the risers first, then the fallers. By stock shows the 10 highest-priced stocks, which carry the most weight in the Dow, or all 30. In By sector, click a sector (marked +) to open up its biggest movers. The blue bar is the overall move."},
   note:{SPX:'__SPXNOTE__',DOW:"Each stock's points = its $ change ÷ the Dow divisor. A $1 move in any Dow stock moves the index by about 6 points. Prices are delayed by about 15 to 20 minutes."}};
 const tx=(k,ix)=>{const t=TXT[k][ix]||TXT[k].SPX;return t!=="__SPXNOTE__"?t:(SPYUSED?`S&P 500 weights are State Street's SPY holdings as of the ${new Date(SPYUSED+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short"})} close`:"S&P 500 weights for the top 25 come from SPY holdings and the rest are estimated from market caps")+"; Nasdaq 100 weights come from QQQ holdings, rolled forward daily. Sectors are GICS. The stocks can add up to slightly more or less than the index move; in By stock that difference sits in \"Rest of index\". Prices from Google Finance, delayed about 15 to 20 minutes."};
-function draw(){if(!DATA)return;document.getElementById("pg-h").textContent=VIEW==="weights"?`${NAMES[cur]} weights & stock lookup`:`Who moved the ${NAMES[cur]}?`;
+function draw(){if(!DATA)return;
   ["SPX","NDX","DOW"].forEach(k=>document.getElementById("t-"+k).setAttribute("aria-pressed",k===cur));strip(cur);document.getElementById("note").textContent=tx("note",cur);
   if(VIEW==="weights"){weights();return}const fs=document.getElementById("fall-n"),opts=cur==="DOW"?[[10,"Top 10 by weight"],[20,"All 30"]]:[[0,"Biggest movers"],[10,"Top 10 by weight"],[20,"Top 20 by weight"]];
   fs.innerHTML=opts.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");fs.value=String(effN(cur));["map-h","map-p","fall-p"].forEach((id,i)=>document.getElementById(id).textContent=tx(["mapH","mapP","fallP"][i],cur));document.getElementById("map-h").textContent=`Market map · all ${ALLR[cur].length} stocks`;map(cur);fall(cur)}
