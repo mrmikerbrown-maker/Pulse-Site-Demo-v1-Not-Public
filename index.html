@@ -42,6 +42,12 @@ svg text{fill:var(--text2);font-family:inherit}
 .ctl{display:flex;flex-wrap:wrap;gap:8px 16px;margin-bottom:6px}
 .status{font-size:12px;color:var(--muted);margin:6px 0 0}.status.err{color:var(--pink)}
 .note{font-size:12px;color:var(--muted);margin:0;max-width:72ch}
+.badge{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 0 10px}
+.badge i{width:8px;height:8px;border-radius:50%;background:var(--dim)}
+.badge.live{color:var(--up);border-color:rgba(40,224,160,.45)}.badge.live i{background:var(--up);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.badge.live i{animation:none}}
+.dl{margin-left:auto}
 .cta{display:inline-block;color:var(--accent);font-weight:700;text-decoration:none}.cta:hover{text-decoration:underline}
 @media (max-width:560px){.strip{grid-template-columns:1fr 1fr}.strip .v{font-size:20px}.strip>div:last-child:nth-child(odd){grid-column:1/-1}section{padding:12px}}
 </style>
@@ -49,6 +55,7 @@ svg text{fill:var(--text2);font-family:inherit}
 <img class="logo" src="data:image/png;base64,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" alt="Newsquawk" width="150">
 <header>
   <div>
+    <p class="badge" id="badge" hidden><i></i><span></span></p>
     <h1>Who moved the index?</h1>
     <p class="sub">Which stocks and sectors pushed the index up or dragged it down today, in index points. Prices are delayed by about 15 to 20 minutes, regular US session only.</p>
     <p class="status" id="status" aria-live="polite">Loading the latest data…</p>
@@ -63,7 +70,7 @@ svg text{fill:var(--text2);font-family:inherit}
 <section>
   <h2>Where the move came from</h2>
   <p id="fall-p"></p>
-  <div class="ctl"><div class="tabs" role="group" aria-label="Group by"><button class="chip" data-m="sector" aria-pressed="true">By sector</button><button class="chip" data-m="stock" aria-pressed="false">By stock</button></div><div class="tabs" id="fall-n" hidden role="group" aria-label="Number of stocks"><button class="chip" data-n="0" id="n3" aria-pressed="true">Biggest movers</button><button class="chip" data-n="10" aria-pressed="false">Top 10 by weight</button><button class="chip" data-n="20" id="n2" aria-pressed="false">Top 20 by weight</button></div></div>
+  <div class="ctl"><div class="tabs" role="group" aria-label="Group by"><button class="chip" data-m="sector" aria-pressed="true">By sector</button><button class="chip" data-m="stock" aria-pressed="false">By stock</button></div><div class="tabs" id="fall-n" hidden role="group" aria-label="Number of stocks"><button class="chip" data-n="0" id="n3" aria-pressed="true">Biggest movers</button><button class="chip" data-n="10" aria-pressed="false">Top 10 by weight</button><button class="chip" data-n="20" id="n2" aria-pressed="false">Top 20 by weight</button></div><button class="chip dl" id="dl" type="button">Download image</button></div>
   <p class="hint" id="swipe" hidden>Swipe the chart sideways to see all of it.</p><div class="scrollx"><svg id="fall" role="img" aria-label="Waterfall of the index move"></svg></div>
 </section>
 <section>
@@ -147,22 +154,22 @@ function fallSteps(ix,narrow){const d=DATA[ix],dj=ix==="DOW",st=[];
     if(others.length)st.push({n:`Rest of index (${others.length})`,v:d.pts-shown,k:"rest"});}
   // An open sector's stocks re-walk that sector's own step (from its start to its end); they don't add to the running total.
   let run=0,sub=0;st.forEach(g=>{if(g.k==="sub"||g.k==="subg"){g.a=sub;sub+=g.v;g.b=sub}else{g.a=run;run+=g.v;g.b=run;sub=g.a}});st.push({n:"Index move",v:d.pts,a:0,b:d.pts,k:"total"});return st}
-function fall(ix){const svg=document.getElementById("fall");svg.innerHTML="";const d=DATA[ix];
-  document.getElementById("fall-n").hidden=fallMode!=="stock";
-  const box=svg.parentNode.getBoundingClientRect().width||900,narrow=box<600,steps=fallSteps(ix,narrow);
+function fall(ix,target,boxW){const svg=target||document.getElementById("fall");svg.innerHTML="";const d=DATA[ix];
+  if(!target)document.getElementById("fall-n").hidden=fallMode!=="stock";
+  const box=boxW||svg.parentNode.getBoundingClientRect().width||900,narrow=box<600,steps=fallSteps(ix,narrow);
   const L=narrow?44:56,R=10,top=12,bot=narrow?96:112,minCol=narrow?22:25;
   const W=Math.max(Math.round(box),L+R+steps.length*minCol),H=(narrow?300:360)+bot;
-  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.style.width=W+"px";svg.style.maxWidth="none";document.getElementById("swipe").hidden=W<=Math.round(box)+1;
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.style.width=W+"px";svg.style.maxWidth="none";if(!target)document.getElementById("swipe").hidden=W<=Math.round(box)+1;
   const all=steps.flatMap(g=>[g.a,g.b]).concat(0);const ticks=niceTicks(Math.min(...all),Math.max(...all),narrow?5:6);
   const lo=Math.min(...all,ticks[0]),hi=Math.max(...all,ticks[ticks.length-1]);const y=v=>top+(hi-v)/(hi-lo)*(H-top-bot);
   ticks.forEach(t=>{el("line",{x1:L,x2:W-R,y1:y(t),y2:y(t),stroke:css("--rule")},svg);const tx=el("text",{x:L-8,y:y(t)+4,"text-anchor":"end",class:"axis"},svg);tx.textContent=fmtP(t).replace(".00","")});
   el("line",{x1:L,x2:W-R,y1:y(0),y2:y(0),stroke:css("--ink"),"stroke-width":1.2},svg);
   const cw=(W-L-R)/steps.length,base=H-bot+12;
-  const pat=el("pattern",{id:"hatch",width:6,height:6,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},el("defs",{},svg));el("rect",{width:6,height:6,fill:css("--muted"),"fill-opacity":0.25},pat);el("line",{x1:0,y1:0,x2:0,y2:6,stroke:css("--muted"),"stroke-width":2.5},pat);
+  const pat=el("pattern",{id:target?"hatch2":"hatch",width:6,height:6,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},el("defs",{},svg));el("rect",{width:6,height:6,fill:css("--muted"),"fill-opacity":0.25},pat);el("line",{x1:0,y1:0,x2:0,y2:6,stroke:css("--muted"),"stroke-width":2.5},pat);
   el("line",{x1:L+cw*(steps.length-1),x2:L+cw*(steps.length-1),y1:top,y2:H-bot+4,stroke:css("--line")},svg);
   steps.forEach((g,i)=>{const sub=g.k==="sub"||g.k==="subg",faded=g.k==="rest"||g.k==="subg";
     const bw=cw*(sub?0.5:g.k==="rest"?0.4:0.66),x=L+i*cw+(cw-bw)/2,cx=L+i*cw+cw/2;
-    const fill=g.k==="total"?css("--accent"):g.k==="rest"?"url(#hatch)":(g.v>=0?css("--up"):css("--down"));
+    const fill=g.k==="total"?css("--accent"):g.k==="rest"?`url(#${target?"hatch2":"hatch"})`:(g.v>=0?css("--up"):css("--down"));
     const rc=el("rect",{x,y:y(Math.max(g.a,g.b)),width:bw,height:Math.max(1.5,Math.abs(y(g.a)-y(g.b))),rx:2,fill,stroke:g.k==="rest"?css("--muted"):"none","fill-opacity":g.k==="rest"?1:faded?0.5:sub?0.8:(g.k==="sector"&&open.has(ix+g.n))?0.35:1},svg);
     const name=g.k==="sector"?(SHORT[g.n]||g.n)+(open.has(ix+g.n)?" −":" +"):g.n;
     const lab=el("text",{x:cx+4,y:base,"text-anchor":"end",transform:`rotate(-45 ${cx+4} ${base})`,"font-size":sub?(narrow?10:11):(narrow?11:12),"font-weight":(g.k==="stock"||g.k==="sector"||g.k==="total"||g.k==="sub")?700:400,style:faded?`fill:${css("--muted")}`:sub?`fill:${css("--text2")}`:""},svg);lab.textContent=name;
@@ -218,15 +225,65 @@ function build(rows){const D={},A={SPX:[],NDX:[],DOW:[]},S={};
     S[ix]={sectors,resid}}
   DATA=D;ALLR=A;SECT=S}
 const status=document.getElementById("status");
+// Market state. Google resets some stocks' previous close before the US open, so outside the live session the page
+// shows last-session.csv, a copy of the sheet saved after each close by .github/workflows/snapshot.yml.
+const MON={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+function nyNow(){const p=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",year:"numeric",month:"numeric",day:"numeric",weekday:"short",hour:"numeric",minute:"numeric",hourCycle:"h23"}).formatToParts(new Date()).map(x=>[x.type,x.value]));
+  return{y:+p.year,m:+p.month-1,d:+p.day,wd:p.weekday,mins:+p.hour*60+ +p.minute}}
+// "30 Oct 16:47" -> a sortable day number (year taken from New York's today, stepping back over New Year)
+function quoteDay(last,ny){const m=/^(\d{1,2}) (\w{3})/.exec(last||"");if(!m||!(m[2] in MON))return 0;
+  let y=ny.y;if(MON[m[2]]>ny.m+1)y--;return Date.UTC(y,MON[m[2]],+m[1])/864e5}
+const sessionName=day=>new Date(day*864e5).toLocaleDateString("en-GB",{timeZone:"UTC",weekday:"short",day:"numeric",month:"short"});
+async function getCSV(url){const res=await fetch(url+(url.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"});
+  if(!res.ok)throw new Error("HTTP "+res.status);return parseCSV(await res.text())}
+const badge=document.getElementById("badge");
+function setBadge(live,text){badge.hidden=false;badge.classList.toggle("live",live);badge.querySelector("span").textContent=text}
+let LIVE=false,SESSION="";
 async function load(){
   if(CSV_URL.startsWith("__")){status.textContent="Data link not set up yet.";return}
-  try{const res=await fetch(CSV_URL+(CSV_URL.includes("?")?"&":"?")+"t="+Date.now(),{cache:"no-store"});
-    if(!res.ok)throw new Error("HTTP "+res.status);
-    build(parseCSV(await res.text()));
+  try{const ny=nyNow(),today=Date.UTC(ny.y,ny.m,ny.d)/864e5,open=!/Sat|Sun/.test(ny.wd)&&ny.mins>=570&&ny.mins<960;
+    let rows=await getCSV(CSV_URL);build(rows);
+    const liveDay=quoteDay(DATA.SPX.last,ny);LIVE=open&&liveDay===today;let day=liveDay;
+    if(!LIVE){try{const snap=await getCSV("last-session.csv");const keep=[DATA,ALLR,SECT];build(snap);
+        const snapDay=quoteDay(DATA.SPX.last,ny);if(snapDay>=liveDay)day=snapDay;else{[DATA,ALLR,SECT]=keep}}
+      catch(e){build(rows)}}
+    SESSION=sessionName(day);
+    if(LIVE)setBadge(true,"Live · prices delayed about 15 min");
+    else setBadge(false,(open&&ny.mins<615?"Waiting for today's first prices":"Market closed")+" · showing the "+SESSION+" session");
     const now=new Date().toLocaleTimeString("en-GB",{timeZone:"Europe/London",hour:"2-digit",minute:"2-digit"});
-    status.textContent=`Updated ${now} London time. Index quote as of ${DATA.SPX.last} New York time. Refreshes every minute.`;
+    status.textContent=LIVE?`Updated ${now} London time. Index quote as of ${DATA.SPX.last} New York time. Refreshes every minute.`
+      :`Final figures for the ${SESSION} session. Checked ${now} London time; live updates resume at the US open (14:30 UK).`;
     status.classList.remove("err");draw()}
   catch(e){status.textContent=(DATA?"Couldn't refresh just now, showing the last data. ":"Couldn't load the data. ")+"Trying again in a minute.";status.classList.add("err")}}
+
+// Download the waterfall as a branded PNG. The chart is redrawn at desktop width off screen, with its styles inlined.
+const NAMES={SPX:"S&P 500",NDX:"Nasdaq 100",DOW:"Dow Jones"};
+const loadImg=src=>new Promise((ok,bad)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=bad;i.src=src});
+async function downloadImage(){if(!DATA)return;const btn=document.getElementById("dl");btn.disabled=true;
+  try{const host=document.createElement("div");host.style.cssText="position:absolute;left:-10000px;top:0;width:1100px";document.body.appendChild(host);
+    const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");host.appendChild(svg);fall(cur,svg,1100);
+    const [,, W, H]=svg.getAttribute("viewBox").split(" ").map(Number),FONT=getComputedStyle(document.body).fontFamily;
+    const clone=svg.cloneNode(true),src=svg.querySelectorAll("text"),dst=clone.querySelectorAll("text");
+    src.forEach((t,i)=>{const c=getComputedStyle(t);dst[i].setAttribute("fill",c.fill);dst[i].setAttribute("font-family",FONT);dst[i].setAttribute("font-size",c.fontSize);dst[i].setAttribute("font-weight",c.fontWeight);dst[i].removeAttribute("style");dst[i].removeAttribute("class")});
+    clone.setAttribute("xmlns","http://www.w3.org/2000/svg");clone.setAttribute("width",W);clone.setAttribute("height",H);clone.removeAttribute("style");host.remove();
+    const chart=await loadImg("data:image/svg+xml;charset=utf-8,"+encodeURIComponent(new XMLSerializer().serializeToString(clone)));
+    const logo=await loadImg(document.querySelector(".logo").src);
+    const pad=40,head=170,foot=56,CW=W+pad*2,CH=head+H+foot,k=2,cv=document.createElement("canvas");cv.width=CW*k;cv.height=CH*k;
+    const g=cv.getContext("2d");g.scale(k,k);g.fillStyle=css("--bg");g.fillRect(0,0,CW,CH);
+    const gr=g.createLinearGradient(0,0,CW,0);gr.addColorStop(0,"#00e0ff");gr.addColorStop(.4,"rgba(0,224,255,0)");gr.addColorStop(.6,"rgba(0,224,255,0)");gr.addColorStop(1,"#ff3b6b");g.fillStyle=gr;g.fillRect(0,0,CW,4);
+    const lw=150;g.drawImage(logo,pad,28,lw,lw*logo.naturalHeight/logo.naturalWidth);
+    const d=DATA[cur],mode=fallMode==="sector"?"by sector":fallN===0?"biggest movers":cur==="DOW"&&fallN===20?"all 30 stocks":`top ${fallN} by weight`;
+    g.fillStyle=css("--text");g.font=`700 30px ${FONT}`;g.fillText(`Who moved the ${NAMES[cur]}?`,pad,112);
+    g.fillStyle=css("--muted");g.font=`400 15px ${FONT}`;g.fillText(`${LIVE?"As of "+d.last+" New York time":SESSION+" close"} · contribution in index points, ${mode}`,pad,140);
+    g.textAlign="right";g.fillStyle=d.pts>=0?css("--up"):css("--down");g.font=`700 30px ${FONT}`;g.fillText(`${fmtP(d.pts)} pts`,CW-pad,72);
+    g.fillStyle=css("--text2");g.font=`400 15px ${FONT}`;g.fillText(`${d.close.toLocaleString("en-GB",{minimumFractionDigits:2})} (${fmtPct(d.pct)})`,CW-pad,98);g.textAlign="left";
+    g.drawImage(chart,pad,head,W,H);
+    g.fillStyle=css("--muted");g.font=`400 13px ${FONT}`;g.fillText("Source: Newsquawk calculations from delayed Google Finance prices. newsquawk.com",pad,CH-24);
+    const a=document.createElement("a");a.download=`who-moved-${cur.toLowerCase()}-${new Date().toISOString().slice(0,10)}.png`;
+    a.href=URL.createObjectURL(await new Promise(r=>cv.toBlob(r,"image/png")));document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}
+  catch(e){alert("Sorry, the image couldn't be made in this browser.")}
+  finally{btn.disabled=false}}
+document.getElementById("dl").addEventListener("click",downloadImage);
 load();setInterval(()=>{if(!document.hidden)load()},REFRESH_MS);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)load()});
 </script>

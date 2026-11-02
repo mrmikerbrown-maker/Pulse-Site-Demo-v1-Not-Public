@@ -1,0 +1,27 @@
+name: Save last session
+on:
+  schedule:
+    # 16:40 New York time in both summer (20:40 UTC) and winter (21:40 UTC); the script skips the wrong one
+    - cron: "40 20 * * 1-5"
+    - cron: "40 21 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Save now, whatever the time"
+        type: boolean
+        default: false
+permissions:
+  contents: write
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 .github/snapshot.py
+        env:
+          FORCE: ${{ inputs.force && '1' || '0' }}
+      - run: |
+          git add last-session.csv 2>/dev/null || exit 0
+          git diff --cached --quiet && exit 0
+          git -c user.name="github-actions[bot]" -c user.email="41898208+github-actions[bot]@users.noreply.github.com" commit -m "Save last session"
+          git push
