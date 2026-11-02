@@ -1,0 +1,21 @@
+name: Save period start prices
+on:
+  schedule:
+    # After the US close (22:30 UTC), with a midday backup in case the evening run fails or runs late
+    - cron: "30 22 * * 1-5"
+    - cron: "0 12 * * 1-5"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  periods:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 .github/periods.py
+      - run: |
+          git add periods.csv
+          git diff --cached --quiet && exit 0
+          git -c user.name="github-actions[bot]" -c user.email="41898208+github-actions[bot]@users.noreply.github.com" commit -m "Save period start prices"
+          git pull --rebase -q
+          git push
