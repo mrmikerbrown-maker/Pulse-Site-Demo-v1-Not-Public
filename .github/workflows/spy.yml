@@ -1,0 +1,20 @@
+name: Save SPY weights
+on:
+  schedule:
+    # Weekdays 11:00 and 13:00 UTC, before the US open; State Street posts the previous close's holdings overnight
+    - cron: "0 11 * * 1-5"
+    - cron: "0 13 * * 1-5"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  spy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 .github/spy.py
+      - run: |
+          git add spy-weights.csv
+          git diff --cached --quiet && exit 0
+          git -c user.name="github-actions[bot]" -c user.email="41898208+github-actions[bot]@users.noreply.github.com" commit -m "Save SPY weights"
+          git push
