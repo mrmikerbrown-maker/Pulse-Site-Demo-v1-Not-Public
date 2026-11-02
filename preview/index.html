@@ -126,10 +126,9 @@ footer{display:flex;flex-direction:column;gap:8px;margin-top:4px}footer .status{
   <p class="hint" id="swipe" hidden>Swipe the chart sideways to see all of it.</p><div class="scrollx"><svg id="fall" role="img" aria-label="Waterfall of the index move"></svg></div>
 </section>
 <section>
-  <h2 id="map-h">Market map of the top 50</h2>
-  <p id="map-p"></p>
+  <div class="sh"><h2 id="map-h">Market map</h2><div class="acts"><div class="pop" id="pop2"><button class="how" id="how2" type="button" aria-expanded="false" aria-controls="howp2"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.2v4M8 4.8v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>How to read this</button><div class="popp" id="howp2" role="dialog" aria-label="How to read the market map" hidden><p id="map-p"></p></div></div></div></div>
   <div class="legend"><span>−3%</span><i></i><span>+3%</span></div>
-  <svg id="map" role="img" aria-label="Treemap of top 50 stocks by weight"></svg>
+  <svg id="map" role="img" aria-label="Treemap of every stock in the index, grouped by sector"></svg>
 </section>
 </div>
 <div id="v-weights" hidden>
@@ -190,15 +189,27 @@ function squarify(items,x,y,w,h,out){if(!items.length)return;const total=items.r
   if(w>=h){const rw=rs/h;let yy=y;row.forEach(r=>{const rh=r.v*scale/rw;out.push({...r,x,y:yy,w:rw,h:rh});yy+=rh});squarify(items.slice(row.length),x+rw,y,w-rw,h,out)}
   else{const rh=rs/w;let xx=x;row.forEach(r=>{const rw=r.v*scale/rh;out.push({...r,x:xx,y,w:rw,h:rh});xx+=rw});squarify(items.slice(row.length),x,y+rh,w,h-rh,out)}}
 function mix(c1,c2,t){const p=c=>[1,3,5].map(i=>parseInt(c.slice(i,i+2),16));const a=p(c1),b=p(c2);return"rgb("+a.map((v,i)=>Math.round(v+(b[i]-v)*t)).join(",")+")"}
-function map(ix){const svg=document.getElementById("map");svg.innerHTML="";const W=vw(svg),H=Math.round(W<600?W*1.15:W*0.56);svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
-  const items=[...DATA[ix].rows].sort((a,b)=>b[2]-a[2]).map(r=>({r,v:r[2]}));const out=[];squarify(items,0,0,W,H,out);
-  const neutral=css("--neutral"),up=css("--up"),dn=css("--down");
-  out.forEach(o=>{const r=o.r,t=Math.min(1,Math.abs(r[3])/3);const fill=mix(neutral,r[3]>=0?up:dn,0.25+0.75*t);
-    const rc=el("rect",{x:o.x+1,y:o.y+1,width:Math.max(0,o.w-2),height:Math.max(0,o.h-2),fill},svg);
-    hover(rc,`<b>${r[0]}</b> ${r[1]}<br>Weight ${r[2].toFixed(2)}% · Move ${fmtPct(r[3])}<br>Impact ${fmtP(r[4])} pts<br>Click for its weight in all three indices`);rc.style.cursor="pointer";rc.addEventListener("click",()=>openStock(r[0]));
-    if(o.w>38&&o.h>26){const fs=Math.max(10,Math.min(22,Math.sqrt(o.w*o.h)/7));
-      const g=el("text",{x:o.x+o.w/2,y:o.y+o.h/2,"text-anchor":"middle","font-size":fs,"font-weight":700,"pointer-events":"none",style:`fill:${t>0.45?"#06060A":"#FFFFFF"}`},svg);g.textContent=r[0];
-      if(o.h>fs*2.6){const g2=el("text",{x:o.x+o.w/2,y:o.y+o.h/2+fs*1.05,"text-anchor":"middle","font-size":fs*0.7,"pointer-events":"none",style:`fill:${t>0.45?"#06060A":"#FFFFFF"}`},svg);g2.textContent=fmtPct(r[3],1)}}})}
+// Market map: every stock, grouped into sector blocks (largest sector first), each sector squarified inside its block.
+function map(ix){const svg=document.getElementById("map");svg.innerHTML="";const W=vw(svg),narrow=W<600,H=Math.round(narrow?W*1.5:W*0.62);svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  const g={};ALLR[ix].forEach(r=>{const s=SECN[r[5]]||"Other";(g[s]=g[s]||[]).push(r)});
+  const secs=Object.entries(g).map(([n,l])=>({n,l:l.sort((a,b)=>b[2]-a[2]),v:l.reduce((a,r)=>a+Math.max(r[2],1e-6),0)})).sort((a,b)=>b.v-a.v);
+  const blocks=[];squarify(secs,0,0,W,H,blocks);
+  const neutral=css("--neutral"),up=css("--up"),dn=css("--down"),HEAD=narrow?14:16;
+  blocks.forEach(b=>{const bx=b.x+1.5,by=b.y+1.5,bw=Math.max(0,b.w-3),bh=Math.max(0,b.h-3),head=bw>34&&bh>30?HEAD:0;
+    el("rect",{x:bx,y:by,width:bw,height:bh,fill:css("--bg")},svg);
+    if(head){const t=el("text",{x:bx+4,y:by+head-4,"font-size":narrow?10:11,"font-weight":700,"pointer-events":"none",style:`fill:${css("--muted")};letter-spacing:.04em`},svg);
+      const nm=(SHORT[b.n]||b.n).toUpperCase(),ss=SECT[ix].sectors.find(q=>q[0]===b.n),sp=ss?ss[2]:b.l.reduce((a,r)=>a+r[4],0);const cap=Math.floor((bw-8)/(narrow?6.2:6.8)),full=nm.length+2+fmtP(sp).length<=cap;
+      t.textContent=nm.length<=cap?nm:nm.slice(0,Math.max(1,cap-1))+"…";
+      if(full){const v=el("tspan",{dx:6,style:`fill:${sp>=0?css("--up"):css("--down")}`},t);v.textContent=fmtP(sp)}}
+    const cells=[];squarify(b.l.map(r=>({r,v:Math.max(r[2],1e-6)})),bx,by+head,bw,bh-head,cells);
+    cells.forEach(o=>{const r=o.r,t=Math.min(1,Math.abs(r[3])/3),fill=mix(neutral,r[3]>=0?up:dn,0.25+0.75*t);
+      const rc=el("rect",{x:o.x+0.5,y:o.y+0.5,width:Math.max(0,o.w-1),height:Math.max(0,o.h-1),fill},svg);
+      hover(rc,`<b>${shortName(r)}</b><br>${r[0]} · ${r[1]}<br>${b.n} · weight ${r[2].toFixed(2)}%<br>Move ${fmtPct(r[3])} · ${fmtP(r[4])} index pts<br>Click for its weight in all three indices`);
+      rc.style.cursor="pointer";rc.addEventListener("click",()=>openStock(r[0]));
+      if(o.w>30&&o.h>18){const fs=Math.max(9,Math.min(22,Math.min(o.w/(r[0].length*0.68),Math.sqrt(o.w*o.h)/6.5)));if(fs*r[0].length*0.62>o.w-4)return;
+        const col=t>0.45?"#06060A":"#FFFFFF",two=o.h>fs*2.5;
+        const a=el("text",{x:o.x+o.w/2,y:o.y+o.h/2+(two?-fs*0.15:fs*0.35),"text-anchor":"middle","font-size":fs,"font-weight":700,"pointer-events":"none",style:`fill:${col}`},svg);a.textContent=r[0];
+        if(two){const c=el("text",{x:o.x+o.w/2,y:o.y+o.h/2+fs*0.95,"text-anchor":"middle","font-size":fs*0.7,"pointer-events":"none",style:`fill:${col}`},svg);c.textContent=fmtPct(r[3],1)}}})})}
 
 // Short company names for chart labels; anything not listed gets its legal suffixes stripped.
 const SHORTN={"BRK.B":"Berkshire","MU":"Micron","AMD":"AMD","JNJ":"J&J","AMAT":"Applied Materials","PANW":"Palo Alto","TXN":"Texas Instruments","TMO":"Thermo Fisher","IBM":"IBM","MRVL":"Marvell","VZ":"Verizon","ABT":"Abbott Labs","STX":"Seagate","ISRG":"Intuitive Surgical","IBKR":"Interactive Brkrs","VRTX":"Vertex","COF":"Capital One","BMY":"Bristol-Myers","MPC":"Marathon Pet.","ADP":"ADP","BNY":"BNY","VRT":"Vertiv","CEG":"Constellation","PNC":"PNC","WMB":"Williams","UPS":"UPS","ICE":"ICE","REGN":"Regeneron","RCL":"Royal Caribbean","HOOD":"Robinhood","TRV":"Travelers","MSI":"Motorola","ITW":"Illinois Tool","CL":"Colgate","RSG":"Republic Services","ORLY":"O'Reilly","AEP":"American Electric","APO":"Apollo","APD":"Air Products","AJG":"Gallagher","NXPI":"NXP","OXY":"Occidental","BSX":"Boston Scientific","FANG":"Diamondback","EW":"Edwards","BDX":"Becton Dickinson","HONA":"Honeywell Aero","ROK":"Rockwell","FITB":"Fifth Third","WAB":"Wabtec","VMRK":"Vivmark","FIX":"Comfort Systems","IDXX":"IDEXX","MCHP":"Microchip","AMP":"Ameriprise","ED":"Con Edison","LYV":"Live Nation","PRU":"Prudential","CMG":"Chipotle","EL":"Estee Lauder","MLM":"Martin Marietta","ADM":"ADM","TTWO":"Take-Two","ODFL":"Old Dominion","HIG":"Hartford","CBOE":"Cboe","HBAN":"Huntington","EXR":"Extra Space","RJF":"Raymond James","WTW":"WTW","WST":"West Pharma","PCG":"PG&E","AWK":"American Water","CTSH":"Cognizant","CNP":"CenterPoint","CINF":"Cincinnati Fin.","DGX":"Quest","CFG":"Citizens","EXPD":"Expeditors","Q":"Qnity","ES":"Eversource","CASY":"Casey's","DRI":"Darden","RF":"Regions","PFG":"Principal","SYF":"Synchrony","IFF":"IFF","PKG":"Packaging Corp","TPL":"Texas Pacific","SMCI":"Super Micro","LUV":"Southwest","LYB":"LyondellBasell","SWKS":"Skyworks","JBHT":"J.B. Hunt","BR":"Broadridge","SBAC":"SBA Comms","FIS":"FIS","CHTR":"Charter","IP":"Intl Paper","DD":"DuPont","CRL":"Charles River","HST":"Host Hotels","BEN":"Franklin","SWK":"Stanley B&D","CHRW":"C.H. Robinson","MAA":"Mid-America Apt","DOC":"Healthpeak","PNW":"Pinnacle West","LULU":"Lululemon","HII":"Huntington Ingalls","JKHY":"Jack Henry","UHS":"Universal Health","FRT":"Federal Realty","NCLH":"Norwegian Cruise","ARE":"Alexandria","SPCX":"SpaceX","CCEP":"Coca-Cola EP","ALNY":"Alnylam","AMZN":"Amazon","LLY":"Eli Lilly","MDT":"Medtronic","PEG":"PSEG","PNR":"Pentair","EBAY":"eBay","GOOGL":"Alphabet A","GOOG":"Alphabet C","FOXA":"Fox A","FOX":"Fox B","NWSA":"News Corp A","NWS":"News Corp B","META":"Meta","JPM":"JPMorgan","XOM":"Exxon Mobil","WMT":"Walmart","COST":"Costco","KO":"Coca-Cola","HD":"Home Depot","MA":"Mastercard","V":"Visa","PG":"P&G","BAC":"Bank of America","WFC":"Wells Fargo","GS":"Goldman Sachs","MS":"Morgan Stanley","UNH":"UnitedHealth","CRM":"Salesforce","ORCL":"Oracle","CSCO":"Cisco","MCD":"McDonald's","DIS":"Disney","PEP":"PepsiCo","TMUS":"T-Mobile","GE":"GE Aerospace","CAT":"Caterpillar","RTX":"RTX","HON":"Honeywell","LMT":"Lockheed","NFLX":"Netflix","AVGO":"Broadcom","NVDA":"Nvidia","AAPL":"Apple","MSFT":"Microsoft","TSLA":"Tesla","ABBV":"AbbVie","MRK":"Merck","ACN":"Accenture","GILD":"Gilead","INTC":"Intel","PLTR":"Palantir","SNDK":"SanDisk","CVX":"Chevron","AXP":"AmEx","SHW":"Sherwin-Williams","NKE":"Nike","KHC":"Kraft Heinz","MDLZ":"Mondelez","BKNG":"Booking","SBUX":"Starbucks","ADBE":"Adobe","QCOM":"Qualcomm","INTU":"Intuit","KLAC":"KLA","LRCX":"Lam Research","AMGN":"Amgen","PFE":"Pfizer","CVS":"CVS","T":"AT&T","CMCSA":"Comcast","C":"Citigroup","SCHW":"Schwab","BLK":"BlackRock","SPGI":"S&P Global","NOW":"ServiceNow","UBER":"Uber","ANET":"Arista","CRWD":"CrowdStrike","MMM":"3M","BA":"Boeing","NEE":"NextEra","DHR":"Danaher","SYK":"Stryker","LOW":"Lowe's","TJX":"TJX","DE":"Deere","UNP":"Union Pacific","ETN":"Eaton","PGR":"Progressive","CB":"Chubb","GEV":"GE Vernova","COP":"ConocoPhillips","MO":"Altria","PM":"Philip Morris","CME":"CME","ELV":"Elevance","CI":"Cigna","HCA":"HCA","APH":"Amphenol","ADI":"Analog Devices","KKR":"KKR","BX":"Blackstone","WDC":"Western Digital","DELL":"Dell","ASML":"ASML","ARM":"Arm","PDD":"PDD","MELI":"MercadoLibre","SHOP":"Shopify","ABNB":"Airbnb","DASH":"DoorDash","FTNT":"Fortinet","CDNS":"Cadence","SNPS":"Synopsys","MAR":"Marriott","CTAS":"Cintas","PAYX":"Paychex","CSX":"CSX","ROST":"Ross Stores","PCAR":"Paccar","MNST":"Monster","KDP":"Keurig Dr Pepper","FAST":"Fastenal","WDAY":"Workday","ADSK":"Autodesk","DDOG":"Datadog","CPRT":"Copart","EXC":"Exelon","XEL":"Xcel","BKR":"Baker Hughes","GEHC":"GE HealthCare","DXCM":"Dexcom","BIIB":"Biogen","ON":"ON Semi","CSGP":"CoStar","VRSK":"Verisk","ROP":"Roper","AXON":"Axon","APP":"AppLovin","MSTR":"Strategy","TRI":"Thomson Reuters"};
@@ -262,15 +273,15 @@ function fall(ix,target,boxW,extra=0){const svg=target||document.getElementById(
 
 let cur="SPX";
 const TXT={
-  mapH:{SPX:"Market map of the top 50",NDX:"Market map of the top 50",DOW:"Market map of all 30"},
-  mapP:{SPX:"Each box is sized by the stock's weight in the index and coloured by its % move on the day. Brighter means a bigger move.",DOW:"The Dow is price-weighted, so each box is sized by the stock's share price and coloured by its % move on the day. Brighter means a bigger move."},
+  mapH:{SPX:"Market map of all 503",NDX:"Market map of all 101",DOW:"Market map of all 30"},
+  mapP:{SPX:"Every stock in the index, grouped by GICS sector. Each box is sized by the stock's weight and coloured by its % move on the day: brighter means a bigger move. The figure next to each sector name is its contribution in index points. Hover over a box for details, or click it for the stock's weight in all three indices.",DOW:"Every Dow stock, grouped by GICS sector. The Dow is price-weighted, so each box is sized by the share price and coloured by its % move on the day: brighter means a bigger move. The figure next to each sector name is its contribution in index points. Hover over a box for details, or click it for the stock's weight in all three indices."},
   fallP:{SPX:"How the index got from yesterday's close to today's move: the risers first, then the fallers. By stock shows the 10 biggest risers and 10 biggest fallers in points, or the largest stocks by index weight; the grey column is everything else in the index. By sector covers every stock; click a sector (marked +) to open up its biggest movers. The blue bar is the overall move.",DOW:"How the Dow got from yesterday's close to today's move: the risers first, then the fallers. By stock shows the 10 highest-priced stocks, which carry the most weight in the Dow, or all 30. In By sector, click a sector (marked +) to open up its biggest movers. The blue bar is the overall move."},
   note:{SPX:'__SPXNOTE__',DOW:"Each stock's points = its $ change ÷ the Dow divisor. A $1 move in any Dow stock moves the index by about 6 points. Prices are delayed by about 15 to 20 minutes."}};
 const tx=(k,ix)=>{const t=TXT[k][ix]||TXT[k].SPX;return t!=="__SPXNOTE__"?t:(SPYUSED?`S&P 500 weights are State Street's SPY holdings as of the ${new Date(SPYUSED+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short"})} close`:"S&P 500 weights for the top 25 come from SPY holdings and the rest are estimated from market caps")+"; Nasdaq 100 weights come from QQQ holdings, rolled forward daily. Sectors are GICS. The stocks can add up to slightly more or less than the index move; in By stock that difference sits in \"Rest of index\". Prices from Google Finance, delayed about 15 to 20 minutes."};
 function draw(){if(!DATA)return;document.getElementById("fall-h").textContent=`Who moved the ${NAMES[cur]}?`;
   ["SPX","NDX","DOW"].forEach(k=>document.getElementById("t-"+k).setAttribute("aria-pressed",k===cur));strip(cur);document.getElementById("note").textContent=tx("note",cur);
   if(VIEW==="weights"){weights();return}const fs=document.getElementById("fall-n"),opts=cur==="DOW"?[[10,"Top 10 by weight"],[20,"All 30"]]:[[0,"Biggest movers"],[10,"Top 10 by weight"],[20,"Top 20 by weight"]];
-  fs.innerHTML=opts.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");fs.value=String(effN(cur));["map-h","map-p","fall-p"].forEach((id,i)=>document.getElementById(id).textContent=tx(["mapH","mapP","fallP"][i],cur));map(cur);fall(cur)}
+  fs.innerHTML=opts.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");fs.value=String(effN(cur));["map-h","map-p","fall-p"].forEach((id,i)=>document.getElementById(id).textContent=tx(["mapH","mapP","fallP"][i],cur));document.getElementById("map-h").textContent=`Market map · all ${ALLR[cur].length} stocks`;map(cur);fall(cur)}
 ["SPX","NDX","DOW"].forEach(k=>document.getElementById("t-"+k).addEventListener("click",()=>{cur=k;draw()}));
 document.querySelectorAll("[data-m]").forEach(b=>b.addEventListener("click",()=>{fallMode=b.dataset.m;document.querySelectorAll("[data-m]").forEach(c=>c.setAttribute("aria-pressed",c===b));fall(cur)}));
 document.getElementById("fall-n").addEventListener("change",e=>{fallN=+e.target.value;fall(cur)});
@@ -382,7 +393,7 @@ async function downloadImage(){if(!DATA)return;const btn=document.getElementById
   finally{btn.disabled=false}}
 document.getElementById("dl").addEventListener("click",downloadImage);
 // "How to read this": opens on hover with a mouse, on tap on a phone; closes on leaving, tapping elsewhere, Escape or scrolling.
-(()=>{const pop=document.getElementById("pop"),btn=document.getElementById("how"),pp=document.getElementById("howp");let t;
+[["pop","how","howp"],["pop2","how2","howp2"]].forEach(([a,b,c])=>{const pop=document.getElementById(a),btn=document.getElementById(b),pp=document.getElementById(c);let t;
   const place=()=>{const r=btn.getBoundingClientRect(),w=pp.offsetWidth;pp.style.top=(r.bottom+6)+"px";pp.style.left=Math.max(16,Math.min(r.right-w,innerWidth-w-16))+"px"};
   const show=()=>{clearTimeout(t);pp.hidden=false;btn.setAttribute("aria-expanded","true");place()};
   const hide=()=>{pp.hidden=true;btn.setAttribute("aria-expanded","false")};
@@ -391,7 +402,7 @@ document.getElementById("dl").addEventListener("click",downloadImage);
   btn.addEventListener("click",()=>pp.hidden?show():(hover?null:hide()));
   document.addEventListener("click",e=>{if(!pop.contains(e.target))hide()});
   document.addEventListener("keydown",e=>{if(e.key==="Escape")hide()});
-  addEventListener("scroll",hide,{passive:true});addEventListener("resize",hide)})();
+  addEventListener("scroll",hide,{passive:true});addEventListener("resize",hide)});
 // ---- Weights & stock lookup ----
 let VIEW="move",SEL=null,SORT={k:"rank",dir:1},LIMIT=100;
 const IXS=["SPX","NDX","DOW"],q=document.getElementById("q");
