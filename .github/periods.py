@@ -1,112 +1,62 @@
-"""Save the closing prices the site needs for its Week, Month and Year-to-date views.
+"""Add the session just saved in last-session.csv to periods.csv, the closes the site uses for Week, Month and YTD.
 
-Writes periods.csv: one row per stock (keyed by the sheet's Symbol column) and one per index
-(IDX_SPX, IDX_NDX, IDX_DOW), one column per date. The dates kept are the last close of last year,
-every month-end close since, and the last 15 closes, which covers every start date the site
-can need: the close before the year, the month and the week of the session it shows.
-Prices are Yahoo daily closes, adjusted for splits but not dividends (like the indices).
+periods.csv has one row per stock (the sheet's Symbol) and one per index (IDX_SPX, IDX_NDX, IDX_DOW),
+and one column per close. It was seeded once with closes for 31 Dec 2025, 30 Sep, 23 Oct and 30 Oct 2026
+(TradingView). Each evening this rolls every stock forward by its % change on the day from the sheet,
+and records the index closes as they are. Nothing is fetched from outside, so nothing can be blocked.
+
+The file keeps last year's final close, the last close of each month since, and the last 15 closes:
+every date a Week, Month or Year-to-date view can start from.
 """
-import csv, io, json, sys, time, urllib.parse, urllib.request, urllib.error
-from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, date, timedelta
+import csv
+from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
-URL = ("https://docs.google.com/spreadsheets/d/e/2PACX-1vSE9500jiKFvBw_k0q2m8CPaZ3VbZNv0uIYCe-QSnXpbASoqvwr2RW2hocHl5NVQejXIfVe4CdhX67h"
-       "/pub?gid=454467433&single=true&output=csv")
-INDICES = {"IDX_SPX": "^GSPC", "IDX_NDX": "^NDX", "IDX_DOW": "^DJI"}
-NY = ZoneInfo("America/New_York")
-now = datetime.now(NY)
-# Today's bar only counts once the US session has closed.
-last_ok = now.date() if now.hour * 60 + now.minute >= 16 * 60 + 30 else now.date() - timedelta(days=1)
-start = date(now.year - 1, 12, 1)
-p1 = int(datetime(start.year, start.month, start.day, tzinfo=NY).timestamp())
-p2 = int((now + timedelta(days=1)).timestamp())
+MON = {m: i + 1 for i, m in enumerate("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split())}
+num = lambda s: float(str(s).replace(",", "")) if str(s).strip() not in ("", "-") else None
 
-rows = list(csv.reader(io.StringIO(urllib.request.urlopen(URL, timeout=60).read().decode("utf-8"))))
-syms = {}
-for r in rows[1:]:
-    if r and r[0] in ("SPX", "NDX", "DOW") and len(r) > 4 and r[4]:
-        g = (r[1].split(":")[-1] if r[1] else r[4]).strip()
-        syms[r[4]] = g.replace(".", "-")
-syms.update(INDICES)
+rows = list(csv.reader(open("last-session.csv", encoding="utf-8")))
+idx = {r[0]: r for r in rows if r and r[0].startswith("IDX_")}
+d, m = idx["IDX_SPX"][5].split()[:2]
+ny = datetime.now(ZoneInfo("America/New_York")).date()
+year = ny.year - (1 if MON[m] > ny.month else 0)
+day = date(year, MON[m], int(d)).isoformat()
 
-BROWSER = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
-errors = []
+table = list(csv.reader(open("periods.csv", encoding="utf-8")))
+dates, data = table[0][1:], {r[0]: r[1:] for r in table[1:] if r}
+if day <= dates[-1]:
+    print(f"periods.csv already has {dates[-1]}; nothing to add for {day}")
+    raise SystemExit(0)
 
-def get(ysym, ua):
-    url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(ysym)}"
-           f"?period1={p1}&period2={p2}&interval=1d")
-    req = urllib.request.Request(url, headers={"User-Agent": ua} if ua else {})
-    j = json.load(urllib.request.urlopen(req, timeout=20))
-    res = j["chart"]["result"][0]
-    tz = ZoneInfo(res["meta"].get("exchangeTimezoneName") or "America/New_York")
-    out = {}
-    for t, c in zip(res.get("timestamp") or [], res["indicators"]["quote"][0]["close"]):
-        d = datetime.fromtimestamp(t, tz).date()
-        if c is not None and d <= last_ok:
-            out[d] = c
-    return out
+new = {}
+for k, r in idx.items():
+    new[k] = num(r[3])
+for r in rows:
+    if r and r[0] in ("SPX", "NDX", "DOW") and len(r) > 8 and r[4] and r[4] not in new:
+        chg = num(r[8])
+        prev = data.get(r[4], [""])[-1]
+        new[r[4]] = float(prev) * (1 + (chg or 0) / 100) if prev else 100.0  # a new member counts from here
+if any(new.get(k) is None for k in ("IDX_SPX", "IDX_NDX", "IDX_DOW")):
+    raise SystemExit("Index closes missing from last-session.csv")
 
-# Find a User-Agent Yahoo accepts from here (it has refused both kinds from Actions at times).
-UA = False
-for ua in (BROWSER, None):
-    try:
-        get("^GSPC", ua); UA = ua; break
-    except Exception as e:
-        print(f"Probe with {'browser' if ua else 'default'} User-Agent failed: {e}", flush=True)
-if UA is False:
-    sys.exit(1)
-print(f"Using the {'browser' if UA else 'default'} User-Agent; fetching {len(syms)} symbols", flush=True)
+dates.append(day)
+for k in set(data) | set(new):
+    row = data.get(k, [""] * (len(dates) - 1))
+    v = new.get(k)
+    row.append(f"{v:.4f}" if v is not None else row[-1])
+    data[k] = row
 
-def fetch(item):
-    key, ysym = item
-    for attempt in range(3):
-        try:
-            return key, get(ysym, UA)
-        except urllib.error.HTTPError as e:
-            if e.code == 404:
-                errors.append(f"{ysym}: 404"); return key, {}
-            err = f"{ysym}: HTTP {e.code}"
-        except Exception as e:
-            err = f"{ysym}: {e}"
-        time.sleep(1.5 * (attempt + 1))
-    errors.append(err)
-    return key, None
+# Keep the last 15 closes, plus the last close of every month from December last year.
+last_of_month = {}
+for i, s in enumerate(dates):
+    last_of_month[s[:7]] = i
+first_month = f"{int(day[:4]) - 1}-12"
+keep = sorted(set(range(max(0, len(dates) - 15), len(dates))) | {i for mth, i in last_of_month.items() if mth >= first_month})
 
-t0 = time.time()
-with ThreadPoolExecutor(4) as ex:
-    got = dict(ex.map(fetch, syms.items()))
-print(f"Fetched in {time.time() - t0:.0f}s; problems: {errors[:30]}", flush=True)
-
-bad = [k for k, v in got.items() if not v]
-idx_days = sorted(got.get("IDX_SPX") or {})
-if any(not got.get(k) for k in INDICES) or len(bad) > 0.05 * len(syms) or not idx_days:
-    print(f"Not saving: {len(bad)} of {len(syms)} symbols failed: {bad[:40]}")
-    sys.exit(1)
-
-# Dates to keep: last close of last year, each month-end since, and the last 15 closes.
-keep = set(idx_days[-15:])
-by_month = {}
-for d in idx_days:
-    by_month[(d.year, d.month)] = d
-keep |= set(by_month.values())
-keep = sorted(keep)
-
+order = ["IDX_SPX", "IDX_NDX", "IDX_DOW"] + sorted(k for k in data if not k.startswith("IDX_"))
 with open("periods.csv", "w", encoding="utf-8", newline="") as f:
     w = csv.writer(f)
-    w.writerow(["sym"] + [d.isoformat() for d in keep])
-    for key in list(INDICES) + sorted(k for k in got if k not in INDICES):
-        v = got.get(key) or {}
-        if not v:
-            continue
-        line, first = [], min(v)
-        for d in keep:
-            # A missing day (halt, late listing) takes the last close before it; before its first close it stays blank.
-            if d in v:
-                line.append(f"{v[d]:.4f}")
-            elif d > first:
-                line.append(f"{v[max(x for x in v if x < d)]:.4f}")
-            else:
-                line.append("")
-        w.writerow([key] + line)
-print(f"Saved {len(got) - len(bad)} symbols, {len(keep)} dates ({keep[0]} to {keep[-1]}). Missing: {bad}")
+    w.writerow(["sym"] + [dates[i] for i in keep])
+    for k in order:
+        w.writerow([k] + [data[k][i] for i in keep])
+print(f"Added {day}: {len(new)} rows; keeping {len(keep)} dates from {dates[keep[0]]}")

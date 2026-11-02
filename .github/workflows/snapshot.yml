@@ -20,8 +20,10 @@ jobs:
       - run: python3 .github/snapshot.py
         env:
           FORCE: ${{ inputs.force && '1' || '0' }}
+      # Roll the Week/Month/YTD closes forward with the session just saved (skips if it's already there)
+      - run: python3 .github/periods.py
       - run: |
-          git add last-session.csv 2>/dev/null || exit 0
+          git add last-session.csv periods.csv 2>/dev/null || exit 0
           git diff --cached --quiet && exit 0
           git -c user.name="github-actions[bot]" -c user.email="41898208+github-actions[bot]@users.noreply.github.com" commit -m "Save last session"
           git push
