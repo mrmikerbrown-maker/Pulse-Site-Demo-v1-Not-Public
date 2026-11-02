@@ -1,9 +1,5 @@
 name: Save period start prices
 on:
-  schedule:
-    # After the US close (22:30 UTC), with a midday backup in case the evening run fails or runs late
-    - cron: "30 22 * * 1-5"
-    - cron: "0 12 * * 1-5"
   workflow_dispatch:
 permissions:
   contents: write
