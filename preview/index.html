@@ -171,21 +171,21 @@ function niceTicks(lo,hi,n=5){const span=hi-lo,step0=span/n,mag=Math.pow(10,Math
 
 function strip(ix){const d=DATA[ix],c=d.pts>=0?"pos":"neg",A=ALLR[ix],up=A.filter(r=>r[3]>0).length,dn=A.filter(r=>r[3]<0).length,fl=A.length-up-dn;
   document.getElementById("strip").innerHTML=`<div class="sl"><span class="lv">${d.close.toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2})}</span><span class="ch ${c}">${fmtPct(d.pct)}</span><span class="ch ${c}">${fmtP(d.pts)} pts</span></div>`
-    +`<div class="br"><b class="pos">${up} up</b> · <b class="neg">${dn} down</b>${fl?` · ${fl} flat`:""}</div>`;
+    +`<div class="br"><b class="pos">${up} stocks up</b> · <b class="neg">${dn} down</b>${fl?` · ${fl} flat`:""}</div>`;
   document.getElementById("lede").textContent=headline(ix)}
 // One-line summary written from the data: the move, the sector that drove it, and the three stocks that did most.
 const PROSE={"Info Tech":"Tech","Health Care":"Health care","Consumer Discretionary":"Consumer discretionary","Consumer Staples":"Consumer staples","Communication Services":"Communication services","Real Estate":"Real estate"};
-function headline(ix){const d=DATA[ix],down=d.pts<0,sg=down?-1:1,pt=v=>{const a=Math.abs(v);return(a<10?a.toFixed(1):Math.round(a).toLocaleString("en-GB"))+" pts"};
+function headline(ix){const d=DATA[ix],down=d.pts<0,sg=down?-1:1,L=LIVE,pc=Math.abs(d.pct).toFixed(2)+"%";
   const name=ix==="DOW"?"The Dow":"The "+NAMES[ix];
-  if(Math.abs(d.pct)<0.05)return`${name} ${LIVE?"is":"finished"} flat (${fmtPct(d.pct)}).`;
-  const secs=SECT[ix].sectors.filter(x=>x[2]*sg>0).sort((a,b)=>b[2]*sg-a[2]*sg),top=secs[0];
-  const st=ALLR[ix].filter(r=>r[4]*sg>0).sort((a,b)=>b[4]*sg-a[4]*sg).slice(0,3),sum=st.reduce((a,r)=>a+r[4],0);
-  const list=st.map(shortName),names=list.length>1?list.slice(0,-1).join(", ")+" and "+list[list.length-1]:list[0];
-  let t=`${name} ${LIVE?(down?"is down":"is up"):(down?"fell":"rose")} ${pt(d.pts)} (${fmtPct(d.pct)}).`;
-  if(top){const sn=PROSE[top[0]]||top[0],most=top[2]/d.pts>=0.5,pl=/s$/.test(sn);
-    t+=` ${sn} ${LIVE?(most?(down?`${pl?"are":"is"} doing most of the damage`:`${pl?"are":"is"} doing most of the lifting`):(down?`${pl?"are":"is"} the biggest drag`:`${pl?"are":"is"} the biggest boost`)):(most?(down?"did most of the damage":"did most of the lifting"):(down?`${pl?"were":"was"} the biggest drag`:`${pl?"were":"was"} the biggest boost`))} at ${down?"−":"+"}${pt(top[2])}`;
-    if(st.length)t+=`, and ${names} ${st.length>1?"alone ":""}${LIVE?(down?"are taking off":"are adding"):(down?"took off":"added")} ${pt(sum)}.`;else t+="."}
-  if(st.length===1)t=t.replace(" are taking off"," is taking off").replace(" are adding"," is adding");
+  if(Math.abs(d.pct)<0.05)return`${name} ${L?"is":"finished"} flat.`;
+  const top=SECT[ix].sectors.filter(x=>x[2]*sg>0).sort((a,b)=>b[2]*sg-a[2]*sg)[0];
+  const st=ALLR[ix].filter(r=>r[4]*sg>0).sort((a,b)=>b[4]*sg-a[4]*sg).slice(0,3).map(shortName);
+  let t=`${name} ${L?(down?"is down":"is up"):(down?"fell":"rose")} ${pc}`;
+  if(top){const sn=(PROSE[top[0]]||top[0]).toLowerCase(),most=top[2]/d.pts>=0.5;
+    t+=most?`, with ${sn} doing most of the ${down?"damage":"lifting"}`:`, with ${sn} the biggest ${down?"drag":"boost"}`}
+  t+=".";
+  if(st.length){const names=st.length>1?st.slice(0,-1).join(", ")+" and "+st[st.length-1]:st[0],pl=st.length>1;
+    t+=` ${names} ${L?(pl?"are":"is")+(down?" taking the most off":" adding the most"):(down?"took the most off":"added the most")}.`}
   return t}
 
 function bars(ix){const svg=document.getElementById("bars");svg.innerHTML="";
