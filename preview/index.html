@@ -227,7 +227,7 @@ function fall(ix,target,boxW,extra=0){const svg=target||document.getElementById(
   const cw=(W-L-R)/steps.length,base=H-bot+12;
   const pat=el("pattern",{id:target?"hatch2":"hatch",width:6,height:6,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},el("defs",{},svg));el("rect",{width:6,height:6,fill:css("--muted"),"fill-opacity":0.25},pat);el("line",{x1:0,y1:0,x2:0,y2:6,stroke:css("--muted"),"stroke-width":2.5},pat);
   el("line",{x1:L+cw*(steps.length-1),x2:L+cw*(steps.length-1),y1:top,y2:H-bot+4,stroke:css("--line")},svg);
-  const labs=[];
+  const labs=[],hits=[];
   steps.forEach((g,i)=>{const sub=g.k==="sub"||g.k==="subg",faded=g.k==="rest"||g.k==="subg";
     const bw=cw*(sub?0.5:g.k==="rest"?0.4:0.66),x=L+i*cw+(cw-bw)/2,cx=L+i*cw+cw/2;
     const fill=g.k==="total"?css("--accent"):g.k==="rest"?`url(#${target?"hatch2":"hatch"})`:(g.v>=0?css("--up"):css("--down"));
@@ -238,10 +238,11 @@ function fall(ix,target,boxW,extra=0){const svg=target||document.getElementById(
     let info="";if(g.r)info=`${g.r[0]} · ${g.r[1]}<br>Weight ${g.r[2].toFixed(2)}% · Move ${fmtPct(g.r[3])}<br>`;
     if(g.k==="sector")info=`${g.cnt} stocks · ${g.w.toFixed(1)}% of the index<br>`;
     if(g.k==="rest")info="Every other stock in the index, added together<br>";
-    hover(rc,`<b>${g.r?shortName(g.r):g.n}</b><br>${info}${fmtP(g.v)} pts${g.k==="total"?"":` · running total ${fmtP(g.b)}`}${g.k==="sector"?"<br>Click to "+(open.has(ix+g.n)?"hide":"show")+" its stocks":g.r?"<br>Click for its weight in all three indices":""}`);
-    if(g.r&&!target){[rc,lab].forEach(n=>{n.style.cursor="pointer";n.addEventListener("click",()=>openStock(g.r[0]))})}
-    if(g.k==="sector"){[rc,lab].forEach(n=>{n.style.cursor="pointer";n.addEventListener("click",()=>{const k=ix+g.n;open.has(k)?open.delete(k):open.add(k);tip.hidden=true;fall(ix)})})}
+    const html=`<b>${g.r?shortName(g.r):g.n}</b><br>${info}${fmtP(g.v)} pts${g.k==="total"?"":` · running total ${fmtP(g.b)}`}${g.k==="sector"?"<br>Click to "+(open.has(ix+g.n)?"hide":"show")+" its stocks":g.r?"<br>Click for its weight in all three indices":""}`;
+    hits.push([i,html,g.r?()=>openStock(g.r[0]):g.k==="sector"?()=>{const k=ix+g.n;open.has(k)?open.delete(k):open.add(k);tip.hidden=true;fall(ix)}:null]);
     if(i<steps.length-2||g.k==="rest"){const nb=steps[i+1],nsub=nb.k==="sub"||nb.k==="subg",nw=cw*(nsub?0.5:0.66),lv=nb.k==="total"||Math.abs(nb.a-g.b)<1e-9?g.b:g.a;el("line",{x1:x+bw,x2:L+(i+1)*cw+(cw-nw)/2,y1:y(lv),y2:y(lv),stroke:css("--muted"),"stroke-dasharray":"2 2"},svg)}});
+  // Each column's whole strip (bar, empty space and its label) is one hover and click target, so thin bars are easy to hit.
+  if(!target)hits.forEach(([i,html,fn])=>{const h=el("rect",{x:L+i*cw,y:0,width:cw,height:H,fill:"#000","fill-opacity":0,"pointer-events":"all"},svg);hover(h,html);if(fn){h.style.cursor="pointer";h.addEventListener("click",fn)}});
   // Long names on the first columns would run off the left edge, so widen the left margin and redraw once.
   if(!extra){let need=0;labs.forEach(([t,x])=>{need=Math.max(need,t.getComputedTextLength()*0.7071-x+4)});if(need>0)return fall(ix,target,boxW,Math.ceil(need))}}
 
