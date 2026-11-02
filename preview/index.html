@@ -78,7 +78,7 @@ footer{display:flex;flex-direction:column;gap:8px;margin-top:4px}footer .status{
 .tile{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card);min-width:0;display:flex;flex-direction:column;gap:2px}
 .tile .k{font-size:12px;color:var(--muted);font-weight:600}.tile .v{font-size:24px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
 .tile .s{font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums}.tile.off .v{color:var(--dim);font-size:16px;padding:5px 0}
-.tbl{overflow-x:auto;margin-top:8px}
+.tbl{overflow-x:auto}.tn{margin:10px 0 0!important}
 #wt{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
 #wt th{background:var(--card);text-align:left;color:var(--muted);font-weight:600;padding:8px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;user-select:none}
 #wt th:hover{color:var(--text)}
@@ -126,7 +126,8 @@ footer{display:flex;flex-direction:column;gap:8px;margin-top:4px}footer .status{
   <div class="sh"><h1 id="w-h">S&amp;P 500 weights</h1><p class="wn" id="w-n"></p></div>
   <div class="find"><label for="q" class="vh">Look up a stock</label><input id="q" type="search" list="syms" placeholder="Look up a stock, e.g. AAPL or Apple" autocomplete="off" spellcheck="false" enterkeyhint="search"><datalist id="syms"></datalist></div>
   <div id="card" hidden></div>
-  <div class="tbl"><table id="wt"><thead><tr><th data-k="rank" class="n" aria-sort="ascending">#</th><th data-k="sym">Stock</th><th data-k="sec" class="hide-s">Sector</th><th data-k="w" class="n">Weight</th><th data-k="pct" class="n">Day</th><th data-k="pts" class="n" title="How many index points this stock added or took off today">Index pts</th></tr></thead><tbody></tbody></table></div>
+  <p class="wn tn">Index pts = how many points the stock added to or took off the index today.</p>
+  <div class="tbl"><table id="wt"><thead><tr><th data-k="rank" class="n" aria-sort="ascending">#</th><th data-k="sym">Stock</th><th data-k="sec" class="hide-s">Sector</th><th data-k="w" class="n">Weight</th><th data-k="pct" class="n">Day</th><th data-k="pts" class="n" id="th-pts">Index pts</th></tr></thead><tbody></tbody></table></div>
   <p class="empty" id="w-e" hidden>No stock in this index matches that.</p>
 </section>
 </div>
@@ -390,6 +391,7 @@ function weights(){fillList();const ix=cur;document.getElementById("w-h").textCo
   document.getElementById("w-e").hidden=list.length>0}
 document.querySelector("#wt tbody").addEventListener("click",e=>{const tr=e.target.closest("tr");if(!tr)return;
   if(tr.classList.contains("more")){LIMIT=1e9;weights();return}openStock(tr.dataset.s)});
+hover(document.getElementById("th-pts"),"How many points this stock added to<br>or took off the index today");
 document.querySelectorAll("#wt th").forEach(th=>th.addEventListener("click",()=>{const k=th.dataset.k;SORT=SORT.k===k?{k,dir:-SORT.dir}:{k,dir:1};weights()}));
 q.addEventListener("input",()=>{const t=q.value.trim().toUpperCase(),m=allStocks();if(m.has(t)){openStock(t,true);return}weights()});
 q.addEventListener("keydown",e=>{if(e.key==="Enter"){const s=match(q.value);if(s)openStock(s,true)}});
