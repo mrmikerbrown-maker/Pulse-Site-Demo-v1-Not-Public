@@ -241,8 +241,8 @@ const TXT={
   mapH:{SPX:"Market map of the top 50",NDX:"Market map of the top 50",DOW:"Market map of all 30"},
   mapP:{SPX:"Each box is sized by the stock's weight in the index and coloured by its % move on the day. Brighter means a bigger move.",DOW:"The Dow is price-weighted, so each box is sized by the stock's share price and coloured by its % move on the day. Brighter means a bigger move."},
   fallP:{SPX:"How the index got from yesterday's close to today's move: the risers first, then the fallers. By sector covers every stock; click a sector (marked +) to open up its biggest movers. By stock shows the 10 biggest risers and 10 biggest fallers in points, or the largest stocks by index weight; the grey column is everything else in the index. The blue bar is the overall move.",DOW:"How the Dow got from yesterday's close to today's move: the risers first, then the fallers. Click a sector (marked +) to open up its biggest movers. By stock shows the 10 highest-priced stocks, which carry the most weight in the Dow, or all 30. The blue bar is the overall move."},
-  note:{SPX:'Top 25 weights from SPY and QQQ holdings, names 26 to 50 from market caps, both rolled forward daily; the rest of the index is weighted by market cap. Sectors are GICS. Because weights outside the top 50 are estimates, the stocks can add up to slightly more or less than the index move; in By stock that difference sits in "Rest of the index". Prices from Google Finance, delayed about 15 to 20 minutes.',DOW:"Each stock's points = its $ change ÷ the Dow divisor. A $1 move in any Dow stock moves the index by about 6 points. Prices are delayed by about 15 to 20 minutes."}};
-const tx=(k,ix)=>TXT[k][ix]||TXT[k].SPX;
+  note:{SPX:'__SPXNOTE__',DOW:"Each stock's points = its $ change ÷ the Dow divisor. A $1 move in any Dow stock moves the index by about 6 points. Prices are delayed by about 15 to 20 minutes."}};
+const tx=(k,ix)=>{const t=TXT[k][ix]||TXT[k].SPX;return t!=="__SPXNOTE__"?t:(SPYUSED?`S&P 500 weights are State Street's SPY holdings as of the ${new Date(SPYUSED+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short"})} close`:"S&P 500 weights for the top 25 come from SPY holdings and the rest are estimated from market caps")+"; Nasdaq 100 weights come from QQQ holdings, rolled forward daily. Sectors are GICS. The stocks can add up to slightly more or less than the index move; in By stock that difference sits in \"Rest of index\". Prices from Google Finance, delayed about 15 to 20 minutes."};
 function draw(){if(!DATA)return;document.getElementById("fall-h").textContent=`Who moved the ${NAMES[cur]}?`;
   ["SPX","NDX","DOW"].forEach(k=>document.getElementById("t-"+k).setAttribute("aria-pressed",k===cur));strip(cur);document.getElementById("note").textContent=tx("note",cur);
   if(VIEW==="weights"){weights();return}document.querySelectorAll("[data-n]").forEach(c=>c.setAttribute("aria-pressed",+c.dataset.n===effN(cur)));document.getElementById("n3").hidden=cur==="DOW";document.getElementById("n2").textContent=cur==="DOW"?"All 30":"Top 20 by weight";["map-h","map-p","fall-p"].forEach((id,i)=>document.getElementById(id).textContent=tx(["mapH","mapP","fallP"][i],cur));map(cur);fall(cur)}
@@ -263,6 +263,14 @@ function parseCSV(t){const out=[];let row=[],f="",q=false;
 // Tidy legal-name clutter from the sheet's names: "(The)", "(HC)", "(REIT)", trailing "New" and so on.
 const clean=n=>String(n||"").replace(/\s*\((The|HC|Holding Co|REIT|Delaware|D\/B\/A|Ireland|New)\)/g,"").replace(/\s+New$/,"").trim();
 const num=s=>{const v=parseFloat(String(s==null?"":s).replace(/,/g,""));return isFinite(v)?v:0};
+// SPY holdings files saved each weekday morning by .github/workflows/spy.yml: today's and the one before.
+let SPYF=[],SPYUSED="";
+async function loadSPY(){const out=[];for(const f of ["../spy-weights.csv","../spy-weights-prev.csv"]){
+    try{const t=await getCSV(f),asof=(t[0]||[])[1]||"",w=new Map();t.slice(1).forEach(r=>{if(r[0]&&+r[1]>0)w.set(r[0],+r[1])});
+      if(/^\d{4}-\d\d-\d\d$/.test(asof)&&w.size>400)out.push({asof,day:Date.UTC(+asof.slice(0,4),+asof.slice(5,7)-1,+asof.slice(8,10))/864e5,w})}catch(e){}}
+  SPYF=out.sort((a,b)=>b.day-a.day)}
+// The newest holdings from before the session day; if none is that old, the oldest we have.
+const pickSPY=day=>SPYF.find(f=>f.day<day)||SPYF[SPYF.length-1]||null;
 function build(rows){const D={},A={SPX:[],NDX:[],DOW:[]},S={};
   rows.slice(1).forEach(r=>{const k=r[0];
     if(k&&k.startsWith("IDX_")){const ix=k.slice(4),close=num(r[3]),prev=num(r[7]);D[ix]={close,prev,pct:num(r[8]),pts:close-prev,last:r[5],rows:[]}}
@@ -271,6 +279,13 @@ function build(rows){const D={},A={SPX:[],NDX:[],DOW:[]},S={};
     const w=num(r[7]),p=num(r[8]),pts=ix==="DOW"?num(r[9]):w/100*p/100*D[ix].prev;
     const row=[r[4],clean(r[13]||r[5])||SECN[r[2]]||"",w,p,pts,r[2]];A[ix].push(row);
     if(ix==="DOW"||r[6]==="TRUE")D[ix].rows.push(row)});
+  // S&P 500 weights: State Street's full SPY holdings, struck at the close before the session shown.
+  // Any member SPY doesn't list keeps the sheet's estimate. Without a SPY file the sheet's weights stand.
+  SPYUSED="";if(D.SPX&&A.SPX.length){const sp=pickSPY(quoteDay(D.SPX.last,nyNow()));
+    if(sp){const hit=A.SPX.filter(r=>sp.w.has(r[0]));
+      if(hit.length>=A.SPX.length*0.95){const F=hit.reduce((a,r)=>a+sp.w.get(r[0]),0),M=A.SPX.filter(r=>!sp.w.has(r[0])).reduce((a,r)=>a+r[2],0);
+        A.SPX.forEach(r=>{if(sp.w.has(r[0]))r[2]=sp.w.get(r[0])*(100-M)/F;r[4]=r[2]/100*r[3]/100*D.SPX.prev});
+        D.SPX.rows=[...A.SPX].sort((a,b)=>b[2]-a[2]).slice(0,50);SPYUSED=sp.asof}}}
   if(!D.SPX||!D.NDX||!D.DOW||A.SPX.length<400||A.NDX.length<90||A.DOW.length!==30)throw new Error("The data looks incomplete");
   D.DOW.divisor=META.divisor||0;
   for(const ix of ["SPX","NDX","DOW"]){const g={};
@@ -300,7 +315,7 @@ let LIVE=false,SESSION="";
 async function load(){
   if(CSV_URL.startsWith("__")){status.textContent="Data link not set up yet.";return}
   try{const ny=nyNow(),today=Date.UTC(ny.y,ny.m,ny.d)/864e5,open=!/Sat|Sun/.test(ny.wd)&&ny.mins>=570&&ny.mins<960;
-    let rows=await getCSV(CSV_URL);build(rows);
+    await loadSPY();let rows=await getCSV(CSV_URL);build(rows);
     const liveDay=quoteDay(DATA.SPX.last,ny);LIVE=open&&liveDay===today;let day=liveDay;
     if(!LIVE){try{const snap=await getCSV("../last-session.csv");const keep=[DATA,ALLR,SECT];build(snap);
         const snapDay=quoteDay(DATA.SPX.last,ny);if(snapDay>=liveDay)day=snapDay;else{[DATA,ALLR,SECT]=keep}}
@@ -363,7 +378,7 @@ function card(){const box=document.getElementById("card");if(!SEL){box.hidden=tr
   document.getElementById("cx").addEventListener("click",()=>{SEL=null;q.value="";location.hash="#weights"})}
 const SEC_KEY={rank:o=>o.rank,sym:o=>o.r[0],sec:o=>SECN[o.r[5]]||"",w:o=>-o.r[2],pct:o=>-o.r[3],pts:o=>-o.r[4]};
 function weights(){fillList();const ix=cur;document.getElementById("w-h").textContent=NAMES[ix]+" weights";
-  document.getElementById("w-n").textContent=ix==="DOW"?"Price-weighted: each stock's weight is its share price over the sum of all 30.":`${ALLR[ix].length} stocks · ${ix==="SPX"?"largest 25 from SPY holdings, the rest estimated from market caps":"from QQQ holdings, rolled forward daily"}`;
+  document.getElementById("w-n").textContent=ix==="DOW"?"Price-weighted: each stock's weight is its share price over the sum of all 30.":`${ALLR[ix].length} stocks · ${ix==="SPX"?(SPYUSED?"from SPY holdings as of the "+new Date(SPYUSED+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short"})+" close":"largest 25 from SPY holdings, the rest estimated from market caps"):"from QQQ holdings, rolled forward daily"}`;
   card();
   const t=q.value.trim().toUpperCase(),f=SORT.k,key=SEC_KEY[f];
   let list=ranked(ix).filter(o=>!t||o.r[0].includes(t)||o.r[1].toUpperCase().includes(t)||o.r[0]===SEL);

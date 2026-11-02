@@ -47,6 +47,12 @@ for r in rows[hi + 1:]:
 total = sum(w for _, w in out)
 if not asof or len(out) < 480 or not 95 < total < 101:
     sys.exit(f"SPY file looks wrong: as of {asof!r}, {len(out)} stocks, weights sum {total:.2f}")
+# Keep the previous day's file too: after the close the site shows that session, which needs the weights
+# from the close before it, not the ones State Street posts that evening.
+import os, shutil
+if os.path.exists("spy-weights.csv"):
+    old = open("spy-weights.csv").readline().strip().split(",")[-1]
+    if old != asof: shutil.copy("spy-weights.csv", "spy-weights-prev.csv")
 with open("spy-weights.csv", "w", newline="") as f:
     w = csv.writer(f, lineterminator="\n")
     w.writerow(["asof", asof])
