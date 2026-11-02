@@ -177,6 +177,10 @@ function strip(ix){const d=DATA[ix],c=d.pts>=0?"pos":"neg",A=ALLR[ix],up=A.filte
 // One-line summary written from the data: the move, the sector that drove it, and the three stocks that did most.
 const PROSE={"Info Tech":"Tech","Health Care":"Health care","Consumer Discretionary":"Consumer discretionary","Consumer Staples":"Consumer staples","Communication Services":"Communication services","Real Estate":"Real estate"};
 const CLASSCO={GOOGL:"Alphabet",GOOG:"Alphabet",FOXA:"Fox",FOX:"Fox",NWSA:"News Corp",NWS:"News Corp"};
+// Hover: points as a share of the index's move, e.g. "+123.05 pts · 17.5% of the gain", or "−25.38 pts · cut the gain by 3.6%".
+function share(ix,v){const d=DATA[ix];if(Math.abs(d.pct)<0.05||!v)return"";
+  const pc=Math.abs(v/d.pts*100).toFixed(1)+"%",m=d.pts>0?"gain":"fall";
+  return v*d.pts>0?` · ${pc} of the ${m}`:` · cut the ${m} by ${pc}`}
 function headline(ix){const d=DATA[ix],down=d.pts<0,sg=down?-1:1,L=LIVE,pc=Math.abs(d.pct).toFixed(2)+"%";
   const name=ix==="DOW"?"The Dow":"The "+NAMES[ix];
   const P=PER!=="d";
@@ -229,7 +233,7 @@ function map(ix){const svg=document.getElementById("map");svg.innerHTML="";const
     const cells=[];squarify(b.l.map(r=>({r,v:Math.max(r[2],1e-6)})),bx,by+head,bw,bh-head,cells);
     cells.forEach(o=>{const r=o.r,t=Math.min(1,Math.abs(r[3])/SCALE[PER]),fill=mix(neutral,r[3]>=0?up:dn,0.25+0.75*t);
       const rc=el("rect",{x:o.x+0.5,y:o.y+0.5,width:Math.max(0,o.w-1),height:Math.max(0,o.h-1),fill},svg);
-      hover(rc,`<b>${shortName(r)}</b><br>${r[0]} · ${r[1]}<br>${b.n} · weight ${r[2].toFixed(2)}%<br>Move ${fmtPct(r[3])} · ${fmtP(r[4])} index pts<br>Click for its weight in all three indices`);
+      hover(rc,`<b>${shortName(r)}</b> ${r[0]}<br>${SHORT[b.n]||b.n} · weight ${r[2].toFixed(2)}% · move ${fmtPct(r[3])}<br>${fmtP(r[4])} pts${share(ix,r[4])}`);
       rc.style.cursor="pointer";rc.addEventListener("click",()=>openStock(r[0]));
       if(o.w>30&&o.h>18){const fs=Math.max(9,Math.min(22,Math.min(o.w/(r[0].length*0.68),Math.sqrt(o.w*o.h)/6.5)));if(fs*r[0].length*0.62>o.w-4)return;
         const col=t>0.45?"#06060A":"#FFFFFF",two=o.h>fs*2.5;
@@ -266,8 +270,8 @@ function fallSteps(ix,narrow){const d=DATA[ix],dj=ix==="DOW",st=[];
         others.forEach(r=>{const s=SECN[r[5]]||"Other";(g[s]=g[s]||{v:0,n:0,w:0});g[s].v+=r[4];g[s].n++;g[s].w+=r[2]});
         Object.values(g).forEach(o=>o.v+=(rest-raw)*o.w/ow);
         const ch=Object.entries(g).sort((a,b)=>Math.abs(b[1].v)-Math.abs(a[1].v)),top=ch.slice(0,5),rem=ch.slice(5),out=[];
-        top.sort((a,b)=>b[1].v-a[1].v).forEach(([n,o])=>out.push({n:`Other ${(SECAB[n]||n).toLowerCase()} (${o.n})`,v:o.v,k:"rest",split:1,info:`The ${o.n} ${n} stocks outside the top ${pick.length}, added together`}));
-        if(rem.length)out.push({n:`All other (${rem.reduce((a,x)=>a+x[1].n,0)})`,v:rem.reduce((a,x)=>a+x[1].v,0),k:"rest",split:1,info:`Stocks in ${rem.map(x=>(SECAB[x[0]]||x[0]).toLowerCase()).join(", ")} outside the top ${pick.length}, added together`});
+        top.sort((a,b)=>b[1].v-a[1].v).forEach(([n,o])=>out.push({n:`Other ${(SECAB[n]||n).toLowerCase()} (${o.n})`,v:o.v,k:"rest",split:1,info:`${o.n} ${SHORT[n]||n} stocks outside the top ${pick.length}`}));
+        if(rem.length)out.push({n:`All other (${rem.reduce((a,x)=>a+x[1].n,0)})`,v:rem.reduce((a,x)=>a+x[1].v,0),k:"rest",split:1,info:`${rem.map(x=>SECAB[x[0]]||x[0]).join(", ")}`});
         out.forEach(o=>st.push(o))}}}
   // An open sector's stocks re-walk that sector's own step (from its start to its end); they don't add to the running total.
   let run=0,sub=0;st.forEach(g=>{if(g.k==="sub"||g.k==="subg"){g.a=sub;sub+=g.v;g.b=sub}else{g.a=run;run+=g.v;g.b=run;sub=g.a}});st.push({n:"Index move",v:d.pts,a:0,b:d.pts,k:"total"});return st}
@@ -293,10 +297,10 @@ function fall(ix,target,boxW,extra=0){const svg=target||document.getElementById(
     const lab=el("text",{x:cx+4,y:base,"text-anchor":"end",transform:`rotate(-45 ${cx+4} ${base})`,"font-size":sub?(narrow?10:11):(narrow?11:12),"font-weight":(g.k==="stock"||g.k==="sector"||g.k==="total"||g.k==="sub")?700:400,style:faded?`fill:${css("--muted")}`:sub?`fill:${css("--text2")}`:""},svg);lab.textContent=name;labs.push([lab,cx+4]);
     if(g.k==="total"&&TOTSTYLE==="B"){const y0=y(0),y1=y(g.b),i=1;el("path",{d:`M${x+i} ${y0}V${y1+(y1>y0?-i:i)}H${x+bw-i}V${y0}`,fill:"none",stroke:tc,"stroke-width":2,"stroke-linejoin":"miter","pointer-events":"none"},svg)}
     if(g.k==="rest"&&!g.split){const t=el("text",{x:cx,y:y(Math.max(g.a,g.b))-6,"text-anchor":"middle","font-size":11},svg);t.textContent=fmtP(g.v)}
-    let info="";if(g.r)info=`${g.r[0]} · ${g.r[1]}<br>Weight ${g.r[2].toFixed(2)}% · Move ${fmtPct(g.r[3])}<br>`;
+    let info="";if(g.r)info=`Weight ${g.r[2].toFixed(2)}% · move ${fmtPct(g.r[3])}<br>`;
     if(g.k==="sector")info=`${g.cnt} stocks · ${g.w.toFixed(1)}% of the index<br>`;
-    if(g.k==="rest")info=(g.info||"Every other stock in the index, added together")+"<br>";
-    const html=`<b>${g.r?shortName(g.r):g.n}</b><br>${info}${fmtP(g.v)} pts${g.k==="total"?"":` · running total ${fmtP(g.b)}`}${g.k==="sector"?"<br>Click to "+(open.has(ix+g.n)?"hide":"show")+" its stocks":g.r?"<br>Click for its weight in all three indices":""}`;
+    if(g.k==="rest")info=(g.info||"Every other stock in the index")+"<br>";
+    const html=`<b>${g.r?shortName(g.r):g.n}</b>${g.r?" "+g.r[0]:""}<br>${info}${fmtP(g.v)} pts${g.k==="total"?"":share(ix,g.v)}${g.k==="sector"?"<br>Click to "+(open.has(ix+g.n)?"hide":"show")+" its stocks":""}`;
     hits.push([lab,cx+4,x,bw,y(Math.max(g.a,g.b)),Math.abs(y(g.a)-y(g.b)),html,g.r?()=>openStock(g.r[0]):g.k==="sector"?()=>{const k=ix+g.n;open.has(k)?open.delete(k):open.add(k);tip.hidden=true;fall(ix)}:null]);
     if(i<steps.length-2||g.k==="rest"){const nb=steps[i+1],nsub=nb.k==="sub"||nb.k==="subg",nw=cw*(nsub?0.5:0.66),lv=nb.k==="total"||Math.abs(nb.a-g.b)<1e-9?g.b:g.a;el("line",{x1:x+bw,x2:L+(i+1)*cw+(cw-nw)/2,y1:y(lv),y2:y(lv),stroke:css("--muted"),"stroke-dasharray":"2 2"},svg)}});
   // Hover and click targets: the bar (padded so thin bars are easy to hit) and the slanted name under it.
