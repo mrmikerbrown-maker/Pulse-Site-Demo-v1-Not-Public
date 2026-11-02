@@ -259,7 +259,7 @@ function fallSteps(ix,narrow){const d=DATA[ix],dj=ix==="DOW",st=[];
 function fall(ix,target,boxW,extra=0){const svg=target||document.getElementById("fall");svg.innerHTML="";const d=DATA[ix];
   if(!target)document.getElementById("fall-n").hidden=fallMode!=="stock";
   const box=boxW||svg.parentNode.getBoundingClientRect().width||900,narrow=box<600,steps=fallSteps(ix,narrow);
-  const L=(narrow?44:56)+extra,R=10,top=12,bot=narrow?96:112,minCol=narrow?22:25;
+  const L=(narrow?44:56)+extra,R=10,top=24,bot=narrow?96:112,minCol=narrow?22:25;
   const W=Math.max(Math.round(box),L+R+steps.length*minCol),H=(narrow?300:360)+bot;
   svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.style.width=W+"px";svg.style.maxWidth="none";if(!target)document.getElementById("swipe").hidden=W<=Math.round(box)+1;
   const all=steps.flatMap(g=>[g.a,g.b]).concat(0);const ticks=niceTicks(Math.min(...all),Math.max(...all),narrow?5:6);
