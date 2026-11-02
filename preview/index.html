@@ -111,7 +111,7 @@ footer{display:flex;flex-direction:column;gap:8px;margin-top:4px}footer .status{
 <div id="v-move">
 <section>
   <div class="sh"><h1 id="fall-h">Who moved the S&amp;P 500?</h1><details class="how"><summary>How to read this</summary><p id="fall-p"></p></details></div>
-  <div class="ctl"><div class="tabs" role="group" aria-label="Group by"><button class="chip" data-m="sector" aria-pressed="true">By sector</button><button class="chip" data-m="stock" aria-pressed="false">By stock</button></div><div class="tabs" id="fall-n" hidden role="group" aria-label="Number of stocks"><button class="chip" data-n="0" id="n3" aria-pressed="true">Biggest movers</button><button class="chip" data-n="10" aria-pressed="false">Top 10 by weight</button><button class="chip" data-n="20" id="n2" aria-pressed="false">Top 20 by weight</button></div><button class="chip dl" id="dl" type="button">Download image</button></div>
+  <div class="ctl"><div class="tabs" role="group" aria-label="Group by"><button class="chip" data-m="stock" aria-pressed="true">By stock</button><button class="chip" data-m="sector" aria-pressed="false">By sector</button></div><div class="tabs" id="fall-n" role="group" aria-label="Number of stocks"><button class="chip" data-n="0" id="n3" aria-pressed="true">Biggest movers</button><button class="chip" data-n="10" aria-pressed="false">Top 10 by weight</button><button class="chip" data-n="20" id="n2" aria-pressed="false">Top 20 by weight</button></div><button class="chip dl" id="dl" type="button">Download image</button></div>
   <p class="hint" id="swipe" hidden>Swipe the chart sideways to see all of it.</p><div class="scrollx"><svg id="fall" role="img" aria-label="Waterfall of the index move"></svg></div>
 </section>
 <section>
@@ -194,7 +194,7 @@ const SHORTN={"BRK.B":"Berkshire","MU":"Micron","AMD":"AMD","JNJ":"J&J","AMAT":"
 const shortName=r=>{if(SHORTN[r[0]])return SHORTN[r[0]];let n=String(r[1]||r[0]).replace(/^The /,"");
   for(let k=0;k<4;k++)n=n.replace(/,?\s+(Inc\.?|Incorporated|Corporation|Corp\.?|Company|Companies|Co\.?|Holdings?|Group|plc\.?|PLC|Ltd\.?|N\.?V\.?|S\.A\.|Limited|LLC|& Co\.?|L\.P\.|SE|AG)$/,"").trim();
   n=n.replace(/,$/,"");return n.length>18?n.slice(0,17).trim()+"…":n||r[0]};
-let fallN=0,fallMode="sector";
+let fallN=0,fallMode="stock";
 // The Dow has no Biggest movers option, so it shows Top 10 when movers is picked.
 const effN=ix=>ix==="DOW"&&fallN===0?10:fallN;const open=new Set();
 const SHORT={"Consumer Discretionary":"Cons. Discretionary","Communication Services":"Comm. Services","Consumer Staples":"Cons. Staples"};
@@ -253,7 +253,7 @@ let cur="SPX";
 const TXT={
   mapH:{SPX:"Market map of the top 50",NDX:"Market map of the top 50",DOW:"Market map of all 30"},
   mapP:{SPX:"Each box is sized by the stock's weight in the index and coloured by its % move on the day. Brighter means a bigger move.",DOW:"The Dow is price-weighted, so each box is sized by the stock's share price and coloured by its % move on the day. Brighter means a bigger move."},
-  fallP:{SPX:"How the index got from yesterday's close to today's move: the risers first, then the fallers. By sector covers every stock; click a sector (marked +) to open up its biggest movers. By stock shows the 10 biggest risers and 10 biggest fallers in points, or the largest stocks by index weight; the grey column is everything else in the index. The blue bar is the overall move.",DOW:"How the Dow got from yesterday's close to today's move: the risers first, then the fallers. Click a sector (marked +) to open up its biggest movers. By stock shows the 10 highest-priced stocks, which carry the most weight in the Dow, or all 30. The blue bar is the overall move."},
+  fallP:{SPX:"How the index got from yesterday's close to today's move: the risers first, then the fallers. By stock shows the 10 biggest risers and 10 biggest fallers in points, or the largest stocks by index weight; the grey column is everything else in the index. By sector covers every stock; click a sector (marked +) to open up its biggest movers. The blue bar is the overall move.",DOW:"How the Dow got from yesterday's close to today's move: the risers first, then the fallers. By stock shows the 10 highest-priced stocks, which carry the most weight in the Dow, or all 30. In By sector, click a sector (marked +) to open up its biggest movers. The blue bar is the overall move."},
   note:{SPX:'__SPXNOTE__',DOW:"Each stock's points = its $ change ÷ the Dow divisor. A $1 move in any Dow stock moves the index by about 6 points. Prices are delayed by about 15 to 20 minutes."}};
 const tx=(k,ix)=>{const t=TXT[k][ix]||TXT[k].SPX;return t!=="__SPXNOTE__"?t:(SPYUSED?`S&P 500 weights are State Street's SPY holdings as of the ${new Date(SPYUSED+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short"})} close`:"S&P 500 weights for the top 25 come from SPY holdings and the rest are estimated from market caps")+"; Nasdaq 100 weights come from QQQ holdings, rolled forward daily. Sectors are GICS. The stocks can add up to slightly more or less than the index move; in By stock that difference sits in \"Rest of index\". Prices from Google Finance, delayed about 15 to 20 minutes."};
 function draw(){if(!DATA)return;document.getElementById("fall-h").textContent=`Who moved the ${NAMES[cur]}?`;
