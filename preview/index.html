@@ -5,7 +5,21 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Who Moved the Index? | Newsquawk</title>
 <meta name="robots" content="noindex">
-<meta name="description" content="Live: which stocks and sectors moved the S&amp;P 500, Nasdaq 100 and Dow today, in index points.">
+<meta name="description" content="Which stocks and sectors moved the S&amp;P 500, Nasdaq 100 and Dow, in index points: today, this week, this month and this year.">
+<!-- Link previews (Slack, X, WhatsApp, LinkedIn) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Newsquawk">
+<meta property="og:title" content="Who moved the index?">
+<meta property="og:description" content="Which stocks and sectors moved the S&amp;P 500, Nasdaq 100 and Dow, in index points: today, this week, this month and this year.">
+<meta property="og:url" content="https://mrmikerbrown-maker.github.io/index-contribution-site/">
+<meta property="og:image" content="https://mrmikerbrown-maker.github.io/index-contribution-site/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Newsquawk chart of the stocks behind the S&amp;P 500's move">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Who moved the index?">
+<meta name="twitter:description" content="Which stocks and sectors moved the S&amp;P 500, Nasdaq 100 and Dow, in index points: today, this week, this month and this year.">
+<meta name="twitter:image" content="https://mrmikerbrown-maker.github.io/index-contribution-site/og.png">
 <style>
 /* Layout: Newsquawk house look (dark only). Logo, title, index toggle, stat strip, then three stacked chart cards, CTA. */
 :root{--bg:#06060A;--card:#0D0E15;--line:#22242E;--text:#FFFFFF;--text2:#CBD5E1;--muted:#8A8FA3;--dim:#5E6273;--accent:#00E0FF;--pink:#FF3B6B;
@@ -324,8 +338,8 @@ function draw(){if(!DATA)return;usePeriod();
   ["SPX","NDX","DOW"].forEach(k=>document.getElementById("t-"+k).setAttribute("aria-pressed",k===cur));strip(cur);document.getElementById("note").textContent=tx("note",cur);
   if(VIEW==="weights"){weights();return}const fs=document.getElementById("fall-n"),opts=cur==="DOW"?[[10,"Top 10 by weight"],[20,"All 30"]]:[[0,"Biggest movers"],[10,"Top 10 by weight"],[20,"Top 20 by weight"]];
   fs.innerHTML=opts.map(([v,t])=>`<option value="${v}">${t}</option>`).join("");fs.value=String(effN(cur));["map-h","map-p","fall-p"].forEach((id,i)=>document.getElementById(id).textContent=tx(["mapH","mapP","fallP"][i],cur));document.getElementById("map-h").textContent=`Market map · all ${ALLR[cur].length} stocks`;const sc=SCALE[PER],lg=document.querySelector(".legend");lg.firstElementChild.textContent="−"+sc+"%";lg.lastElementChild.textContent="+"+sc+"%";map(cur);fall(cur)}
-["SPX","NDX","DOW"].forEach(k=>document.getElementById("t-"+k).addEventListener("click",()=>{const was=cur;cur=k;if(PER!=="d"&&(k==="DOW"||was==="DOW"))periodDefaults();draw()}));
-document.querySelectorAll("[data-p]").forEach(b=>b.addEventListener("click",()=>{if(b.disabled||PER===b.dataset.p)return;PER=b.dataset.p;periodDefaults();tip.hidden=true;draw()}));
+["SPX","NDX","DOW"].forEach(k=>document.getElementById("t-"+k).addEventListener("click",()=>{const was=cur;cur=k;if(PER!=="d"&&(k==="DOW"||was==="DOW"))periodDefaults();setHash();draw()}));
+document.querySelectorAll("[data-p]").forEach(b=>b.addEventListener("click",()=>{if(b.disabled||PER===b.dataset.p)return;PER=b.dataset.p;periodDefaults();tip.hidden=true;setHash();draw()}));
 document.querySelectorAll("[data-m]").forEach(b=>b.addEventListener("click",()=>{fallMode=b.dataset.m;document.querySelectorAll("[data-m]").forEach(c=>c.setAttribute("aria-pressed",c===b));fall(cur)}));
 document.getElementById("fall-n").addEventListener("change",e=>{fallN=+e.target.value;fall(cur)});
 let rzW=innerWidth,rz;addEventListener("resize",()=>{if(innerWidth===rzW)return;rzW=innerWidth;clearTimeout(rz);rz=setTimeout(()=>{if(VIEW==="move")draw()},150)});
@@ -416,7 +430,7 @@ const fromName=day=>new Date(day*864e5).toLocaleDateString("en-GB",PER==="y"?{ti
 // Point DATA/ALLR/SECT at the day's figures or the period's. The weights page always shows the day.
 function usePeriod(){if(!BASE)return;const row=document.getElementById("per-row");row.hidden=VIEW!=="move";
   const pd=VIEW==="move"&&PER!=="d"?periodData():null;
-  if(PER!=="d"&&!pd&&VIEW==="move"){PER="d";periodDefaults()}
+  if(PER!=="d"&&!pd&&VIEW==="move"&&PF!==undefined&&DATA){PER="d";periodDefaults();setHash()}
   document.querySelectorAll("[data-p]").forEach(b=>{b.setAttribute("aria-pressed",b.dataset.p===PER);if(b.dataset.p!=="d")b.disabled=!PF});
   ({D:DATA,A:ALLR,S:SECT}=pd||BASE);
   document.getElementById("since").textContent=pd?`From the ${fromName(DATA[cur].from)} close`:""}
@@ -531,13 +545,20 @@ q.addEventListener("input",()=>{const t=q.value.trim().toUpperCase(),m=allStocks
 q.addEventListener("keydown",e=>{if(e.key==="Enter"){const s=match(q.value);if(s)openStock(s,true)}});
 function openStock(sym,keepQ){SEL=sym;if(!keepQ)q.value="";const h="#stock/"+encodeURIComponent(sym);
   if(location.hash!==h)location.hash=h;else route()}
+// Shareable links: #spx, #ndx/week, #dow/ytd … open that index and period on the Index move page.
+const PSLUG={d:"today",w:"week",m:"month",y:"ytd"};
+function moveHash(){return"#"+cur.toLowerCase()+(PER!=="d"?"/"+PSLUG[PER]:"")}
+function setHash(){if(VIEW==="move"&&location.hash!==moveHash())history.replaceState(null,"",moveHash())}
 function route(){const h=decodeURIComponent(location.hash.slice(1));const m=/^stock\/(.+)$/.exec(h);
+  const v=/^(spx|ndx|dow)(?:\/(today|week|month|ytd))?$/i.exec(h);
+  if(v){const ix=v[1].toUpperCase(),p=Object.keys(PSLUG).find(k=>PSLUG[k]===(v[2]||"today").toLowerCase());const was=cur;cur=ix;
+    if(p!==PER){PER=p;periodDefaults()}else if(PER!=="d"&&(ix==="DOW"||was==="DOW"))periodDefaults()}
   const nv=m||h==="weights"?"weights":"move";if(m)SEL=m[1].toUpperCase();else if(h==="weights"){}else SEL=null;
   // A stock that isn't in the current index switches to the first index that has it
   if(m&&DATA&&!findIn(cur,SEL)){const ix=IXS.find(i=>findIn(i,SEL));if(ix)cur=ix}
   const changed=nv!==VIEW;VIEW=nv;document.getElementById("v-move").hidden=VIEW!=="move";document.getElementById("v-weights").hidden=VIEW!=="weights";
   document.querySelectorAll(".views a").forEach(a=>a.dataset.v===VIEW?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current"));
-  tip.hidden=true;draw();if(changed||m)scrollTo({top:0})}
+  tip.hidden=true;if(VIEW==="move")setHash();draw();if(changed||m)scrollTo({top:0})}
 addEventListener("hashchange",route);
 const NAMES={SPX:"S&P 500",NDX:"Nasdaq 100",DOW:"Dow Jones"};
 route();
