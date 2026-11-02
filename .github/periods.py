@@ -30,36 +30,53 @@ for r in rows[1:]:
         syms[r[4]] = g.replace(".", "-")
 syms.update(INDICES)
 
-AGENTS = [None, "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"]
+BROWSER = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+errors = []
+
+def get(ysym, ua):
+    url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(ysym)}"
+           f"?period1={p1}&period2={p2}&interval=1d")
+    req = urllib.request.Request(url, headers={"User-Agent": ua} if ua else {})
+    j = json.load(urllib.request.urlopen(req, timeout=20))
+    res = j["chart"]["result"][0]
+    tz = ZoneInfo(res["meta"].get("exchangeTimezoneName") or "America/New_York")
+    out = {}
+    for t, c in zip(res.get("timestamp") or [], res["indicators"]["quote"][0]["close"]):
+        d = datetime.fromtimestamp(t, tz).date()
+        if c is not None and d <= last_ok:
+            out[d] = c
+    return out
+
+# Find a User-Agent Yahoo accepts from here (it has refused both kinds from Actions at times).
+UA = False
+for ua in (BROWSER, None):
+    try:
+        get("^GSPC", ua); UA = ua; break
+    except Exception as e:
+        print(f"Probe with {'browser' if ua else 'default'} User-Agent failed: {e}", flush=True)
+if UA is False:
+    sys.exit(1)
+print(f"Using the {'browser' if UA else 'default'} User-Agent; fetching {len(syms)} symbols", flush=True)
 
 def fetch(item):
     key, ysym = item
-    url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.parse.quote(ysym)}"
-           f"?period1={p1}&period2={p2}&interval=1d")
-    for attempt in range(6):
-        ua = AGENTS[attempt % 2]
-        req = urllib.request.Request(url, headers={"User-Agent": ua} if ua else {})
+    for attempt in range(3):
         try:
-            j = json.load(urllib.request.urlopen(req, timeout=30))
-            res = j["chart"]["result"][0]
-            tz = ZoneInfo(res["meta"].get("exchangeTimezoneName") or "America/New_York")
-            closes = res["indicators"]["quote"][0]["close"]
-            out = {}
-            for t, c in zip(res.get("timestamp") or [], closes):
-                d = datetime.fromtimestamp(t, tz).date()
-                if c is not None and d <= last_ok:
-                    out[d] = c
-            return key, out
+            return key, get(ysym, UA)
         except urllib.error.HTTPError as e:
             if e.code == 404:
-                return key, {}
-            time.sleep(2 * (attempt + 1))
-        except Exception:
-            time.sleep(2 * (attempt + 1))
+                errors.append(f"{ysym}: 404"); return key, {}
+            err = f"{ysym}: HTTP {e.code}"
+        except Exception as e:
+            err = f"{ysym}: {e}"
+        time.sleep(1.5 * (attempt + 1))
+    errors.append(err)
     return key, None
 
+t0 = time.time()
 with ThreadPoolExecutor(4) as ex:
     got = dict(ex.map(fetch, syms.items()))
+print(f"Fetched in {time.time() - t0:.0f}s; problems: {errors[:30]}", flush=True)
 
 bad = [k for k, v in got.items() if not v]
 idx_days = sorted(got.get("IDX_SPX") or {})
