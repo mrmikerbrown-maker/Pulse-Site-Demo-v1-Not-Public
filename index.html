@@ -176,12 +176,15 @@ function strip(ix){const d=DATA[ix],c=d.pts>=0?"pos":"neg",A=ALLR[ix],up=A.filte
   document.getElementById("lede").textContent=headline(ix)}
 // One-line summary written from the data: the move, the sector that drove it, and the three stocks that did most.
 const PROSE={"Info Tech":"Tech","Health Care":"Health care","Consumer Discretionary":"Consumer discretionary","Consumer Staples":"Consumer staples","Communication Services":"Communication services","Real Estate":"Real estate"};
+const CLASSCO={GOOGL:"Alphabet",GOOG:"Alphabet",FOXA:"Fox",FOX:"Fox",NWSA:"News Corp",NWS:"News Corp"};
 function headline(ix){const d=DATA[ix],down=d.pts<0,sg=down?-1:1,L=LIVE,pc=Math.abs(d.pct).toFixed(2)+"%";
   const name=ix==="DOW"?"The Dow":"The "+NAMES[ix];
   const P=PER!=="d";
   if(Math.abs(d.pct)<0.05)return P?`${name} is flat ${PERW[PER]}.`:`${name} ${L?"is":"finished"} flat.`;
   const top=SECT[ix].sectors.filter(x=>x[2]*sg>0).sort((a,b)=>b[2]*sg-a[2]*sg)[0];
-  const st=ALLR[ix].filter(r=>r[4]*sg>0).sort((a,b)=>b[4]*sg-a[4]*sg).slice(0,3).map(shortName);
+  // Two share classes of one company (Alphabet A and C, Fox, News Corp) count as one company here.
+  const co={};ALLR[ix].forEach(r=>{const n=CLASSCO[r[0]]||shortName(r);co[n]=(co[n]||0)+r[4]});
+  const st=Object.entries(co).filter(([,v])=>v*sg>0).sort((a,b)=>b[1]*sg-a[1]*sg).slice(0,3).map(([n])=>n);
   let t=(P?`${name} is ${down?"down":"up"} ${pc} ${PERW[PER]}`:`${name} ${L?(down?"is down":"is up"):(down?"fell":"rose")} ${pc}`)+(top?`, led ${down?"lower":"higher"} by ${(PROSE[top[0]]||top[0]).toLowerCase()}`:"")+".";
   if(st.length){const pl=st.length>1,names=pl?st.slice(0,-1).join(", ")+" and "+st[st.length-1]:st[0];
     t+=` ${names} ${P?(pl?"have been":"has been"):L?(pl?"are":"is"):(pl?"were":"was")} the biggest ${down?"drag":"contributor"}${pl?"s":""}.`}
