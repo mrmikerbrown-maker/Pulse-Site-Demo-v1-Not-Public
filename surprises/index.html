@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="theme-color" content="#06060A">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>What happens when economic data surprises?</title>
+<script>try{var t=localStorage.getItem("ict-theme");if(t?t==="light":matchMedia("(prefers-color-scheme: light)").matches)document.documentElement.classList.add("light")}catch(e){}</script>
+<style>
+:root{box-sizing:border-box;color-scheme:dark;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#06060A;--card:#0D0E15;--text:#FFFFFF;--text2:#CBD5E1;--muted:#8A8FA3;--dim:#5E6273;--line:#22242E;--up:#28E0A0;--down:#FF5D6E;--accent:#00E0FF;--axis:#2c2f3c}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:3px;z-index:60;background:linear-gradient(90deg,#00e0ff,rgba(0,224,255,0) 40%,rgba(0,224,255,0) 60%,#ff3b6b)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text2);font-family:ui-sans-serif,system-ui,-apple-system,"SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;line-height:1.4}
+.wrap{max-width:820px;margin:0 auto;padding:0 16px 28px}
+.logo{display:block;width:150px;height:auto;margin:22px 0 18px}
+h1{font-size:clamp(22px,4.4vw,30px);line-height:1.15;font-weight:800;color:var(--text);margin:4px 0 8px;text-wrap:balance;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:14px;margin:0 0 18px;max-width:62ch}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px}
+.tabs button{white-space:nowrap}
+button{font:inherit;font-size:13px;padding:6px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.on{background:var(--accent);border-color:var(--accent);color:#06060A;font-weight:700}
+.info h2{font-size:16px;margin:0 0 4px}
+.info p{margin:0 0 8px;font-size:14px}
+.imp{font-size:13px;font-weight:700}.imp i{font-style:normal;letter-spacing:2px;color:var(--accent)}
+.imp small{display:block;font-weight:400;color:var(--muted);font-size:12px;margin-top:2px}
+.sliders{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:560px){.sliders{grid-template-columns:1fr}}
+.lab{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--muted);margin-bottom:6px}
+.lab b{font-size:22px;font-weight:900;color:var(--text)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.surprise{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.badge{font-weight:700;font-size:15px;padding:4px 12px;border-radius:99px;background:transparent;border:1px solid var(--accent);color:var(--accent)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.row span{font-size:12px;color:var(--muted)}
+.mode{margin-top:12px}
+.mode .q{font-size:13px;font-weight:600;margin-bottom:6px}
+.mode .h{font-size:12px;color:var(--muted);margin-top:6px}
+.msg{margin:16px 2px 0;font-size:15px;font-weight:600}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+@media(max-width:480px){.grid{grid-template-columns:1fr}}
+.m{text-align:center}.m .n{font-size:13px;color:var(--muted)}
+.m .v{height:84px;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1}
+.m .l{font-size:16px;font-weight:700;margin:2px 0 8px}
+.m .w{font-size:12px;color:var(--muted)}
+.bar{position:relative;height:8px;background:var(--bg);border-radius:4px;margin:0 8px 10px}
+.bar:after{content:"";position:absolute;left:50%;top:-2px;width:1px;height:12px;background:var(--muted)}
+.fill{position:absolute;top:0;height:8px;border-radius:4px;transition:all .2s}
+.v.flat,.l.flat{color:var(--muted)}
+.zone{margin-top:14px}.zb{position:relative;height:24px;display:flex;margin:6px 8px 0}
+.zl,.zr{flex:1;font-size:11px;text-align:center;line-height:24px;color:var(--muted)}
+.zl{background:rgba(138,143,163,.16);border-radius:6px 0 0 6px}.zr{background:rgba(0,224,255,.14);border-radius:0 6px 6px 0}
+.zd{position:absolute;top:3px;width:18px;height:18px;border-radius:50%;transform:translateX(-50%);border:2px solid var(--text)}
+.zd.e{background:var(--card)}.zd.a{background:var(--text)}
+.zk{display:flex;gap:14px;justify-content:center;font-size:11px;color:var(--muted);margin:6px 0}
+.zk i{display:inline-block;width:10px;height:10px;border-radius:50%;border:2px solid var(--text);vertical-align:-1px}.zk i.f{background:var(--text)}
+.zt{font-size:13px}
+.tg{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;padding:2px 8px;border-radius:99px;border:1px solid var(--muted);color:var(--text);margin-bottom:4px}.tg.a{background:var(--accent);border-color:var(--accent);color:#06060A}.note{font-size:12px;color:var(--muted);margin-top:14px}
+.up{color:var(--up)}.dn{color:var(--down)}.ok{color:var(--accent)}.no{color:var(--text2)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}.big{font-size:26px;font-weight:900;color:var(--text)}
+.qrow{padding:10px 0;border-top:1px solid var(--line)}.qn{font-size:13px;color:var(--muted);margin-bottom:6px}
+.qb{display:flex;gap:6px;flex-wrap:wrap}.opt.sel{border-color:var(--accent);background:rgba(0,224,255,.12)}
+.opt.right{border-color:var(--accent);background:rgba(0,224,255,.16);color:var(--text)}.opt.wrong{border:1px dashed var(--muted);background:transparent;color:var(--muted)}
+.why{font-size:12px;color:var(--muted);margin-top:6px}.hintbox{background:var(--bg);border-radius:8px;padding:8px 12px;font-size:13px;margin:8px 0}
+.bigscore{font-size:36px;font-weight:900;margin-top:4px}.bar2{height:8px;background:var(--bg);border-radius:4px;overflow:hidden}.bar2 i{display:block;height:8px;background:var(--accent)}
+.wbox{background:rgba(138,143,163,.12);border:1px dashed var(--muted)}
+.res2{font-size:16px;font-weight:700;margin:10px 0 4px}
+.fx{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}.fx>div{min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.fx .t{font-size:12px;color:var(--muted)}.fx .a{font-size:20px;font-weight:700;margin:2px 0}.vd{font-size:13px;font-weight:700;margin-top:4px}
+.gt{padding:10px 0;border-top:1px solid var(--line)}.gt b{font-size:14px}.gt div{font-size:13px;color:var(--muted);margin-top:2px}
+.steps{margin:8px 0 0;padding-left:20px;font-size:14px}.steps li{margin:4px 0}
+input.sr{width:100%;font:inherit;font-size:14px;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);margin:8px 0}
+.tl{position:relative;display:flex;gap:2px;overflow-x:auto;padding:6px 0 4px;margin:10px 0 4px;border-top:1px solid var(--line)}
+.tc{flex:0 0 auto;width:44px;padding:2px 0 4px;border:1px solid transparent;border-radius:8px;background:transparent;display:flex;flex-direction:column;align-items:center}
+.tc.sel{border-color:var(--accent);background:rgba(0,224,255,.10)}.tc .dt{display:block;width:4px;height:4px;border-radius:50%;margin-top:3px;background:transparent}.tc.fd .dt{background:var(--text2)}
+.tc .tu,.tc .td{height:38px;width:100%;display:flex;justify-content:center}.tc .tu{align-items:flex-end;border-bottom:1px solid var(--muted)}.tc .td{align-items:flex-start}
+.tc i{display:block;width:14px;border-radius:3px}.tc span{font-size:10px;color:var(--muted);margin-top:3px;white-space:nowrap}.tc.sel span{color:var(--text);font-weight:700}
+.tlk{display:flex;gap:4px 14px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:10px}.tlk i{display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:-1px}
+p.n{font-size:12px;color:var(--muted);line-height:1.45}
+.mo{font-size:12px;color:var(--muted);line-height:1.45;margin:6px 0 0}.mo summary{cursor:pointer;color:var(--accent);display:inline-block}.mo p{margin:6px 0 0}
+.term{border-bottom:1.5px dotted var(--accent);cursor:pointer}.term:hover,.term:focus{background:rgba(0,224,255,.14);outline:none;border-radius:2px}
+#tip{position:fixed;z-index:50;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);padding:12px 14px;font-size:13px;line-height:1.45}
+#tip b{display:block;font-size:14px;margin-bottom:4px;padding-right:22px}#tip p{margin:0 0 8px}
+#tip .tx{position:absolute;top:4px;right:6px;border:none;background:transparent;font-size:20px;line-height:1;padding:2px 6px;color:var(--muted)}#tip .tgo{font-size:12px;padding:3px 10px}
+.gh{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:18px 0 2px}
+a.cta{color:var(--accent);font-weight:700;text-decoration:none}a.cta:hover{text-decoration:underline}
+select.rs{width:100%;font:inherit;font-size:14px;padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);margin:8px 0}
+
+.rp{margin:14px 0;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--bg)}
+.rp h3{margin:0 0 2px;font-size:16px;color:var(--text)}.rp .rs{font-size:12px;color:var(--muted);margin:0 0 10px}
+.rpc{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.rpc input[type=range]{flex:1;min-width:140px}
+.rpt{font-size:13px;color:var(--text);font-variant-numeric:tabular-nums;min-width:132px}
+.rpg{display:grid;grid-template-columns:1fr 1fr;gap:10px}.rpg>div{min-width:0;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--card)}
+.rpg .t{font-size:12px;color:var(--muted)}.rpg .v{font-size:20px;font-weight:700;margin:0 0 2px;font-variant-numeric:tabular-nums}
+.rpg svg{display:block;width:100%;height:auto;touch-action:none;cursor:ew-resize}
+@media(max-width:520px){.rpg{grid-template-columns:1fr}}
+.rp .fn{font-size:11px;color:var(--dim);margin:8px 0 0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 18px}.top .logo{margin:0}
+:root.light .logo{filter:invert(1) hue-rotate(180deg)}
+.theme{appearance:none;display:inline-flex;align-items:center;justify-content:center;flex:none;width:30px;height:30px;padding:0;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text2);cursor:pointer}
+.theme:hover{color:var(--text)}.theme:focus-visible{outline:2px solid var(--text);outline-offset:1px}
+.theme svg{width:15px;height:15px}.theme .i-moon{display:none}:root.light .theme .i-sun{display:none}:root.light .theme .i-moon{display:block}
+:root.light{--bg:#F5F6F8;--card:#FFFFFF;--line:#E1E4EA;--text:#0B0D14;--text2:#3A4150;--muted:#6B7280;--dim:#A0A6B2;--accent:#00B4D8;--up:#0E9F6E;--down:#E23D52;--axis:#D5D9E0;color-scheme:light}
+:root.light #tip{box-shadow:0 8px 28px rgba(11,13,20,.14)}
+:root.light input[type=range]{accent-color:#0092B0}
+</style>
+<script src="/nav.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+<div class="top"><img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAARoAAABQCAYAAADGB7oEAAAJPklEQVR42u2da3KkOgyFlVT21WJltleGe2XcH9N9hzBgS5bMq89X1ZWZdLBBlg+SAPM1TRMBAG5DIKL4+vdARPkMfX1BaAC4pcjQa+IPHftbisem2EBoALgPa5P5q1NfTETj4nebwvaNsQHgNtHMktixv7wSvfDrA6EB4ANSprfIpJkABKcoZt5OEgoehAaAm5JmE398CY+lTjJvZ5xFNVES1aBGA8C9o5mp8J2GSdFHpkWtBhENAPeOZrzIK0LzjlyGWlQDoQHg2sTC/+OKWKTGfta2e2yI0D9AaAC4Lrzyu2chmkmGvjKtX2XaingChAaAe/AopDgsEAprVDNPkRIiGgA+g1yIdrJz+6poC0IDwD2FxjNtIkGKlBHRAHBPWPF73kHMNvuE0ADw2UI1FT5ul8chNAB8Vgp1CBAaAO4jKLxDn7yxD1zaPwgNAJ8hQl5pUJOYQWgAuC7PggisRTvWiKd0E+CjJHQQGgDuE7XMxeYpFAoNUfEdhAaAD0iRsnNUU1pYq9omhAaAa6N9LODhGM2kQpsJQgPAvSlFNRq4IDTzaCbWRAlCA8D1U6dSijTMJn4k2zIReaWdtZTqn/oQVtgD4PowKd5IUNlO00ZtdT9ENAB8QFQzdu43bkQ+BKEB4J6kjYilZxQlER4IDQA3i2oG6cTvEEVFKtR/fjA+ANxKbL7oT+3kSf0frhxefTFViswoBgPwuTDZisFikDoBALoDoQEAQGgAABAaAACA0AAAIDQAgA9Aex8Nv36uPUiVXz893h/D9OfRcy70s8d9AkdSskEvm6+NbSa/dwKdybZEguUNgNqm63NyKsPTNNHrM05ywmw76YeVfbz72eorVLYdBftTo3ZMk8K+rTaQ2KL0CcI+5+2zYvxHow2l48lOx7plR1b4/Wj0PavvSn2PHeaIxHdGctiZ0k6ykxNNjZPWIhShoU/tYHvbQCPyraIWLig0Lcc6NoyPl9CMRt+V+j7vsJ/TNE1cq9E8qP0JUCbZGqUj+TyTMZL+ITJu/I4KoTcV0su1tMfTBvRqZxQcd4u93u2HC4X0weAbk9IfkjD9Ygff40a/JCdfC8L9HIgof3feoZrYtDq7pL0sqOGEjoNdIysHTGt3rtjJIx8/ogagnQzRwack/ceNk0hPAT1qfKR2jW9b7HHVKRoV0XMAvJ2aHdqInew+drTPVYhOviAR5lSIWDXjsIf/JmPbUpH5v5+9nt7mheGlipgXP1lgRJ71lxrF4GE4Ns1gB6ENMv1eHvEhtF+r3ef9Smx+1pRJc5wlYdJEM/Px5c5zau9oRiq68R8xMxZ3Q2OBMhiKmkFZyGsp6AZj8TUIt7FeSdFenbAU8Vtt4lUMHpW2ain4tl74aL1KxYYCa6vvBsU+tvjP6ryVpk7Du6izotpDg/pGtSL+7vNLUaNoCWGjw5llD57O+xk3xlkz1leKZoaV6KblGFMlUupVi9ozDW6LZF58CzfOwtDTwzhRmEPWHOLhkI+2OoZXjlxL4fJsfNY+2nQwCfq7gthIRdXDny11oNDhpBWdfE9bTy3PW4eb0rQh2NiYMmnvUxkb76dpuZ9FG7Zrwuux8UY87T09wTGNOTp1mox+rUmhvOZFq+9Z+mOh72lTUHXqlA8422gUNwv6kZyheMfjiw3tRfpzT0foGC6nTn97xmgmO/l9NLbjUWhnZQTc4nvW7OKUawYHR6dioXED/b6y1bLPWZGirF3Z0Th2XAiodeLnzn+/Jw+n/c/kcwLStGP1Pc+anlaQskVococd6pnzls7APQebDRFbMvTJK8LT8tqN3HkCXZFEPtF3rR3rSc4zwrIEB8W2P2WZCGkIy8Y2as4SOxZYlykWsJ3ZM+0TuUn8Jhu373UCF6eAn7QejcRpHkbHY8O+fZHv807TzSOOK/mdxG8svlfb/vCSxycJTbIYiurr3wTBYCfB99FRcBDZ9PUZvojvStO8blHNGYvBniFebjBWr/w2K51q/ohC7DH4i79Ljra6A+yYOknqNFzxm1obsfOcyoIx36zV7C00WTHReoWw3DBxojBX9haqtHCyR4PjhA425YMmvoSn0Ca18XgIJpj0io8l5c5C3+s9b99vpYyCOZDPkDrlEzpxzyhJMwFq/Sb6+wiGZ4qltfnjAAE5IrKuiTST7uFNq9+0tpGMfjfM2qntw6o9zlij6VlXSA7bJcOALY9zLHxYsE+JfM6o2gkfdx7vYLBzS/QZFOkTd/a9fPB8TMrjWLXtz0E7zi3hlyKvnUcA1kHzGOjY6KTZwZ7SHHuk+sOqLSeCTD7r9njXE6TiwYKUmzsJQmwca8+TQlaWIFZ96YypEwnO6PwyIBc+XsKxZWgrT4Gze07CJLR7TWSi83HWxKalT8uxLk9gkhqXZl2hI9J27/4k9g1nSJ2i0BHCxgGMBmdLHSZKr7B5pPqSjcHROZn+3vC3FG7PdY3XjnNc6be1T+mkHjdOYC0RUI/ILDmITY+LKxL7/raj44r6eyww5PEmADY8HdvSxuiwivy7nfmnxyJUvey/R79sHKOx85sNvPyGneaB9S0ImtfPHBbRZOp7S3RyCmGjQ5SQnc420tRwuf/zPo5aSyYd5GN5x4iEjb5wdJrUNao58qpT6iQ2w46GtqZeRwjucPJJ7znxrAI3F2pJW9zpOFptmXaYw6JazdGXt73FZiDfmwKfDm3knW3w7nPoJG6t21vv5UjOdtBGg1k6qZzscIY1f7Lge0lUw2e4j8ZjomWFyFCHv9OmXms2GMjvVvGaLVptHg0TN1Pbg6OWPlt8Y01kpP7gkYJJ/CY5+t4uUc1PxXhP5YBazurvZ3ukg5Vn2+bGweTOat4SEj9J/jqVtbO+JqyW2jwb7LzlmC19ZqNta8daO06PV6hkge/Rjr6X9zier2ma6KQwrd/q/nQy0FXYskMPWyz72mq/dm9LVIT+8z73HNuwYstP8andObPQgHOL39hYGynd0Z0w2e/JD0wAdibumI6Ck/ANEwAAIDTgjNSiDt5IjySrGAIIDQBisVnWYpiOW6UfHAyKwaAVJtnDrVIinfvFdAARDTgookEEAiA0oDteEQiiGaROABSRLDta9UOYERENACUsz2hlOm7pCrAjuGEPeKZQGsGByCB1AqAZ64OLAEIDgApeERnwgfwHo49gcLgPKnwAAAAASUVORK5CYII=" alt="Newsquawk" width="150"><button class="theme" id="theme" type="button" aria-label="Switch to light mode"><svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg><svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1z"/></svg></button></div>
+<h1>What happens when economic data surprises?</h1>
+<p class="sub">Markets don't react to the number itself, only to how it compares with what traders expected. Pick a release, then move the sliders.</p>
+
+<div class="row" style="margin-bottom:12px"><button id="bx" class="on">Explore</button><button id="bq">Quiz: test yourself</button><button id="br">Historical Data Releases</button><button id="bg">Glossary</button></div>
+<div class="tabs" id="tabs"></div>
+<div class="card info" id="info"></div>
+
+<div class="card" id="ctl" style="margin-top:12px">
+  <div class="sliders">
+    <div><div class="lab"><span id="lb1"></span><b id="ev"></b></div><input type="range" id="exp"></div>
+    <div><div class="lab"><span id="lb2"></span><b id="av"></b></div><input type="range" id="act"></div>
+  </div>
+  <div class="surprise"><span>Surprise (actual − expected)</span><span><b id="sv" style="font-size:20px"></b> <span class="badge" id="sb"></span></span></div>
+  <div id="zone"></div>
+  <div class="row" id="presets"><span>Try:</span></div>
+  <div class="mode" id="mode">
+    <div class="q">What is the market most worried about right now?</div>
+    <div class="row" style="margin-top:0"><button id="m_rates">Inflation &amp; interest rates</button><button id="m_growth">Growth &amp; recession</button></div>
+    <div class="h" id="mh"></div>
+  </div>
+</div>
+
+<div class="msg" id="msg"></div>
+<div class="grid" id="grid"></div>
+
+<div id="qz" style="display:none"></div><div id="rl" style="display:none"></div><div id="gl" style="display:none"></div>
+<p class="note">Illustrative only, based loosely on US data. The bigger the surprise, the bigger the typical move, but real days are messy and the reaction can be larger, smaller or even the opposite. Not trading advice.</p>
+<details class="mo"><summary>More detail</summary><p>Headline figures only: real releases also come with revisions and details (like wages in the jobs report) that can matter more. Sizes and impact labels are rough guides.</p></details>
+<p class="note" style="margin-top:6px"><a class="cta" href="https://newsquawk.com" target="_blank" rel="noopener">Take a 1-week trial &rarr; newsquawk.com</a></p>
+</div>
+
+<script>
+var IND=[
+ {tab:"Inflation",title:"Inflation (CPI)",kind:"infl",what:"CPI measures how fast the prices of everyday goods and services are rising compared with a year ago.",imp:3,impw:"High",why:"Inflation drives interest rate decisions, so markets watch it closely.",l:["inflation (yearly)"],min:0,max:5,step:.1,exp:3,dec:1,suf:"%",sign:0,su:"pp",th:[.1,.3],d:[.5,.2],pw:["Very cool","Cool","In line","Hot","Very hot"],up:"Hotter than expected",dn:"Cooler than expected",mu:"Inflation came in higher than expected, so traders bet interest rates stay higher for longer.",md:"Inflation came in lower than expected, so traders bet interest rates can fall sooner."},
+ {tab:"Jobs",title:"Jobs report (nonfarm payrolls)",kind:"gr",what:"Nonfarm payrolls counts how many jobs the US economy added last month, not including farm work.",imp:3,impw:"High",why:"A healthy job market keeps shoppers spending and rates higher. It often moves currencies the most.",l:["jobs added"],min:-100,max:250,step:5,exp:50,dec:0,suf:"k",sign:0,su:"k",th:[20,50],d:[100,40],pw:["Very weak","Weak","In line","Strong","Very strong"],up:"Stronger than expected",dn:"Weaker than expected",mu:"More jobs were added than expected, so the economy looks stronger and traders bet interest rates stay higher.",md:"Fewer jobs were added than expected, so the economy looks weaker and traders bet interest rates can fall sooner."},
+ {tab:"PMI",title:"PMI (business survey)",kind:"gr",what:"PMI is a monthly survey of company managers. Above 50 means their businesses are growing (expansion); below 50 means they are shrinking (contraction).",imp:2,impw:"Moderate",why:"It's an early read on the economy, but it's a survey so it usually moves markets less than hard data.",l:["PMI"],min:40,max:60,step:.1,exp:50.5,dec:1,suf:"",sign:0,su:" pts",th:[.5,1.5],d:[3,1],zone:1,extra:[{t:"Shrinking, but beats forecasts",e:48,a:49},{t:"Growing, but misses forecasts",e:53,a:52}],pw:["Very weak","Weak","In line","Strong","Very strong"],up:"Stronger than expected",dn:"Weaker than expected",mu:"Business activity looks stronger than expected, so traders bet the economy is running hotter and interest rates stay higher.",md:"Business activity looks weaker than expected, so traders bet the economy is cooling and interest rates can fall sooner."},
+ {tab:"Retail sales",title:"Retail sales",kind:"gr",what:"Retail sales tracks how much US shoppers spent in shops and online last month compared with the month before.",imp:2,impw:"Moderate",why:"Consumer spending is most of the US economy, but this report usually moves markets less than jobs or inflation.",l:["change in sales (monthly)"],min:-2,max:2,step:.1,exp:.3,dec:1,suf:"%",sign:1,su:"pp",th:[.2,.6],d:[1,.4],pw:["Very weak","Weak","In line","Strong","Very strong"],up:"Stronger than expected",dn:"Weaker than expected",mu:"Shoppers spent more than expected, so the economy looks stronger and traders bet interest rates stay higher.",md:"Shoppers spent less than expected, so the economy looks weaker and traders bet interest rates can fall sooner."},
+ {tab:"GDP",title:"GDP (economic growth)",kind:"gr",what:"GDP is the total size of the economy. The headline number is how fast it grew last quarter, shown as a yearly rate.",imp:2,impw:"Moderate",why:"It looks backwards, so markets have often seen the story already. Big misses still matter.",l:["growth (yearly rate)"],min:-2,max:6,step:.1,exp:2,dec:1,suf:"%",sign:0,su:"pp",th:[.3,.8],d:[2,.6],pw:["Very weak","Weak","In line","Strong","Very strong"],up:"Stronger than expected",dn:"Weaker than expected",mu:"The economy grew faster than expected, so traders bet interest rates stay higher.",md:"The economy grew slower than expected, so traders bet interest rates can fall sooner."}
+];
+var MK=[
+ {n:"Stocks (S&P 500)"},
+ {n:"Bond yields (10-year)",dir:1,s:"Traders expect rates to stay higher, so bond prices fall and yields rise.",w:"Traders expect lower rates, so bond prices rise and yields fall."},
+ {n:"US dollar",dir:1,s:"Higher rates make holding dollars more attractive.",w:"Lower rates make holding dollars less attractive."},
+ {n:"Gold",dir:-1,s:"Higher yields make gold, which pays no interest, less appealing.",w:"Lower yields make gold, which pays no interest, more appealing."}
+];
+var FL=["Already priced in. Company news and market mood decide the day.","Already priced in. Other data and central bank comments decide the day.","Already priced in. Other news decides the day.","Already priced in. Other news decides the day."];
+var $=function(i){return document.getElementById(i)};
+var cur=0,mode="rates";
+MK.forEach(function(m,k){var d=document.createElement("div");d.className="card m";
+ d.innerHTML='<div class="n">'+m.n+'</div><div class="v" id="v'+k+'"></div><div class="l" id="l'+k+'"></div><div class="bar"><div class="fill" id="f'+k+'"></div></div><div class="w" id="w'+k+'"></div>';$("grid").appendChild(d)});
+function fmt(v,c){var t=Math.abs(v).toFixed(c.dec)+c.suf;return (v<0?"−":(c.sign&&v>0?"+":""))+t}
+function setInd(i){
+ cur=i;var c=IND[i];
+ var tb=$("tabs");tb.innerHTML="";
+ IND.forEach(function(x,k){var b=document.createElement("button");b.textContent=x.tab;b.className=k===i?"on":"";b.onclick=function(){setInd(k)};tb.appendChild(b)});
+ var dots="";for(var n=0;n<3;n++)dots+=n<c.imp?"●":"○";
+ $("info").innerHTML='<h2>'+c.title+'</h2><p><b>What is this number?</b> '+c.what+'</p><div class="imp">Market impact: <i>'+dots+'</i> '+c.impw+'<small>'+c.why+'</small></div>';
+ var nm=c.l[0].charAt(0).toUpperCase()+c.l[0].slice(1);$("lb1").innerHTML='<span class="tg">Expected</span> consensus forecast<br>'+nm;$("lb2").innerHTML='<span class="tg a">Actual</span> the real result<br>'+nm;
+ ["exp","act"].forEach(function(id){var e=$(id);e.min=c.min;e.max=c.max;e.step=c.step});
+ $("exp").value=c.exp;$("act").value=Math.round((c.exp+c.d[1])/c.step)*c.step;
+ var pr=$("presets");pr.innerHTML="<span>Try:</span>";
+ [-c.d[0],-c.d[1],0,c.d[1],c.d[0]].forEach(function(dv,k){var b=document.createElement("button");b.textContent=c.pw[k];
+  b.onclick=function(){$("exp").value=c.exp;$("act").value=Math.round((c.exp+dv)/c.step)*c.step;calc()};pr.appendChild(b)});
+ (c.extra||[]).forEach(function(x){var b=document.createElement("button");b.textContent=x.t;b.onclick=function(){$("exp").value=x.e;$("act").value=x.a;calc()};pr.appendChild(b)});
+ $("mode").style.display=c.kind==="gr"?"block":"none";
+ lk(["info","ctl"]);
+ calc();
+}
+function calc(){
+ var c=IND[cur],e=+$("exp").value,a=+$("act").value;
+ var s=Math.round((a-e)/c.step)*c.step,abs=Math.abs(s),flat=abs<c.step/2;
+ $("ev").textContent=fmt(e,c);$("av").textContent=fmt(a,c);
+ $("sv").textContent=(flat?"":s>0?"+":"−")+(flat?0:abs).toFixed(c.dec)+c.su;
+ $("m_rates").className=mode==="rates"?"on":"";$("m_growth").className=mode==="growth"?"on":"";
+ $("mh").textContent=mode==="growth"?"Growth worries: good economic news is good news for stocks.":"Rate worries: good economic news can be bad news for stocks, because it keeps interest rates high.";
+ var sb=$("sb"),msg=$("msg");
+ if(flat){sb.textContent="In line";sb.className="badge";msg.textContent="This number matched what traders expected, so it is already priced in. Markets will still move today, but other news decides which way, not this number."}
+ else{sb.textContent=s>0?c.up:c.dn;sb.className="badge";msg.textContent=s>0?c.mu:c.md}
+ var z=$("zone");
+ if(c.zone){
+  var pos=function(v){return Math.max(0,Math.min(100,(v-c.min)/(c.max-c.min)*100))};
+  var below=a<49.95,band=Math.abs(a-50)<0.05;
+  var head=band?"Right on the 50 line: growth has stalled.":below?"Below 50 = contraction: businesses report that activity is shrinking.":"Above 50 = expansion: businesses report that activity is growing.";
+  var tw="";
+  if(!flat){if(below&&s>0)tw=" It is still shrinking, but by less than expected, so markets treat it as good news.";else if(!below&&!band&&s<0)tw=" It is still growing, but by less than expected, so markets treat it as disappointing.";else if(below&&s<0)tw=" It is shrinking faster than expected, so markets treat it as bad news.";else if(s>0)tw=" It is growing faster than expected, so markets treat it as good news."}
+  z.innerHTML='<div class="zone"><div class="zb"><div class="zl">Contraction</div><div class="zr">Expansion</div><div class="zd e" style="left:'+pos(e)+'%"></div><div class="zd a" style="left:'+pos(a)+'%"></div></div><div class="zk"><span><i></i> Expected</span><span><i class="f"></i> Actual</span></div><div class="zt"><b>'+head+'</b>'+tw+' Markets react to the surprise versus expectations, not to the 50 line itself.</div></div>';
+ }else z.innerHTML="";
+ var str=Math.min(1,abs/c.d[0]),f=c.imp===3?1:.75,size=Math.round((28+str*44)*f);
+ var word=abs<=c.th[0]+1e-9?"Slightly":abs<=c.th[1]+1e-9?"Moderately":"Sharply";
+ var sdir=c.kind==="infl"?-1:(mode==="growth"?1:-1);
+ MK.forEach(function(m,k){
+  var v=$("v"+k),l=$("l"+k),fl=$("f"+k),w=$("w"+k);
+  if(flat){v.textContent="↔";v.style.fontSize="52px";v.className="v flat";l.textContent="No clear direction";l.className="l flat";fl.style.width="0";w.textContent=FL[k];return}
+  var dir=k===0?sdir:m.dir,up=(s*dir)>0,col=up?"up":"dn";
+  v.textContent=up?"▲":"▼";v.style.fontSize=size+"px";v.className="v "+col;
+  l.textContent=word+(up?" up":" down");l.className="l "+col;
+  var bw=str*50*f;fl.style.width=bw+"%";fl.style.left=up?"50%":(50-bw)+"%";fl.style.background=up?"var(--up)":"var(--down)";
+  if(k===0){var rm=sdir===-1;w.textContent=s>0?(rm?"Higher-for-longer interest rates are bad for company valuations.":"Strong data eases recession worries, which is good for company profits."):(rm?"Lower interest rates ahead are good for company valuations.":"Weak data adds to recession worries, which is bad for company profits.")}
+  else w.textContent=s>0?m.s:m.w;
+ });
+ lk(["msg","grid","zone"]);
+}
+["exp","act"].forEach(function(i){$(i).addEventListener("input",calc)});
+$("m_rates").onclick=function(){mode="rates";calc()};
+$("m_growth").onclick=function(){mode="growth";calc()};
+var QZ={},TOT=5,XPL=["tabs","info","ctl","msg","grid"];
+var PANES={q:"qz",r:"rl",g:"gl"};
+function showMode(m){closeTip();rpStop();XPL.forEach(function(i){$(i).style.display=m==="x"?"":"none"});["qz","rl","gl"].forEach(function(i){$(i).style.display="none"});if(m!=="x")$(PANES[m]).style.display="block";["x","q","r","g"].forEach(function(k){$("b"+k).className=k===m?"on":""});
+ if(m==="q"&&(!QZ.plan||QZ.fin))newSession();if(m==="r"&&!$("rl").innerHTML)renderReal(0);if(m==="g"&&!$("gl").innerHTML)renderGloss()}
+function newSession(){
+ var idx=[0,1,2,3,4].sort(function(){return Math.random()-.5}),fi=Math.floor(Math.random()*TOT);
+ QZ={n:0,sc:0,tot:0,q:null,ans:[],done:false,hint:false,plan:[],log:[],fin:false};
+ idx.forEach(function(ix,j){var c=IND[ix],o=[-c.d[0],-c.d[1],c.d[1],c.d[0]];QZ.plan.push({c:c,dv:j===fi?0:o[Math.floor(Math.random()*4)],reg:Math.random()<.5?"rates":"growth"})});
+ newQ();
+}
+function newQ(){
+ var p=QZ.plan[QZ.n],c=p.c,e=c.exp,a=Math.round((e+p.dv)/c.step)*c.step,s=Math.round((a-e)/c.step)*c.step;
+ QZ.q={c:c,e:e,a:a,s:s,flat:Math.abs(s)<c.step/2,reg:p.reg};QZ.ans=[null,null,null,null];QZ.done=false;QZ.hint=false;QZ.n++;render();
+}
+function truthQ(q,k){if(q.flat)return"flat";var dir=k===0?(q.c.kind==="infl"?-1:(q.reg==="growth"?1:-1)):MK[k].dir;return(q.s*dir)>0?"up":"down"}
+function whyQ(q,k){var s=q.s;if(q.flat)return FL[k];
+ if(k===0){var rm=q.c.kind==="infl"||q.reg==="rates";return s>0?(rm?"Higher-for-longer interest rates are bad for company valuations.":"Strong data eases recession worries, which is good for company profits."):(rm?"Lower interest rates ahead are good for company valuations.":"Weak data adds to recession worries, which is bad for company profits.")}
+ return s>0?MK[k].s:MK[k].w}
+function truth(k){return truthQ(QZ.q,k)}function why(k){return whyQ(QZ.q,k)}
+function render(){
+ var q=QZ.q,c=q.c,h='<div class="card"><div class="n" style="margin:0">Question '+QZ.n+' of '+TOT+' · Score '+QZ.sc+' / '+QZ.tot+'</div><h2 style="margin:6px 0 4px;font-size:16px">'+c.title+'</h2><p style="margin:0 0 4px;font-size:14px">'+c.what+'</p>';
+ h+='<div class="g2"><div><span class="tg">Expected</span><br><b class="big">'+fmt(q.e,c)+'</b></div><div><span class="tg a">Actual</span><br><b class="big">'+fmt(q.a,c)+'</b></div></div>';
+ if(c.kind==="gr")h+='<p style="font-size:14px;margin:0">Right now the market is mostly worried about <b>'+(q.reg==="rates"?"inflation and interest rates":"growth and a recession")+'</b>.</p>';
+ if(QZ.hint)h+='<div class="hintbox">'+(q.flat?"The actual number matches what was expected, so there is no surprise.":"The actual number is "+(q.s>0?"above":"below")+" what was expected. "+(c.kind==="infl"?"Higher inflation means interest rates may stay higher for longer.":"Stronger data means rates may stay higher; weaker data means they can fall sooner."))+'</div>';
+ h+='<p style="font-weight:600;margin:14px 0 0">What happens to each market straight after the release?</p>';
+ MK.forEach(function(m,k){
+  h+='<div class="qrow"><div class="qn">'+m.n+'</div><div class="qb">';
+  [["up","▲ Up"],["down","▼ Down"],["flat","↔ No clear direction"]].forEach(function(o){
+   var cl="opt"+(QZ.ans[k]===o[0]?" sel":"");if(QZ.done){if(o[0]===truth(k))cl+=" right";else if(QZ.ans[k]===o[0])cl+=" wrong"}
+   h+='<button class="'+cl+'" data-k="'+k+'" data-v="'+o[0]+'"'+(QZ.done?" disabled":"")+'>'+o[1]+'</button>'});
+  h+='</div>'+(QZ.done?'<div class="why">'+why(k)+'</div>':"")+'</div>'});
+ var all=QZ.ans.every(function(x){return x});
+ if(!QZ.done)h+='<div class="row" style="margin-top:12px"><button id="qc" class="on"'+(all?"":" disabled")+'>Check answers</button><button id="qh">Hint</button></div>';
+ else{var r=QZ.ans.filter(function(x,k){return x===truth(k)}).length;h+='<div class="res2">You got '+r+' of 4</div><div class="row"><button id="qn" class="on">'+(QZ.n<TOT?"Next question":"See your results")+'</button></div>'}
+ $("qz").innerHTML=h+'</div>';lk(["qz"]);
+ document.querySelectorAll("#qz .opt").forEach(function(b){b.onclick=function(){QZ.ans[+b.getAttribute("data-k")]=b.getAttribute("data-v");render()}});
+ if($("qc"))$("qc").onclick=function(){var ok=QZ.ans.map(function(x,k){return x===truth(k)});ok.forEach(function(v){if(v)QZ.sc++});QZ.tot+=4;QZ.log.push({q:QZ.q,ans:QZ.ans.slice(),ok:ok});QZ.done=true;render()};
+ if($("qh"))$("qh").onclick=function(){QZ.hint=!QZ.hint;render()};
+ if($("qn"))$("qn").onclick=function(){QZ.n<TOT?newQ():results()};
+}
+var LESSON={surprise:["Actual versus expected","Markets react to how the number compares with what was expected, not to the number itself. Higher than expected (hotter inflation, stronger jobs) means interest rates may stay higher for longer, so bond yields rise. Lower than expected does the reverse."],
+ priced:["Already priced in","When the actual number matches expectations, it was already priced in. Markets still move that day, but other news decides which way, not the release."],
+ stocks:["Stocks: rates worry or growth worry","On inflation data, hotter is bad for stocks because it keeps rates high. On growth data it depends on the mood: if the market fears rates, strong data is bad for stocks; if it fears recession, strong data is good."],
+ link:["The dollar and gold follow yields","Higher yields make the dollar more attractive and make gold, which pays no interest, less appealing. Lower yields do the reverse."]};
+function results(){
+ QZ.fin=true;var pc=Math.round(QZ.sc/QZ.tot*100),mk=[0,0,0,0],cc={surprise:[0,0],priced:[0,0],stocks:[0,0],link:[0,0]},miss=[];
+ QZ.log.forEach(function(L,n){L.ok.forEach(function(ok,k){
+  if(ok)mk[k]++;var key=L.q.flat?"priced":k===0?"stocks":k===1?"surprise":"link";cc[key][1]++;if(!ok){cc[key][0]++;miss.push([n,k,L])}})});
+ var W={up:"Up",down:"Down",flat:"No clear direction"};
+ var msg=pc>=90?"Excellent. You have the core ideas.":pc>=70?"Good grasp. A few things to tighten up.":pc>=50?"Getting there. Worth a re-read of the points below.":"A tough one. The points below will help, then try again.";
+ var h='<div class="card"><div class="n" style="margin:0">Your results</div><div class="bigscore">'+QZ.sc+' / '+QZ.tot+' <span style="font-size:18px;color:var(--muted)">('+pc+'%)</span></div><div style="font-size:15px;font-weight:600;margin-top:2px">'+msg+'</div>';
+ h+='<h2 style="margin-top:16px">By market</h2>';
+ MK.forEach(function(m,k){h+='<div class="qn" style="margin-top:6px">'+m.n+' · '+mk[k]+' / '+TOT+'</div><div class="bar2"><i style="width:'+(mk[k]/TOT*100)+'%"></i></div>'});
+ var wk=Object.keys(cc).filter(function(x){return cc[x][0]>0}).sort(function(x,y){return cc[y][0]/cc[y][1]-cc[x][0]/cc[x][1]});
+ h+='<h2 style="margin-top:16px">What to work on</h2>';
+ if(!wk.length)h+='<p style="font-size:14px;margin:0">Nothing. Full marks. Try Explore mode to see how bigger and smaller surprises change the size of the move.</p>';
+ wk.forEach(function(x){h+='<div class="hintbox"><b>'+LESSON[x][0]+'</b> · missed '+cc[x][0]+' of '+cc[x][1]+'<br>'+LESSON[x][1]+'</div>'});
+ if(miss.length){h+='<h2 style="margin-top:16px">What you missed</h2>';
+  miss.forEach(function(m){var L=m[2],q=L.q;h+='<div class="qrow"><div class="qn">Q'+(m[0]+1)+' · '+q.c.title+' · expected '+fmt(q.e,q.c)+', actual '+fmt(q.a,q.c)+(q.c.kind==="gr"?" · market worried about "+(q.reg==="rates"?"rates":"growth"):"")+'</div><div style="font-size:14px"><b>'+MK[m[1]].n+'</b>: you said '+W[L.ans[m[1]]]+', correct was <b>'+W[truthQ(q,m[1])]+'</b></div><div class="why">'+whyQ(q,m[1])+'</div></div>'})}
+ h+='<div class="row" style="margin-top:14px"><button id="qa" class="on">Try again</button><button id="qe">Back to Explore</button></div></div>';
+ $("qz").innerHTML=h;lk(["qz"]);$("qa").onclick=newSession;$("qe").onclick=function(){showMode("x")};
+}
+var REL=[{"k":"cpi","tab":"Inflation","title":"US inflation (CPI)","kind":"infl","u":"pct","d":1,"su":"pp","span":"October 2024 to October 2026","what":"CPI measures how fast everyday prices are rising compared with a year ago.","note":"","rows":[["2026-10-14",3.7,3.6,-1.09,-2.3,-1.66,0.31,null,"The 10-year yield jumped about 14bp within the first hour, but ended the day slightly lower than it started. The daily tile hides that swing, which the replay below shows."],["2026-09-11",3.4,3.4,0.86,0.8,0.04,0.0,null,null],["2026-08-12",3.3,3.4,0.26,-0.6,0.59,0.17,null,null],["2026-07-14",3.5,3.8,0.38,-3.7,1.6,-0.33,null,null],["2026-06-10",4.2,4.2,-1.62,3.6,-3.57,0.09,null,null],["2026-05-12",3.8,3.7,-0.16,5.1,-0.89,0.39,null,null],["2026-04-10",3.3,3.4,-0.11,3.4,-0.64,-0.1,null,null],["2026-03-11",2.4,2.4,-0.08,7.2,-1.2,0.34,null,null],["2026-02-13",2.4,2.5,0.05,-5.0,1.98,-0.04,null,null],["2026-01-13",2.7,2.7,-0.19,-1.0,-0.34,0.29,null,null],["2025-12-18",2.7,3.1,0.79,-2.9,-0.21,0.02,null,null],["2025-10-24",3.0,3.1,0.79,0.0,-0.19,0.02,null,null],["2025-09-11",2.9,2.9,0.85,-1.9,-0.23,-0.31,null,null],["2025-08-12",2.7,2.8,1.13,1.0,-0.17,-0.45,null,null],["2025-07-15",2.7,2.6,-0.4,5.4,-0.67,0.55,null,null],["2025-06-11",2.4,2.5,-0.27,-5.4,0.01,-0.47,null,null],["2025-05-13",2.3,2.4,0.72,-0.2,0.61,-0.83,null,null],["2025-04-10",2.4,2.6,-3.46,9.7,3.19,-1.94,null,null],["2025-03-12",2.8,2.9,0.49,3.2,0.89,0.15,null,null],["2025-02-12",3.0,2.9,-0.27,8.8,-0.13,0.04,null,null],["2025-01-15",2.9,2.9,1.83,-14.1,1.32,-0.1,null,null],["2024-12-11",2.7,2.7,0.82,4.5,1.41,0.23,null,null],["2024-11-13",2.6,2.6,0.02,2.2,-0.76,0.49,null,null],["2024-10-10",2.4,2.3,-0.21,-1.0,0.51,0.0,null,null]]},{"k":"nfp","tab":"Jobs","title":"Jobs report (nonfarm payrolls)","kind":"gr","u":"k","d":0,"su":"k","span":"December 2025 to October 2026","what":"Nonfarm payrolls counts the jobs the US economy added last month, not including farm work.","note":"Payroll headlines are often revised later, and the unemployment rate and wages released alongside can matter more than the headline.","rows":[["2026-10-02",29.0,89.0,0.73,3.2,-0.95,-0.12,null,null],["2026-09-04",162.0,55.0,-0.38,1.2,-1.39,0.16,null,null],["2026-08-07",-23.0,85.0,0.62,-2.7,2.33,-0.36,null,null],["2026-07-02",57.0,114.0,0.0,0.2,1.06,-0.56,null,null],["2026-06-05",172.0,85.0,-2.64,5.7,-3.1,0.64,null,null],["2026-05-08",115.0,65.0,0.84,-2.4,0.42,-0.42,null,null],["2026-04-03",178.0,65.0,null,null,null,0.17,"Good Friday: US equity market closed",null],["2026-03-06",-92.0,58.0,-1.33,-0.2,1.58,-0.21,"NFP + retail sales same day",null],["2026-02-11",130.0,66.0,-0.01,3.3,1.34,0.02,null,null],["2026-01-09",50.0,66.0,0.65,0.2,0.9,0.3,null,null],["2025-12-16",64.0,51.0,-0.24,-3.1,-0.07,-0.04,"NFP + retail sales same day",null]]},{"k":"pmi","tab":"PMI","title":"ISM Services PMI","kind":"gr","u":"pts","d":1,"su":" pts","span":"December 2025 to October 2026","what":"A monthly survey of service-company managers. Above 50 means expansion; below 50 means contraction.","note":"This is the services survey. The manufacturing PMI is not included.","rows":[["2026-10-05",54.9,55.1,0.66,3.2,-0.13,0.17,null,null],["2026-09-03",55.4,54.1,1.06,-0.8,2.84,-0.58,null,null],["2026-08-05",54.1,54.5,-0.17,0.0,3.67,-0.19,null,null],["2026-07-06",54.0,54.2,0.72,-1.4,1.01,-0.02,null,"The previous stock and gold close was before a market holiday, so their move covers two sessions."],["2026-06-03",54.5,53.7,-0.74,4.0,-1.17,0.33,null,null],["2026-05-05",53.6,53.7,0.81,-0.6,0.78,0.01,null,null],["2026-04-06",54.0,54.8,0.44,3.0,0.11,-0.2,null,"The previous stock and gold close was before a market holiday, so their move covers two sessions."],["2026-03-04",56.1,53.5,0.78,3.5,0.21,-0.3,null,null],["2026-02-04",53.8,53.5,-0.51,1.1,0.32,0.27,null,null],["2026-01-07",54.4,52.2,-0.34,-1.9,-0.75,0.14,null,null],["2025-12-03",52.6,52.0,0.3,-2.7,0.28,-0.46,null,null]]},{"k":"rs","tab":"Retail sales","title":"Retail sales","kind":"gr","u":"pct","d":1,"su":"pp","span":"February 2025 to September 2026, with gaps","what":"How much shoppers spent last month compared with the month before.","note":"","rows":[["2026-09-16",1.2,0.8,-0.45,1.4,1.26,0.73,"FOMC decision day",null],["2026-08-14",-0.6,0.1,-0.17,4.3,0.38,-0.31,null,null],["2026-07-16",0.2,0.2,-0.51,0.8,-1.47,0.21,null,null],["2026-06-17",0.9,0.5,-1.21,4.8,0.62,0.85,"FOMC decision day",null],["2026-05-14",0.5,0.5,0.77,1.6,-0.45,0.42,null,null],["2026-04-21",1.7,1.4,-0.63,4.1,-2.26,0.36,null,null],["2026-04-01",0.6,0.5,0.72,0.2,2.87,-0.3,null,null],["2026-03-06",-0.2,-0.3,-1.33,-0.2,1.58,-0.21,"NFP + retail sales same day",null],["2026-02-10",0.0,0.4,-0.33,-5.9,-0.95,0.02,null,null],["2026-01-14",0.6,0.4,-0.53,-3.7,0.8,-0.12,null,null],["2025-12-16",0.0,0.1,-0.24,-3.1,-0.07,-0.04,"NFP + retail sales same day",null],["2025-11-25",0.2,0.4,0.91,-3.1,1.12,-0.39,null,null],["2025-09-16",0.6,0.2,-0.13,-0.6,0.16,-0.71,null,null],["2025-03-17",0.2,0.6,0.64,-2.1,0.17,-0.32,null,null],["2025-02-14",-0.9,-0.1,-0.01,-5.5,-1.52,-0.25,null,null]]},{"k":"gdp","tab":"GDP","title":"GDP (advance estimate)","kind":"gr","u":"pct","d":1,"su":"pp","span":"October 2024 to July 2026","what":"How fast the economy grew last quarter, as a yearly rate. This is the first estimate, revised later.","note":"GDP looks backwards, so markets often react less than to jobs or inflation.","rows":[["2026-07-30",1.5,2.1,1.66,-1.4,3.08,-0.83,"Day after FOMC decision",null],["2026-04-30",2.0,2.2,1.02,-5.6,1.49,-0.89,"Day after FOMC decision",null],["2026-02-20",1.4,2.8,0.69,1.5,1.67,-0.03,null,null],["2025-12-23",4.3,3.3,0.46,0.2,0.81,-0.37,null,null],["2025-07-30",3.0,2.4,-0.13,4.8,0.87,1.0,"FOMC decision day",null],["2025-04-30",-0.3,0.3,0.15,-0.4,-0.43,0.45,null,null],["2025-01-30",2.3,2.6,0.53,-1.2,2.72,0.22,"Day after FOMC decision",null],["2024-10-30",2.8,3.0,-0.33,4.4,0.71,-0.18,null,null]]}];
+var RNOTE={"2025-04-10":"Inflation was cooler than expected, but tariff news dominated markets that day. A good example of other news swamping a data release.","2025-01-15":"The headline number matched, but the 'core' measure (which leaves out food and energy) came in softer than expected, so stocks rallied and yields fell. The headline doesn't always tell the whole story.","2025-01-30":"The Fed had held interest rates the day before, so traders were still digesting that.","2025-02-14":"The day before, Trump announced plans for new &ldquo;reciprocal&rdquo; tariffs, so trade policy was on traders' minds.","2025-05-13":"Markets were still reacting to the US-China tariff truce announced the day before, when the S&amp;P 500 jumped more than 3%. The dollar gave back some of that rally.","2025-07-30":"The Fed held interest rates that afternoon, with two members voting for a cut, and Powell gave no hint of a September cut. Yields and the dollar rose. The strong GDP number was also helped by a drop in imports.","2025-09-16":"The Fed was due to decide the next day and a rate cut was widely expected, so the dollar was already sliding. The Swiss franc hit its strongest level against it in over a decade.","2025-12-16":"This was a delayed jobs report covering two months. Unemployment rose to 4.6%, which first lifted bets on a Fed cut, but the move faded as stocks sold off and the dollar gained.","2025-12-18":"This CPI looked unusually weak but was hard to trust: it was the first big report after the government shutdown disrupted data collection. Traders partly shrugged it off and stocks rose on tech earnings.","2026-01-14":"Iran dominated: a report that Trump had decided on a military strike pushed gold to a record high and made stocks swing. The retail sales number was a sideshow.","2026-02-13":"Inflation was softer, but markets were also jittery about AI-related volatility and bonds rallied as investors looked for safety.","2026-02-20":"The Supreme Court struck down Trump's tariffs that day and he answered with a new 10% global tariff. That dominated trading far more than the weak GDP number.","2026-03-06":"Oil jumped more than 10% on Middle East conflict and fears for shipping through the Strait of Hormuz. That hit stocks harder than the weak jobs number.","2026-03-11":"Inflation matched forecasts, but oil jumped about 5% on the US-Israel conflict with Iran, and a weak 10-year Treasury auction pushed yields higher.","2026-04-01":"Hopes that the US-Iran conflict was nearing an end lifted stocks ahead of an address by Trump, with oil just under $100 a barrel.","2026-04-30":"The Fed had held rates the day before with a hawkish tilt. On the day, the yen surged after Japan was reported to have intervened, and an AI-led rally took the S&amp;P 500 to a record high.","2026-06-05":"The jobs report was strong, but a tech-led selloff (the Nasdaq's worst day since April 2025, on worries about heavy AI-related share issuance), stalled US-Iran talks and a stronger dollar all hit markets, gold included.","2026-06-10":"Inflation matched forecasts, but Trump threatened to strike Iran &ldquo;very hard&rdquo; and tech sold off ahead of the SpaceX IPO. It was an ugly risk-off day and gold broke lower.","2026-06-17":"The Fed held rates, but Chair Warsh sounded hawkish on inflation. The dollar jumped, 2-year yields rose about 17 basis points and stocks fell 1.4%. That, not retail sales, drove the day.","2026-07-14":"Fed Chair Warsh gave testimony to Congress (hawkish on inflation, no signal on rates), and Trump dropped a proposed fee on Strait of Hormuz shipping. The dollar and yields fell while stocks rose.","2026-07-30":"The day after a Fed meeting, USD/JPY dropped sharply on speculation of Japanese intervention. A big tech-led rally lifted stocks while yields rose, despite the weak GDP.","2026-08-05":"Gold surged with no clear trigger. Weaker ADP and ISM data, peace hopes and a weaker dollar may have helped.","2026-08-07":"Payrolls fell, and markets decided a September Fed hike was now less likely than not. Gold rallied, and comments from Japan's finance minister moved USD/JPY too.","2026-09-16":"The Fed raised interest rates for the first time in three years, in a unanimous vote, and Warsh sounded ready to hike again. Stocks fell about 1% and the dollar rose. Retail sales were secondary.","2026-10-02":"Jobs were soft, but a tech-led rally took the Nasdaq 100 to a record close, and oil swung on news of emergency stockpile releases."};
+var REPLAY={"2026-10-14":{"rel":"13:30","tz":"BST","from":-60,"s":{"spx":[-0.152,-0.146,-0.143,-0.124,-0.117,-0.121,-0.124,-0.13,-0.121,-0.117,-0.133,-0.136,-0.149,-0.14,-0.14,-0.133,-0.114,-0.133,-0.149,-0.149,-0.146,-0.133,-0.14,-0.152,-0.146,-0.149,-0.155,-0.168,-0.159,-0.149,-0.136,-0.114,-0.102,-0.086,-0.095,-0.076,-0.089,-0.086,-0.095,-0.105,-0.06,-0.07,-0.076,-0.048,-0.051,-0.051,-0.048,-0.048,-0.057,-0.067,-0.057,-0.06,-0.07,-0.063,-0.057,-0.054,-0.041,-0.044,-0.019,-0.029,0.0,-0.432,-0.454,-0.482,-0.524,-0.558,-0.565,-0.587,-0.616,-0.622,-0.6,-0.593,-0.644,-0.644,-0.676,-0.638,-0.673,-0.631,-0.612,-0.587,-0.565,-0.527,-0.52,-0.584,-0.597,-0.568,-0.584,-0.6,-0.619,-0.682,-0.682,-0.698,-0.663,-0.663,-0.657,-0.682,-0.66,-0.657,-0.663,-0.635,-0.638,-0.641,-0.638,-0.66,-0.638,-0.616,-0.612,-0.628,-0.654,-0.682,-0.717,-0.72,-0.704,-0.708,-0.682,-0.663,-0.666,-0.66,-0.654,-0.666,-0.692,-0.708,-0.714,-0.679,-0.622,-0.682,-0.714,-0.695,-0.689,-0.616,-0.609,-0.568,-0.593,-0.574,-0.622,-0.647,-0.644,-0.625,-0.543,-0.587,-0.539,-0.578,-0.584,-0.701,-0.727,-0.723,-0.781,-0.774,-0.882,-0.895,-0.895,-0.873,-0.866,-0.86,-0.847,-0.895,-0.939,-0.93,-0.949,-0.917,-0.933,-0.923,-0.949,-0.977,-0.977,-0.955,-0.888,-0.914,-0.955,-0.952,-0.961,-0.936,-0.933,-0.927,-0.952,-0.933,-0.952,-0.971,-0.965,-0.965,-0.952,-0.939,-0.927,-0.939,-0.917,-0.885,-0.93,-0.977,-1.009,-0.984,-1.034,-0.987,-1.003,-0.971,-0.971,-1.0,-0.971,-0.958,-0.958,-1.003,-1.041,-1.054,-1.041,-1.082,-1.098,-1.069,-1.044,-1.025,-1.009,-0.99,-0.996,-1.009,-1.069,-1.073,-1.073,-1.092,-1.104,-1.101,-1.126,-1.152,-1.133,-1.117,-1.155,-1.152,-1.13,-1.126,-1.082,-1.085,-1.05,-1.041,-1.054,-1.066,-1.088,-1.076,-1.066,-1.079,-1.095,-1.101,-1.085,-1.117,-1.13,-1.123,-1.107,-1.133,-1.126,-1.136,-1.13,-1.161,-1.193,-1.209,-1.19,-1.231,-1.253,-1.244,-1.25,-1.257,-1.247,-1.238,-1.219,-1.228,-1.247,-1.222,-1.238,-1.225,-1.177,-1.158,-1.177,-1.231,-1.222,-1.219,-1.219,-1.196,-1.234,-1.25,-1.241,-1.25,-1.25,-1.241,-1.228,-1.231,-1.241,-1.276,-1.317,-1.352,-1.384,-1.406,-1.403,-1.396,-1.409,-1.406,-1.374,-1.39,-1.409,-1.403,-1.403,-1.434,-1.399,-1.39,-1.39,-1.399,-1.393],"gold":[-0.333,-0.314,-0.309,-0.314,-0.314,-0.307,-0.309,-0.326,-0.328,-0.311,-0.314,-0.335,-0.34,-0.319,-0.335,-0.321,-0.314,-0.347,-0.369,-0.357,-0.352,-0.345,-0.34,-0.338,-0.314,-0.323,-0.328,-0.364,-0.295,-0.29,-0.331,-0.275,-0.244,-0.223,-0.22,-0.175,-0.151,-0.067,-0.158,-0.189,-0.156,-0.187,-0.228,-0.101,-0.115,-0.081,-0.038,-0.012,-0.048,-0.158,-0.16,-0.098,-0.089,0.002,0.029,-0.053,-0.034,-0.074,-0.043,-0.005,0.0,-0.594,-0.637,-0.673,-0.75,-0.936,-0.896,-0.989,-0.956,-0.994,-1.037,-1.214,-1.389,-1.42,-1.583,-1.442,-1.442,-1.442,-1.408,-1.332,-1.157,-1.14,-1.142,-1.344,-1.205,-1.107,-1.231,-1.286,-1.31,-1.368,-1.327,-1.559,-1.542,-1.633,-1.624,-1.597,-1.502,-1.554,-1.487,-1.439,-1.411,-1.49,-1.597,-1.686,-1.597,-1.528,-1.641,-1.554,-1.667,-1.633,-1.732,-1.679,-1.674,-1.65,-1.586,-1.566,-1.578,-1.6,-1.535,-1.545,-1.514,-1.392,-1.214,-1.255,-1.154,-1.231,-1.181,-1.13,-1.212,-1.214,-1.305,-1.303,-1.277,-1.317,-1.284,-1.176,-1.281,-1.272,-1.176,-1.265,-1.289,-1.324,-1.322,-1.42,-1.36,-1.408,-1.42,-1.444,-1.521,-1.523,-1.554,-1.559,-1.427,-1.451,-1.518,-1.514,-1.518,-1.423,-1.418,-1.358,-1.38,-1.461,-1.432,-1.411,-1.399,-1.427,-1.334,-1.353,-1.377,-1.471,-1.471,-1.459,-1.478,-1.449,-1.348,-1.403,-1.372,-1.37,-1.351,-1.399,-1.339,-1.353,-1.387,-1.368,-1.329,-1.339,-1.389,-1.392,-1.32,-1.315,-1.377,-1.265,-1.289,-1.195,-1.2,-1.169,-1.217,-1.171,-1.207,-1.238,-1.344,-1.408,-1.387,-1.415,-1.454,-1.485,-1.487,-1.514,-1.53,-1.475,-1.432,-1.439,-1.535,-1.499,-1.526,-1.55,-1.526,-1.542,-1.569,-1.621,-1.552,-1.581,-1.645,-1.66,-1.619,-1.586,-1.533,-1.516,-1.492,-1.542,-1.569,-1.554,-1.559,-1.511,-1.456,-1.418,-1.403,-1.444,-1.423,-1.466,-1.454,-1.466,-1.478,-1.538,-1.53,-1.526,-1.552,-1.578,-1.645,-1.662,-1.641,-1.679,-1.715,-1.689,-1.66,-1.619,-1.636,-1.648,-1.669,-1.662,-1.703,-1.691,-1.703,-1.727,-1.629,-1.626,-1.693,-1.705,-1.729,-1.756,-1.753,-1.751,-1.873,-1.911,-1.882,-1.897,-1.851,-1.823,-1.751,-1.772,-1.758,-1.78,-1.787,-1.849,-1.847,-1.837,-1.803,-1.82,-1.871,-1.851,-1.854,-1.866,-1.863,-1.796,-1.796,-1.787,-1.77,-1.76,-1.775,-1.782,-1.765],"dxy":[0.051,0.043,0.063,0.063,0.05,0.055,0.051,0.058,0.044,0.04,0.038,0.034,0.027,0.023,0.027,0.02,0.021,0.021,0.028,0.021,0.016,0.018,0.019,0.024,0.014,0.02,0.037,0.045,0.051,0.04,0.038,0.03,0.026,0.014,0.015,0.012,0.021,0.016,0.026,0.03,0.029,0.032,0.033,0.019,0.028,0.021,0.015,0.012,0.005,0.032,0.052,0.041,0.033,0.033,0.031,0.035,0.033,0.028,0.016,0.016,0.0,0.295,0.325,0.334,0.381,0.376,0.42,0.466,0.48,0.47,0.452,0.452,0.507,0.493,0.507,0.477,0.466,0.468,0.459,0.456,0.44,0.439,0.415,0.475,0.468,0.44,0.473,0.49,0.505,0.516,0.541,0.57,0.587,0.628,0.622,0.62,0.631,0.615,0.612,0.584,0.587,0.596,0.61,0.629,0.626,0.596,0.579,0.594,0.603,0.631,0.645,0.662,0.652,0.641,0.623,0.61,0.613,0.613,0.595,0.588,0.552,0.557,0.527,0.541,0.522,0.535,0.514,0.512,0.521,0.52,0.519,0.523,0.54,0.571,0.584,0.569,0.584,0.573,0.569,0.593,0.595,0.61,0.599,0.619,0.626,0.631,0.66,0.661,0.681,0.667,0.686,0.68,0.676,0.694,0.674,0.66,0.654,0.638,0.627,0.634,0.63,0.651,0.65,0.643,0.639,0.638,0.625,0.622,0.628,0.65,0.635,0.642,0.648,0.628,0.604,0.6,0.612,0.594,0.578,0.587,0.578,0.589,0.592,0.596,0.597,0.609,0.604,0.624,0.622,0.607,0.626,0.604,0.62,0.596,0.59,0.593,0.607,0.611,0.621,0.618,0.643,0.656,0.656,0.649,0.648,0.647,0.655,0.659,0.648,0.656,0.643,0.65,0.672,0.666,0.688,0.695,0.687,0.699,0.712,0.727,0.713,0.708,0.725,0.731,0.722,0.705,0.681,0.691,0.689,0.685,0.695,0.694,0.688,0.694,0.684,0.659,0.645,0.644,0.654,0.661,0.654,0.671,0.678,0.68,0.687,0.675,0.671,0.68,0.687,0.687,0.68,0.672,0.682,0.677,0.652,0.651,0.615,0.628,0.632,0.624,0.636,0.635,0.637,0.628,0.626,0.619,0.639,0.647,0.644,0.649,0.642,0.641,0.644,0.643,0.644,0.638,0.641,0.637,0.627,0.629,0.639,0.633,0.648,0.662,0.655,0.652,0.649,0.666,0.679,0.687,0.699,0.696,0.691,0.689,0.684,0.684,0.679,0.68,0.672,0.67,0.663],"y10":[1.2,1.0,1.0,0.8,1.2,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.8,0.6,1.2,1.2,0.8,0.8,1.0,1.0,0.8,0.8,0.8,1.2,1.2,1.0,0.6,0.4,0.4,0.4,0.2,0.0,0.4,0.4,0.0,0.4,0.4,0.4,0.2,0.2,0.4,0.0,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.4,0.0,-0.3,-0.3,-0.3,0.0,0.0,4.2,6.5,7.3,8.0,8.8,9.3,9.7,10.1,10.3,11.0,11.4,11.8,11.4,12.2,11.8,11.8,11.4,11.4,11.4,11.4,11.4,10.7,11.4,11.6,11.6,11.8,12.2,13.1,13.5,13.5,13.9,13.1,13.1,13.1,13.5,13.5,13.3,13.3,12.9,12.9,12.7,12.7,12.7,13.1,12.7,12.7,12.4,12.7,12.4,12.2,12.4,12.2,12.2,12.2,11.8,12.0,11.6,11.4,11.4,11.4,11.4,11.4,11.4,11.0,10.7,10.3,10.5,10.1,9.7,10.1,10.1,9.7,10.1,10.1,9.7,9.7,9.5,9.5,10.1,10.1,10.5,10.7,10.7,10.3,10.3,10.3,10.1,10.5,10.5,10.5,10.1,9.7,9.7,9.7,9.3,9.0,8.6,8.8,8.4,8.4,8.6,8.4,8.4,8.0,8.4,8.4,8.4,8.2,8.4,8.4,8.0,8.0,8.0,7.6,7.6,7.6,7.3,6.9,7.3,7.3,7.3,6.9,6.7,6.7,6.7,7.1,7.6,7.6,7.3,7.6,6.9,6.7,6.7,6.3,6.3,6.3,6.1,6.5,6.5,6.7,6.7,7.1,7.1,7.1,7.1,7.1,7.1,7.1,7.6,7.3,7.6,8.0,8.0,8.4,8.4,8.4,8.0,8.0,8.4,8.4,8.4,8.0,8.0,7.6,7.6,6.9,6.5,6.7,6.7,6.5,6.3,6.3,6.3,5.9,5.9,5.9,5.7,6.1,6.1,6.1,6.1,5.9,5.9,5.9,6.1,5.7,6.1,5.7,5.9,5.4,5.0,4.8,4.8,4.8,4.6,4.6,5.0,5.4,5.4,5.7,5.7,5.4,5.4,5.4,5.4,5.7,5.9,6.3,6.3,6.3,5.9,6.3,5.9,5.9,5.9,5.7,5.7,5.9,5.7,5.7,5.9,5.4,5.4,5.7,5.7,5.4,5.4,5.4,5.4,5.4,5.4,5.4,5.0,5.0,4.6,4.4,4.2,4.2,4.2,4.6]}},"2026-10-02":{"rel":"13:30","tz":"BST","from":-60,"s":{"spx":[-0.016,-0.029,-0.023,0.0,-0.026,-0.039,-0.039,-0.026,-0.032,-0.035,-0.048,-0.058,-0.071,-0.077,-0.084,-0.08,-0.077,-0.097,-0.106,-0.103,-0.106,-0.103,-0.103,-0.093,-0.116,-0.106,-0.138,-0.116,-0.097,-0.109,-0.103,-0.126,-0.122,-0.122,-0.129,-0.142,-0.138,-0.126,-0.132,-0.109,-0.129,-0.122,-0.116,-0.109,-0.126,-0.126,-0.126,-0.132,-0.122,-0.129,-0.129,-0.122,-0.1,-0.097,-0.09,-0.1,-0.061,-0.061,-0.048,-0.048,0.0,0.167,0.264,0.316,0.287,0.335,0.348,0.383,0.377,0.373,0.341,0.303,0.267,0.299,0.316,0.28,0.251,0.28,0.287,0.303,0.309,0.312,0.293,0.299,0.319,0.351,0.383,0.386,0.373,0.415,0.412,0.399,0.444,0.448,0.46,0.454,0.425,0.415,0.383,0.383,0.393,0.419,0.373,0.37,0.383,0.364,0.348,0.335,0.344,0.335,0.344,0.351,0.348,0.351,0.338,0.341,0.316,0.316,0.325,0.328,0.312,0.27,0.174,0.258,0.219,0.325,0.328,0.341,0.37,0.341,0.341,0.296,0.319,0.37,0.406,0.451,0.473,0.483,0.486,0.441,0.412,0.441,0.406,0.383,0.325,0.258,0.18,0.161,0.212,0.306,0.299,0.277,0.344,0.39,0.415,0.441,0.438,0.415,0.393,0.419,0.38,0.435,0.328,0.412,0.419,0.422,0.399,0.425,0.467,0.476,0.493,0.509,0.486,0.489,0.464,0.538,0.515,0.547,0.518,0.538,0.502,0.457,0.457,0.415,0.441,0.46,0.486,0.489,0.46,0.512,0.502,0.515,0.547,0.534,0.499,0.509,0.47,0.502,0.512,0.544,0.499,0.454,0.467,0.39,0.393,0.357,0.419,0.425,0.422,0.357,0.357,0.348,0.367,0.29,0.248,0.229,0.187,0.196,0.164,0.174,0.103,0.074,0.084,-0.003,0.061,0.055,0.052,0.01,-0.019,0.013,-0.01,-0.058,0.006,0.013,0.023,-0.116,-0.074,-0.029,0.003,0.039,0.074,0.013,0.048,0.087,0.119,0.119,0.113,0.106,0.09,0.148,0.132,0.106,0.093,0.145,0.109,0.1,0.1,0.113,0.109,0.109,0.09,0.087,0.119,0.106,0.058,0.055,0.097,0.08,0.1,0.1,0.129,0.158,0.193,0.19,0.138,0.164,0.145,0.187,0.171,0.2,0.203,0.2,0.161,0.142,0.19,0.167,0.177,0.18,0.174,0.184,0.187,0.177,0.171,0.164,0.145,0.113,0.129,0.093,0.119,0.116,0.09],"gold":[-0.121,-0.123,-0.104,-0.083,-0.13,-0.13,-0.121,-0.095,-0.116,-0.104,-0.107,-0.126,-0.168,-0.171,-0.164,-0.147,-0.185,-0.168,-0.185,-0.18,-0.161,-0.185,-0.209,-0.123,-0.135,-0.093,-0.128,-0.071,-0.052,-0.066,-0.107,-0.123,-0.13,-0.157,-0.185,-0.18,-0.154,-0.114,-0.138,-0.097,-0.176,-0.173,-0.232,-0.244,-0.273,-0.204,-0.218,-0.209,-0.211,-0.142,-0.135,-0.173,-0.104,-0.159,-0.168,-0.211,-0.168,-0.145,-0.109,-0.111,0.0,0.666,0.778,0.818,0.629,0.868,0.925,0.825,0.859,0.818,0.759,0.631,0.534,0.519,0.607,0.598,0.538,0.659,0.638,0.586,0.605,0.619,0.484,0.463,0.519,0.612,0.588,0.69,0.652,0.795,0.761,0.761,0.878,0.873,0.889,0.806,0.685,0.586,0.498,0.489,0.441,0.467,0.396,0.311,0.294,0.221,0.161,0.185,0.152,0.133,0.104,0.1,0.055,0.005,0.005,0.102,0.145,0.069,0.133,0.164,0.166,0.095,0.142,0.176,0.206,0.199,0.168,0.171,0.247,0.301,0.311,0.192,0.154,0.095,0.009,0.0,0.078,0.038,0.104,0.052,0.116,0.152,0.083,-0.002,-0.095,-0.05,-0.183,-0.138,0.009,0.126,0.121,-0.007,-0.045,0.078,0.133,0.173,0.133,-0.059,-0.014,-0.047,-0.085,-0.028,-0.142,-0.066,-0.047,0.059,0.021,-0.017,-0.012,0.033,0.128,0.026,-0.012,-0.1,-0.104,-0.081,-0.199,-0.187,-0.228,-0.268,-0.301,-0.351,-0.365,-0.323,-0.323,-0.254,-0.223,-0.249,-0.346,-0.313,-0.282,-0.216,-0.185,-0.176,-0.216,-0.249,-0.313,-0.268,-0.263,-0.32,-0.377,-0.42,-0.382,-0.543,-0.576,-0.69,-0.697,-0.655,-0.685,-0.69,-0.659,-0.719,-0.816,-0.804,-0.847,-0.837,-0.823,-0.932,-0.963,-0.911,-0.946,-0.972,-1.027,-1.02,-1.003,-0.991,-1.06,-1.124,-1.074,-1.048,-1.051,-1.067,-1.06,-1.065,-1.053,-1.186,-1.181,-1.082,-1.034,-1.063,-1.063,-1.077,-1.084,-1.027,-0.965,-0.968,-1.01,-1.01,-1.029,-1.055,-1.148,-1.148,-1.143,-1.157,-1.131,-1.245,-1.307,-1.302,-1.264,-1.184,-1.233,-1.283,-1.29,-1.309,-1.38,-1.35,-1.347,-1.383,-1.425,-1.442,-1.423,-1.399,-1.35,-1.369,-1.371,-1.342,-1.359,-1.331,-1.293,-1.267,-1.248,-1.248,-1.271,-1.3,-1.207,-1.24,-1.21,-1.2,-1.174,-1.16,-1.176,-1.129,-1.12,-1.141,-1.174,-1.219,-1.274,-1.233,-1.217,-1.24,-1.205],"dxy":[0.155,0.162,0.153,0.132,0.153,0.152,0.135,0.136,0.151,0.15,0.137,0.134,0.129,0.131,0.124,0.12,0.136,0.124,0.134,0.153,0.142,0.145,0.143,0.146,0.152,0.159,0.167,0.148,0.151,0.154,0.158,0.157,0.172,0.179,0.186,0.174,0.195,0.202,0.195,0.2,0.206,0.194,0.216,0.2,0.219,0.21,0.226,0.228,0.22,0.213,0.214,0.218,0.199,0.198,0.208,0.19,0.181,0.185,0.195,0.189,0.0,0.035,-0.065,-0.08,0.045,-0.023,-0.001,-0.004,-0.027,-0.008,-0.051,-0.038,0.048,0.052,0.061,0.05,0.045,0.015,0.011,0.032,0.005,-0.02,0.026,-0.009,-0.003,-0.053,-0.072,-0.075,-0.064,-0.092,-0.08,-0.068,-0.107,-0.068,-0.074,-0.061,-0.039,-0.04,-0.011,0.004,0.012,0.011,-0.01,0.002,0.03,0.054,0.059,0.054,0.051,0.046,0.046,0.041,0.064,0.075,0.057,0.041,0.034,0.044,0.038,0.027,0.002,0.006,0.012,0.025,0.049,0.057,0.053,0.049,0.027,0.022,0.028,0.039,0.03,0.016,0.008,0.014,-0.006,-0.023,-0.036,-0.042,-0.071,-0.092,-0.088,-0.065,-0.036,-0.035,-0.026,-0.039,-0.103,-0.121,-0.133,-0.109,-0.116,-0.123,-0.127,-0.157,-0.164,-0.148,-0.16,-0.169,-0.151,-0.136,-0.093,-0.107,-0.121,-0.161,-0.148,-0.165,-0.152,-0.157,-0.145,-0.153,-0.146,-0.141,-0.116,-0.129,-0.134,-0.144,-0.142,-0.15,-0.165,-0.176,-0.177,-0.176,-0.165,-0.184,-0.164,-0.176,-0.151,-0.134,-0.155,-0.177,-0.187,-0.182,-0.187,-0.18,-0.163,-0.166,-0.179,-0.156,-0.141,-0.123,-0.108,-0.093,-0.094,-0.083,-0.077,-0.101,-0.125,-0.127,-0.126,-0.111,-0.1,-0.097,-0.076,-0.064,-0.037,-0.027,-0.024,-0.035,-0.027,-0.018,-0.026,-0.036,-0.029,-0.023,-0.005,-0.012,-0.017,-0.015,0.0,0.002,0.0,0.01,0.018,0.05,0.042,0.037,0.022,0.022,0.015,0.016,0.016,0.012,-0.013,-0.016,-0.011,-0.002,-0.001,0.022,0.026,0.022,0.026,0.029,0.021,0.033,0.045,0.054,0.049,0.042,0.052,0.045,0.052,0.052,0.057,0.054,0.032,0.038,0.042,0.037,0.031,0.041,0.039,0.048,0.048,0.052,0.051,0.048,0.027,0.029,0.025,0.044,0.061,0.057,0.04,0.046,0.05,0.031,0.026,0.033,0.037,0.034,0.029,0.039,0.054,0.078,0.087,0.086,0.078,0.084,0.085],"y10":[0.2,0.2,0.2,0.2,0.2,0.6,0.6,0.6,0.6,-0.2,-0.2,-0.2,0.2,0.2,-0.2,-0.2,-0.2,-0.2,-0.6,-0.4,-0.8,-0.6,-0.8,-1.0,-1.0,-1.0,-0.6,-0.6,-1.0,-1.0,-1.2,-0.8,-0.6,-0.6,-0.6,-0.6,-0.6,-0.6,-0.6,-0.6,-0.4,-0.2,-0.2,0.2,-0.2,-0.2,-0.2,-0.6,-0.2,-0.2,-0.6,-0.6,-0.6,-0.6,-0.6,-0.6,-0.6,-0.6,-0.4,0.4,0.0,-2.1,-6.1,-6.3,-5.0,-5.7,-5.0,-4.4,-4.8,-4.8,-4.8,-4.8,-4.4,-4.4,-4.0,-3.6,-3.6,-4.4,-4.4,-4.0,-3.8,-3.8,-3.6,-3.8,-4.0,-4.4,-4.4,-4.2,-4.4,-4.6,-4.8,-4.8,-5.7,-5.7,-5.7,-5.0,-5.0,-5.0,-4.0,-4.0,-4.4,-4.0,-4.0,-3.6,-3.6,-3.6,-3.3,-3.3,-3.3,-3.1,-3.1,-2.7,-2.7,-2.7,-2.3,-2.3,-2.3,-2.3,-1.9,-1.5,-1.5,-1.5,-1.2,-1.2,-1.2,-1.5,-1.2,-1.5,-1.9,-1.9,-2.3,-2.3,-2.3,-2.3,-1.9,-1.9,-2.3,-2.3,-1.9,-1.9,-1.9,-1.9,-1.9,-1.9,-1.9,-1.7,-1.5,-1.5,-2.3,-2.3,-2.3,-2.3,-2.7,-2.7,-3.1,-3.3,-3.3,-2.5,-2.3,-1.9,-1.2,-1.9,-1.9,-1.9,-2.3,-2.9,-2.5,-2.7,-2.7,-3.1,-3.3,-3.3,-2.9,-2.7,-2.7,-2.7,-2.7,-2.3,-1.9,-1.7,-2.1,-1.7,-1.2,-1.2,-0.8,-1.0,-1.0,-0.8,-0.6,-0.6,-1.0,-0.8,-1.0,-1.2,-1.0,-0.8,-0.8,-0.6,-0.6,-0.2,0.0,0.4,0.6,0.9,0.9,1.3,1.5,1.5,1.5,1.9,1.9,1.9,1.9,2.3,2.5,2.1,1.9,2.3,2.3,2.5,2.1,2.8,3.0,2.5,2.5,2.5,2.8,2.5,2.8,2.5,2.8,2.8,2.5,2.5,2.8,3.2,3.2,3.2,3.2,3.0,3.2,2.8,3.2,3.0,2.5,2.5,2.8,2.8,2.5,2.8,2.8,2.8,2.8,2.8,3.2,3.2,3.2,3.2,3.2,2.8,3.2,3.2,3.2,3.6,3.6,4.0,4.0,3.8,4.2,3.8,3.8,3.8,3.8,4.0,4.4,4.7,4.4,4.0,4.0,3.6,3.6,4.0,4.0,4.0,3.6,4.0,4.0,3.6,3.6,3.6,3.6,3.6,3.4,3.6,4.0,4.2,3.8,3.8,4.2,4.2,4.2]}},"2026-10-05":{"rel":"15:00","tz":"BST","from":-60,"s":{"spx":[-0.254,-0.231,-0.231,-0.231,-0.228,-0.228,-0.231,-0.228,-0.234,-0.228,-0.215,-0.199,-0.186,-0.183,-0.189,-0.199,-0.189,-0.183,-0.167,-0.167,-0.164,-0.151,-0.148,-0.157,-0.161,-0.177,-0.151,-0.161,-0.128,-0.135,-0.119,-0.064,0.026,0.016,0.029,0.019,0.039,0.003,-0.016,-0.006,-0.006,0.0,0.029,0.016,-0.006,0.003,0.003,-0.022,0.0,0.003,0.003,0.003,0.013,0.0,-0.029,-0.029,0.006,0.0,-0.003,-0.032,0.0,-0.064,0.0,0.022,0.042,0.035,0.087,0.083,0.09,0.125,0.151,0.119,0.157,0.167,0.193,0.167,0.215,0.244,0.238,0.225,0.228,0.273,0.257,0.27,0.254,0.266,0.279,0.27,0.244,0.238,0.26,0.212,0.196,0.17,0.144,0.148,0.167,0.154,0.199,0.212,0.222,0.228,0.222,0.202,0.199,0.209,0.218,0.218,0.218,0.199,0.222,0.228,0.205,0.209,0.228,0.222,0.209,0.225,0.273,0.276,0.273,0.279,0.273,0.254,0.25,0.27,0.25,0.241,0.247,0.241,0.225,0.244,0.228,0.218,0.228,0.244,0.225,0.238,0.244,0.234,0.25,0.257,0.241,0.247,0.26,0.276,0.273,0.25,0.257,0.26,0.282,0.295,0.295,0.315,0.318,0.308,0.299,0.308,0.305,0.308,0.311,0.305,0.343,0.347,0.356,0.343,0.315,0.315,0.321,0.327,0.343,0.343,0.363,0.347,0.343,0.34,0.331,0.34,0.343,0.347,0.34,0.318,0.331,0.321,0.295,0.302,0.305,0.302,0.292,0.305,0.318,0.308,0.318,0.331,0.327,0.321,0.299,0.308,0.295,0.295,0.295,0.292,0.302,0.321,0.363,0.369,0.363,0.379,0.372,0.376,0.379,0.392,0.372,0.369,0.382,0.392,0.404,0.421,0.421,0.433,0.427,0.44,0.456,0.469,0.475,0.491,0.482,0.472,0.459,0.472,0.475,0.488,0.485,0.494,0.498,0.478,0.462,0.462,0.453,0.462,0.443,0.443,0.443,0.427,0.421,0.408,0.417,0.427,0.437,0.433,0.43,0.443,0.446,0.446,0.449,0.453,0.472,0.472,0.453,0.456,0.469,0.475,0.462,0.465,0.475,0.482,0.465,0.462,0.462,0.475,0.475,0.462,0.475,0.462,0.459,0.465,0.465,0.469,0.469,0.462,0.453,0.449,0.469,0.469,0.498,0.546,0.533,0.526,0.517,0.523,0.523,0.523,0.53,0.514,0.53,0.507,0.501,0.51,0.517,0.53,0.53],"gold":[0.509,0.516,0.504,0.488,0.471,0.44,0.382,0.315,0.315,0.367,0.406,0.392,0.392,0.382,0.379,0.401,0.423,0.428,0.425,0.425,0.387,0.367,0.377,0.372,0.413,0.428,0.423,0.404,0.413,0.396,0.42,0.408,0.346,0.315,0.305,0.334,0.245,0.235,0.219,0.226,0.214,0.144,0.159,0.178,0.108,0.06,-0.012,-0.053,0.026,0.058,0.079,0.132,0.163,0.149,0.154,0.108,0.062,0.012,0.005,-0.026,0.0,0.079,0.197,0.195,0.257,0.084,0.161,0.144,0.113,0.228,0.24,0.144,0.171,0.132,0.19,0.166,0.142,0.096,0.154,0.113,0.091,0.13,0.122,0.144,0.115,0.125,0.11,0.142,0.098,0.06,0.043,0.01,0.007,-0.012,-0.055,-0.036,-0.012,-0.002,0.007,0.017,0.05,0.091,0.139,0.122,0.13,0.127,0.067,0.074,0.139,0.118,0.142,0.168,0.199,0.187,0.24,0.264,0.223,0.255,0.286,0.293,0.279,0.288,0.245,0.221,0.187,0.207,0.171,0.178,0.151,0.175,0.127,0.12,0.118,0.103,0.101,0.07,0.034,0.019,0.029,0.036,0.034,-0.053,-0.159,-0.202,-0.147,-0.067,-0.017,0.014,0.038,0.084,0.091,0.058,0.024,0.058,0.046,0.055,0.043,0.048,0.05,0.062,0.06,0.072,0.067,0.055,0.062,0.029,-0.031,-0.014,-0.014,0.014,0.038,0.036,0.07,0.067,0.031,0.05,0.06,0.086,0.055,0.038,0.031,-0.014,-0.022,-0.046,-0.091,-0.072,-0.082,-0.079,-0.084,-0.077,-0.053,-0.048,-0.106,-0.089,-0.144,-0.142,-0.18,-0.19,-0.166,-0.163,-0.168,-0.161,-0.159,-0.159,-0.154,-0.161,-0.197,-0.192,-0.209,-0.19,-0.197,-0.156,-0.163,-0.178,-0.154,-0.171,-0.159,-0.159,-0.166,-0.156,-0.127,-0.135,-0.151,-0.127,-0.118,-0.108,-0.118,-0.163,-0.154,-0.127,-0.159,-0.135,-0.12,-0.07,-0.098,-0.086,-0.103,-0.079,-0.098,-0.089,-0.122,-0.094,-0.103,-0.142,-0.132,-0.127,-0.144,-0.147,-0.142,-0.178,-0.214,-0.221,-0.216,-0.235,-0.231,-0.175,-0.142,-0.202,-0.216,-0.223,-0.204,-0.187,-0.168,-0.137,-0.135,-0.125,-0.137,-0.154,-0.156,-0.159,-0.144,-0.175,-0.161,-0.183,-0.166,-0.161,-0.173,-0.195,-0.183,-0.149,-0.156,-0.149,-0.115,-0.106,-0.077,-0.084,-0.101,-0.089,-0.094,-0.058,-0.043,-0.005,-0.002,-0.01,0.007,-0.01,-0.005,-0.002,0.012,0.0,0.019],"dxy":[-0.13,-0.137,-0.144,-0.153,-0.15,-0.139,-0.11,-0.111,-0.099,-0.107,-0.096,-0.078,-0.086,-0.094,-0.083,-0.086,-0.089,-0.079,-0.103,-0.106,-0.091,-0.095,-0.097,-0.088,-0.098,-0.082,-0.082,-0.084,-0.065,-0.057,-0.058,-0.053,-0.041,-0.042,-0.031,-0.029,-0.021,-0.012,-0.017,-0.003,-0.01,-0.012,-0.013,-0.017,-0.011,-0.016,0.012,0.016,-0.01,-0.011,-0.015,-0.008,-0.004,0.002,0.011,0.004,0.014,0.015,0.001,0.008,0.0,0.004,-0.03,-0.036,-0.05,-0.037,-0.039,-0.043,-0.014,-0.025,-0.031,-0.022,-0.032,-0.03,-0.031,-0.024,-0.02,0.002,-0.019,-0.01,-0.014,-0.03,-0.015,-0.005,0.01,-0.001,-0.007,-0.015,-0.011,-0.027,-0.023,-0.032,-0.048,-0.057,-0.055,-0.029,-0.026,-0.026,-0.024,-0.028,-0.029,-0.037,-0.064,-0.067,-0.066,-0.082,-0.079,-0.086,-0.112,-0.096,-0.101,-0.104,-0.114,-0.118,-0.139,-0.135,-0.14,-0.146,-0.149,-0.141,-0.145,-0.166,-0.176,-0.167,-0.167,-0.181,-0.185,-0.189,-0.203,-0.195,-0.17,-0.166,-0.181,-0.172,-0.178,-0.172,-0.154,-0.15,-0.149,-0.164,-0.161,-0.158,-0.156,-0.141,-0.149,-0.157,-0.157,-0.161,-0.167,-0.176,-0.171,-0.176,-0.175,-0.171,-0.16,-0.161,-0.16,-0.153,-0.155,-0.17,-0.173,-0.161,-0.17,-0.17,-0.171,-0.155,-0.139,-0.145,-0.147,-0.149,-0.145,-0.154,-0.149,-0.154,-0.151,-0.149,-0.155,-0.168,-0.165,-0.162,-0.161,-0.146,-0.149,-0.142,-0.143,-0.141,-0.135,-0.126,-0.132,-0.123,-0.135,-0.127,-0.096,-0.098,-0.101,-0.104,-0.107,-0.107,-0.119,-0.109,-0.096,-0.099,-0.106,-0.099,-0.11,-0.103,-0.089,-0.084,-0.084,-0.082,-0.088,-0.098,-0.099,-0.093,-0.097,-0.098,-0.096,-0.102,-0.104,-0.099,-0.098,-0.1,-0.099,-0.106,-0.113,-0.109,-0.101,-0.1,-0.09,-0.096,-0.092,-0.09,-0.096,-0.11,-0.106,-0.106,-0.108,-0.113,-0.106,-0.103,-0.09,-0.096,-0.093,-0.088,-0.087,-0.073,-0.07,-0.07,-0.071,-0.061,-0.047,-0.052,-0.054,-0.053,-0.052,-0.053,-0.067,-0.072,-0.072,-0.071,-0.079,-0.092,-0.085,-0.086,-0.092,-0.089,-0.087,-0.091,-0.097,-0.097,-0.103,-0.096,-0.104,-0.101,-0.104,-0.108,-0.106,-0.092,-0.09,-0.095,-0.097,-0.095,-0.102,-0.103,-0.1,-0.091,-0.103,-0.107,-0.103,-0.103,-0.108,-0.109,-0.108,-0.106,-0.105,-0.096,-0.121,-0.123,-0.129,-0.137,-0.142],"y10":[-0.6,-0.6,-0.6,-0.6,-0.6,-0.6,-0.6,0.2,0.2,-0.2,-0.2,-0.6,-0.6,-0.9,-0.6,-0.6,-0.9,-1.1,-1.1,-1.5,-1.3,-1.1,-1.3,-1.5,-1.5,-0.9,-0.6,-0.6,-0.9,-0.6,-0.9,-0.9,-0.6,-0.6,-0.4,-0.6,-0.2,-0.4,-0.6,-0.6,-0.6,-0.6,-0.6,-0.6,-0.6,-0.6,-0.6,-0.9,-1.3,-1.5,-1.1,-0.6,-0.6,-0.6,-0.2,-0.6,-0.6,-0.4,-0.6,-0.2,0.0,0.0,-0.9,-0.9,-1.3,-1.1,-1.5,-1.5,-1.1,-0.9,-0.9,-0.9,-0.9,-1.1,-0.9,-1.1,-1.1,-0.6,-0.9,-1.3,-1.1,-1.1,-1.5,-1.9,-1.5,-1.1,-1.3,-1.5,-1.1,-0.2,0.2,0.2,0.2,0.2,0.6,0.6,1.3,1.1,0.8,0.6,0.8,0.6,0.6,0.6,0.6,0.4,0.6,0.2,0.6,0.6,0.6,1.1,0.8,0.8,0.8,0.6,1.1,0.8,0.6,1.1,0.8,1.1,1.1,1.1,1.5,1.5,1.5,1.5,1.5,1.5,1.9,1.9,1.9,1.9,1.9,1.9,1.9,1.7,1.7,1.9,1.9,1.9,1.9,2.3,1.9,1.9,1.9,1.9,1.9,1.9,1.5,1.7,1.7,1.7,1.5,1.5,1.5,1.5,1.5,1.5,1.5,1.5,1.7,1.3,1.3,1.5,2.3,1.9,1.9,1.7,1.5,1.9,1.5,1.7,1.7,2.3,2.3,2.1,2.3,2.3,2.3,2.3,2.3,2.3,2.3,2.5,2.5,2.5,2.5,2.5,2.3,2.3,2.3,2.5,2.5,2.8,2.5,2.5,2.5,2.8,2.8,2.5,2.3,2.3,2.3,2.3,2.5,2.5,2.3,2.3,1.9,1.9,2.1,2.3,2.3,2.3,2.3,1.9,2.3,2.3,2.5,2.5,2.8,2.5,2.5,2.3,2.5,2.3,2.8,2.5,2.5,2.5,2.5,2.5,2.8,2.8,2.8,2.8,3.0,3.0,3.2,3.2,3.2,3.2,3.2,3.2,3.4,3.2,3.0,3.0,3.2,3.0,3.2,3.2,3.2,3.2,3.2,3.6,3.6,3.6,3.4,3.2,3.2,3.2,3.6,3.6,3.6,3.6,3.6,3.6,3.6,3.6,3.8,3.8,3.8,4.0,3.8,3.8,4.0,4.0,3.6,3.8,3.6,3.4,3.6,3.8,3.8,3.6,3.6,3.6,3.6,3.6,3.6,3.6,3.6,3.6,3.6,3.6,3.6,3.6,3.6]}}};
+var FLN={"NFP + retail sales same day":"Jobs and retail sales were both released this day","FOMC decision day":"This was a Fed decision day","Day after FOMC decision":"This was the day after a Fed decision"};
+var cr=0,ci=0;
+var MKT=[{n:"Stocks (S&amp;P 500)",ix:3,dec:1,u:"%",tiny:.1},{n:"10-year bond yield",ix:4,dec:0,u:" bp",tiny:1.01,dir:1},{n:"US dollar (DXY)",ix:6,dec:1,u:"%",tiny:.1,dir:1},{n:"Gold",ix:5,dec:1,u:"%",tiny:.2,dir:-1}];
+function dlab(d){return new Date(d+"T00:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric",timeZone:"UTC"})}
+function sg(x,d,u){var r=Math.abs(x).toFixed(d);return(+r===0?"":x>0?"+":"−")+r+u}
+function fv(R,v){var n=(v<0?"−":"");return R.u==="k"?n+Math.abs(Math.round(v))+"k":R.u==="pts"?v.toFixed(1):n+Math.abs(v).toFixed(1)+"%"}
+function flagTxt(f){return FLN[f]||(f.indexOf("Good Friday")===0?"The US stock market was closed (Good Friday), so there is no stock or gold move to show":f)}
+function scoreHtml(R){
+ var cl=R.rows.filter(function(r){return !r[7]&&Math.abs(r[1]-r[2])>1e-9}),ex=R.rows.filter(function(r){return r[7]}).length,str=function(r){return r[1]>r[2]};
+ function hit(ix,dir,nm){var x=cl.filter(function(r){return r[ix]!=null});if(!x.length)return"";var ok=x.filter(function(r){return str(r)===(r[ix]*dir>0)}).length;return"<li>"+nm+" went the textbook way <b>"+ok+" of "+x.length+"</b></li>"}
+ var h='<ul class="steps" style="margin-top:6px">';
+ if(R.kind==="infl")h+=hit(3,-1,"Stocks");
+ else{var st=cl.filter(function(r){return r[3]!=null}),su=st.filter(str),sw=st.filter(function(r){return !str(r)});
+  var sp=[];if(su.length)sp.push("rose on <b>"+su.filter(function(r){return r[3]>0}).length+" of "+su.length+"</b> stronger-than-expected releases");if(sw.length)sp.push("fell on <b>"+sw.filter(function(r){return r[3]<0}).length+" of "+sw.length+"</b> weaker ones");
+  if(sp.length)h+="<li>Stocks "+sp.join(" and ")+"</li>"}
+ h+=hit(4,1,"The 10-year yield")+hit(6,1,"The dollar")+hit(5,-1,"Gold")+"</ul>";
+ return '<div class="hintbox" style="margin-top:10px"><b>The honest scorecard.</b> Based on '+cl.length+" releases that had a surprise"+(ex?" (leaving out "+ex+" with overlapping events)":"")+". "+(cl.length<8?"<b>Very small sample.</b> ":"")+h+"</div>"}
+
+var RPT=null,RPF=0,RPS=1,RPV=0;
+var RPM=[{k:"spx",n:"Stocks (S&amp;P 500)",u:"%",d:1},{k:"y10",n:"10-year bond yield",u:" bp",d:0},{k:"dxy",n:"US dollar (DXY)",u:"%",d:1},{k:"gold",n:"Gold",u:"%",d:1}];
+var RPVW=[{n:"Full: 1h before to 4h after",lo:-60,hi:240,tk:[-60,0,60,120,180,240]}];
+function rpFmt(m){var a=Math.abs(m),h=Math.floor(a/60),mm=a%60,t=(h?h+"h":"")+(h&&mm?" ":"")+(mm||!h?mm+"m":"");return m===0?"0":(m>0?"+":"−")+t}
+function rpStop(){if(RPT){clearInterval(RPT);RPT=null}var b=$("rpp");if(b)b.textContent="▶ Play"}
+function rpSum(E){
+ var o=[],z=-E.from;
+ RPM.forEach(function(M){
+  var a=E.s[M.k],pk=0,lim=M.k==="y10"?1.5:.1;
+  for(var i=z;i<=z+15&&i<a.length;i++)if(Math.abs(a[i])>Math.abs(pk))pk=a[i];
+  var fin=a[a.length-1],nm=M.n.replace(/ \(.*\)/,"").replace("US dollar","Dollar"),F=sg(fin,M.d,M.u),P=sg(pk,M.d,M.u),t;
+  if(Math.abs(pk)<lim){var mn=Math.min.apply(null,a.slice(z)),mx=Math.max.apply(null,a.slice(z));t=Math.max(mx,-mn)<lim*2?"barely moved.":Math.abs(fin)>=lim*2?"barely reacted at first, then drifted to "+F+" by four hours on.":"barely reacted at first, then ranged from "+sg(mn,M.d,M.u)+" to "+sg(mx,M.d,M.u)+" and ended "+F+"."}
+  else if(Math.abs(fin)<lim*.7)t="moved "+P+" in the first 15 minutes, then ended back near where it started.";
+  else if(fin*pk<0)t="moved "+P+" in the first 15 minutes, then reversed to "+F+" by four hours on.";
+  else if(Math.abs(fin)>1.15*Math.abs(pk))t="moved "+P+" in the first 15 minutes and kept going, reaching "+F+" by four hours on.";
+  else if(Math.abs(fin)>=.85*Math.abs(pk))t="moved "+P+" in the first 15 minutes and held it ("+F+" four hours on).";
+  else t="moved "+P+" in the first 15 minutes, then faded to "+F+" by four hours on, giving back about "+Math.round((1-Math.abs(fin)/Math.abs(pk))*20)*5+"% of the move.";
+  o.push('<li><b>'+nm+'</b> '+t+'</li>')});
+ return'<div class="hintbox"><b>How it played out</b><ul style="margin:6px 0 0;padding-left:18px">'+o.join("")+'</ul></div>'}
+function rpBlock(dt,R,r){
+ var E=REPLAY[dt];if(!E)return"";
+ var h='<div class="rp" id="rpw"><h3>Replay: how markets reacted</h3><p class="rs">Each chart starts at zero at the moment the number came out ('+E.rel+' '+E.tz+'), so you can see the first reaction and whether it held or faded. One-minute prices. Actual '+fv(R,r[1])+' vs '+fv(R,r[2])+' expected.</p>';
+ h+='<div class="rpc"><button id="rpp">▶ Play</button><button id="rps" title="Playback speed">Speed: normal</button></div><div class="rpc"><input type="range" id="rpr" aria-label="Move through time"><span class="rpt" id="rpt"></span></div><div class="rpg">';
+ RPM.forEach(function(M){h+='<div><div class="t">'+M.n+'</div><div class="v" id="rpv-'+M.k+'"></div><svg viewBox="0 0 300 120" id="rpsv-'+M.k+'" role="img" aria-label="'+M.n+' around the release"></svg></div>'});
+ h+='</div>'+rpSum(E)+'<p class="fn">Times are London. Other news in the following hours (US data, speeches, earnings) is mixed into the later moves.</p><details class="mo"><summary>More detail</summary><p>Prices: S&amp;P 500 front-month futures, DXY, COMEX gold futures and the US 10-year yield.</p></details></div>';
+ return h}
+function rpInit(dt){
+ var E=REPLAY[dt];if(!E||!$("rpw"))return;rpStop();var N=E.s.spx.length,V=RPVW[RPV],lo,hi,L=34,Rr=292,T=8,B=100,geo;
+ function idx(m){return m-E.from}
+ function clock(m){var p=E.rel.split(":"),t=(+p[0])*60+(+p[1])+m,hh=Math.floor(t/60)%24,mm=t%60;return(hh<10?"0":"")+hh+":"+(mm<10?"0":"")+mm}
+ function setView(){V=RPVW[RPV];lo=idx(V.lo);hi=idx(V.hi);geo={};
+  RPM.forEach(function(M){var a=E.s[M.k].slice(lo,hi+1),mn=Math.min(0,Math.min.apply(null,a)),mx=Math.max(0,Math.max.apply(null,a)),pd=(mx-mn)*.12||1;geo[M.k]={mn:mn-pd,mx:mx+pd}});
+  var r=$("rpr");r.min=lo;r.max=hi;RPF=Math.max(lo,Math.min(hi,RPF))}
+ function X(f){return L+(Rr-L)*(f-lo)/(hi-lo)}
+ function draw(){
+  RPM.forEach(function(M){
+   var a=E.s[M.k],g=geo[M.k],Y=function(v){return B-(B-T)*(v-g.mn)/(g.mx-g.mn)},x0=X(idx(0));
+   var s='<line x1="'+L+'" x2="'+Rr+'" y1="'+Y(0)+'" y2="'+Y(0)+'" style="stroke:var(--axis)" stroke-width="1"/>';
+   s+='<line x1="'+x0+'" x2="'+x0+'" y1="'+T+'" y2="'+B+'" style="stroke:var(--muted)" stroke-width="1" stroke-dasharray="3 3"/>';
+   s+='<text x="'+(x0+4)+'" y="'+(T+8)+'" style="fill:var(--muted)" font-size="10">Release</text>';
+   V.tk.forEach(function(m,i){s+='<text x="'+X(idx(m))+'" y="114" style="fill:var(--muted)" font-size="10" text-anchor="'+(i===0?"start":i===V.tk.length-1?"end":"middle")+'">'+rpFmt(m)+'</text>'});
+   s+='<text x="'+(L-4)+'" y="'+(Y(0)+3)+'" style="fill:var(--muted)" font-size="10" text-anchor="end">0</text>';
+   var pts=[];for(var i=lo;i<=RPF;i++)pts.push(X(i).toFixed(1)+","+Y(a[i]).toFixed(1));
+   s+='<polyline points="'+pts.join(" ")+'" fill="none" style="stroke:var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+   s+='<circle cx="'+X(RPF)+'" cy="'+Y(a[RPF])+'" r="4" style="fill:var(--accent);stroke:var(--card)" stroke-width="2"/>';
+   $("rpsv-"+M.k).innerHTML=s;
+   var v=a[RPF],q=Math.round(v*Math.pow(10,M.d)),el=$("rpv-"+M.k);el.textContent=sg(v,M.d,M.u)||"0"+M.u;el.className="v "+(q>0?"up":q<0?"dn":"");
+  });
+  var m=E.from+RPF;$("rpt").textContent=clock(m)+" "+E.tz+" · "+(m===0?"release":rpFmt(m)+(m>0?" after":" before"));$("rpr").value=RPF;
+ }
+ function step(){if(!$("rpw")){rpStop();return}if(RPF>=hi){rpStop();return}RPF++;draw()}
+ function play(){if(RPT){rpStop();return}if(RPF>=hi)RPF=lo;draw();$("rpp").textContent="❚❚ Pause";RPT=setInterval(step,RPS===1?(hi-lo>100?90:260):(hi-lo>100?30:90))}
+ $("rpp").onclick=play;
+ $("rps").onclick=function(){RPS=RPS===1?2:1;this.textContent="Speed: "+(RPS===1?"normal":"fast");if(RPT){rpStop();play()}};
+ $("rpr").oninput=function(){rpStop();RPF=+this.value;draw()};
+ RPM.forEach(function(M){var sv=$("rpsv-"+M.k),mv=function(e){var rc=sv.getBoundingClientRect(),f=Math.round(lo+((e.clientX-rc.left)/rc.width*300-L)/(Rr-L)*(hi-lo));RPF=Math.max(lo,Math.min(hi,f));draw()};
+  sv.onpointerdown=function(e){rpStop();mv(e);sv.setPointerCapture(e.pointerId);sv.onpointermove=mv};sv.onpointerup=function(){sv.onpointermove=null}});
+ RPF=idx(0);setView();draw();
+}
+function renderReal(k,i){
+ rpStop();
+ cr=k||0;ci=i||0;var R=REL[cr],rows=R.rows,inf=R.kind==="infl";
+ var h='<div class="card"><h2>Historical Data Releases</h2><div class="row" style="margin-bottom:8px">'+REL.map(function(x,j){return'<button data-j="'+j+'" class="'+(j===cr?"on":"")+'">'+x.tab+"</button>"}).join("")+"</div>";
+ h+='<p style="font-size:14px;margin:0"><b>'+R.title+"</b>: "+R.what+" "+rows.length+" historical releases, "+R.span+". Pick one to see what the textbook says and what actually happened that day.</p><p class=\"n\" style=\"margin:8px 0 0;font-size:13px\"><b>What is &ldquo;the textbook&rdquo;?</b> The usual reaction you would expect from the rule of thumb: a hotter or stronger number means rates stay higher, so yields and the dollar rise and gold falls. Real days often break the rule, and the tiles below show when.</p>"+scoreHtml(R);
+ var mx=0;rows.forEach(function(q){mx=Math.max(mx,Math.abs(q[1]-q[2]))});mx=mx||1;
+ h+='<div class="tlk"><span><i style="background:var(--accent)"></i> '+(inf?"Hotter":"Stronger")+' than expected</span><span><i style="background:var(--text2)"></i> '+(inf?"Cooler":"Weaker")+' than expected</span><span><i style="background:var(--muted)"></i> In line</span><span><i style="background:var(--text2);border-radius:50%;width:5px;height:5px;vertical-align:1px"></i> Overlapping events that day</span></div><div class="tlk" style="margin-top:4px"><span>Taller bar = bigger surprise. Months show the release date, not the period the data covers.</span></div><div class="tl" id="tl">';
+ rows.map(function(q,j){return[q,j]}).reverse().forEach(function(p){
+  var q=p[0],j=p[1],sv=Math.round((q[1]-q[2])*Math.pow(10,R.d))/Math.pow(10,R.d),fl=Math.abs(sv)<1e-9,hh=fl?3:Math.max(7,Math.round(Math.abs(sv)/mx*34)),col=fl?"var(--muted)":sv>0?"var(--accent)":"var(--text2)";
+  var lb=new Date(q[0]+"T00:00:00Z").toLocaleDateString("en-GB",{month:"short",year:"2-digit",timeZone:"UTC"});
+  h+='<button class="tc'+(j===ci?" sel":"")+(q[7]?" fd":"")+'" data-i="'+j+'" title="'+dlab(q[0])+'" aria-label="'+dlab(q[0])+': '+fv(R,q[1])+' vs '+fv(R,q[2])+' expected"><div class="tu">'+(sv>0||fl?'<i style="height:'+hh+'px;background:'+col+';--c:'+col+'"></i>':"")+'</div><div class="td">'+(sv<0?'<i style="height:'+hh+'px;background:'+col+';--c:'+col+'"></i>':"")+'</div><span>'+lb+"</span><u class=\"dt\"></u></button>"});
+ h+="</div>";;
+ var r=rows[ci],p10=Math.pow(10,R.d),s=Math.round((r[1]-r[2])*p10)/p10,flat=Math.abs(s)<1e-9,strong=s>0;
+ h+='<p style="margin:12px 0 0;font-size:13px;color:var(--muted)">Released <b style="color:var(--text)">'+dlab(r[0])+"</b></p>";
+ h+='<div class="g2"><div><span class="tg">Expected</span><br><b class="big">'+fv(R,r[2])+'</b></div><div><span class="tg a">Actual</span><br><b class="big">'+fv(R,r[1])+"</b></div></div>";
+ h+='<div style="font-weight:700;margin-bottom:4px">'+(flat?"In line with expectations":(strong?(inf?"Hotter":"Stronger"):(inf?"Cooler":"Weaker"))+" than expected ("+sg(s,R.d,R.su)+")")+"</div>";
+ if(r[7])h+='<div class="hintbox wbox"><b>⚠ Caution.</b> '+flagTxt(r[7])+". The market move that day cannot be pinned on this release alone.</div>";
+ if(r[8])h+='<p class="n">'+r[8]+'</p>';
+ var ag=0;h+='<div class="fx">';
+ MKT.forEach(function(M,mi){
+  var x=r[M.ix];
+  if(x==null){h+='<div><div class="t">'+M.n+'</div><div class="vd" style="color:var(--muted);margin-top:8px">No data for this day</div></div>';return}
+  var mood=mi===0&&!inf,dir=mi===0?(inf?-1:0):M.dir,tb,vd,cl="";
+  if(flat){tb="↔ No clear direction";vd="Headline was in line, so no textbook call"}
+  else if(mood){tb="Depends on the market's mood";
+   if(Math.abs(x)<M.tiny)vd="≈ Barely moved";
+   else vd=(x>0?"Rose":"Fell")+": fits a "+(strong===(x>0)?"growth":"rates")+"-worry mood"}
+  else{tb=(s*dir>0)?"▲ Up":"▼ Down";
+   if(Math.abs(x)<M.tiny)vd="≈ Barely moved";else if((x>0)===(s*dir>0)){vd="✓ Went with the textbook";cl="ok"}else{vd="✗ Went against the textbook";cl="no";ag++}}
+  h+='<div><div class="t">'+M.n+'</div><div class="t">Textbook says: '+tb+'</div><div class="a '+(x>0?"up":x<0?"dn":"")+'">'+(x>0?"▲ ":x<0?"▼ ":"")+sg(x,M.dec,M.u)+'</div><div class="t">What happened that day</div><div class="vd '+cl+'">'+vd+"</div></div>"});
+ h+="</div>";
+ h+=rpBlock(r[0],R,r);
+ if(ag)h+='<div class="hintbox"><b>Why did '+(ag>1?"some":"one")+' go against the textbook?</b> The textbook reaction is just the usual pattern, not a law. On the day, three things can override it: other news landing at the same time, traders having already bet on the result so there was no surprise left, or details inside the report (like core inflation, wages or revisions) telling a different story from the headline.</div>';
+ if(RNOTE[r[0]])h+='<div class="hintbox"><b>What else was going on.</b> '+RNOTE[r[0]]+"</div>";
+ h+='<p class="n">'+(R.note?R.note+" ":"")+'Moves are release-day changes in the daily closes, so other news that day is mixed in.</p><details class="mo"><summary>More detail</summary><p>Actual and forecast figures come from public economic calendars and news reports; forecasts differ a little between data providers. Prices are the S&amp;P 500, DXY, COMEX gold futures and the US 10-year yield. Tiny moves count as "barely moved". For growth releases the stock reaction depends on whether the market is worried about rates or about growth, so the textbook gives no fixed direction.</p></details></div>';
+ $("rl").innerHTML=h;lk(["rl"]);rpInit(r[0]);
+ $("rl").querySelectorAll("button[data-j]").forEach(function(b){b.onclick=function(){renderReal(+b.getAttribute("data-j"),0)}});
+ $("rl").querySelectorAll(".tc").forEach(function(b){b.onclick=function(){renderReal(cr,+b.getAttribute("data-i"))}});
+ var tl=$("tl"),sl=tl.querySelector(".sel");if(sl)tl.scrollLeft=sl.offsetLeft-tl.clientWidth/2+sl.offsetWidth/2;
+}
+var GG=[
+["The big picture",[
+["Surprise","The actual number minus the expected number. Markets react to the surprise, not to the number itself.",["surprise","surprises"]],
+["Consensus (expected)","The average of what economists forecast a number will be. It is the 'expected' figure in this tool. Different data providers publish slightly different consensus numbers.",["consensus","forecast","forecasts"]],
+["Priced in","Already reflected in market prices because people expected it. A number that matches expectations is already priced in, so it usually moves markets less.",["priced in","priced-in"]],
+["Textbook reaction","The usual reaction you would expect from the rule of thumb: hotter or stronger data means interest rates stay higher, so yields and the dollar rise and gold falls. Real days often break the rule.",["textbook"]],
+["Print","Trader slang for a data release or its number. A 'hot print' means a higher-than-expected figure.",["print","prints"]],
+["Beat / miss","A 'beat' means the number came in above the forecast and a 'miss' means below. Whether that is good or bad news depends on the data and on what the market is worried about.",["beat","beats","miss","misses"]],
+["Risk-on / risk-off","Risk-on: traders feel confident and buy stocks and other riskier assets. Risk-off: they get nervous and sell them, often buying safer things such as government bonds, the dollar or gold.",["risk-on","risk-off","risk appetite"]],
+["Safe haven","An asset people tend to buy when they are nervous, such as US government bonds, the dollar, the Swiss franc or gold. It is a tendency, not a guarantee.",["safe haven","safe-haven","safe havens"]],
+["Rally / selloff","A rally is a sharp rise in prices. A selloff is a sharp fall, usually because many people are selling at once.",["rally","rallied","selloff","sell-off"]]
+]],
+["Economic data",[
+["CPI (inflation)","Consumer Price Index. It measures how fast the prices of everyday goods and services are rising compared with a year ago. This is what most people mean by 'inflation'.",["CPI","inflation","consumer price index"]],
+["Core inflation","Inflation leaving out food and energy, which jump around a lot. Central banks watch it because it shows the underlying trend. A report can have a calm headline but a surprising core number, or the other way round.",["core inflation","core CPI","core measure"]],
+["Headline figure","The main top-line number in a report. The details underneath, such as core inflation, wages or revisions, can tell a different story from the headline.",["headline"]],
+["Month-on-month / year-on-year","Month-on-month (m/m) compares with the previous month. Year-on-year (y/y) compares with the same month a year earlier. Inflation is usually quoted year-on-year and retail sales month-on-month.",["month-on-month","year-on-year","m/m","y/y"]],
+["Nonfarm payrolls","The monthly count of jobs the US economy added, not including farm work. Often called 'the jobs report'. It usually comes out on the first Friday of the month.",["nonfarm payrolls","payrolls","jobs report","NFP"]],
+["Unemployment rate","The share of people who want a job but do not have one. A rising rate can signal a weakening economy, which may raise bets on interest rate cuts.",["unemployment rate","unemployment"]],
+["Wages","How fast workers' pay is growing. Fast wage growth can keep inflation high, so markets read it in the jobs report alongside the headline jobs number.",["wages","wage growth","average hourly earnings"]],
+["PMI","Purchasing Managers' Index: a monthly survey of company managers about how business is going. 50 is the line between growing and shrinking.",["PMI","PMIs"]],
+["ISM","The Institute for Supply Management, a US group that publishes the best-known US PMI surveys. The services version used in this tool covers service companies such as retailers, banks and restaurants.",["ISM"]],
+["Contraction / expansion","Shrinking or growing. A PMI above 50 means expansion (businesses growing); below 50 means contraction (businesses shrinking).",["contraction","expansion","contracting","expanding"]],
+["Retail sales","How much shoppers spent in shops and online last month compared with the month before.",["retail sales"]],
+["GDP","Gross Domestic Product: the total size of the economy. The headline figure is how fast it grew over the last quarter, shown as a yearly rate.",["GDP"]],
+["Advance estimate","The first estimate of GDP, published about a month after the quarter ends. It is revised twice later, so the final number can differ.",["advance estimate","advance GDP","first estimate"]],
+["Revision","A later correction to a number that was already published. Revisions can be big and sometimes matter more than the original headline.",["revision","revisions","revised"]],
+["PCE","Personal Consumption Expenditures price index: another inflation measure, and the one the Fed officially targets. It comes out after CPI.",["PCE"]],
+["Recession","A period when the economy shrinks and jobs and spending fall. Fear of one can push stocks down.",["recession"]],
+["Stagflation","Weak growth and high inflation at the same time. It is awkward for central banks because cutting rates to help growth could make inflation worse.",["stagflation"]],
+["Government shutdown","When the US government runs out of funding and parts of it stop work. A shutdown can disrupt or delay official data, as it did for the November 2025 inflation report.",["government shutdown","shutdown"]],
+["Economic calendar","A schedule of upcoming data releases and central bank events, usually showing the forecast and the previous figure. Traders plan around it.",["economic calendar"]]
+]],
+["Central banks and rates",[
+["The Fed","The Federal Reserve, the US central bank. It aims to keep inflation low and unemployment low, and it sets the main US interest rate, which influences borrowing costs across the whole economy.",["the Fed","Federal Reserve","Fed"]],
+["FOMC","The Federal Open Market Committee: the group inside the Fed that votes on interest rates, about eight times a year. Decision days are often volatile.",["FOMC"]],
+["Fed Chair","The head of the Fed. The press conference after each decision is closely watched, and a hawkish or dovish tone can move markets even when rates do not change.",["Fed Chair","Chair Warsh","Warsh","Powell"]],
+["Central bank","An institution, such as the Fed, the European Central Bank or the Bank of England, that controls a country's interest rates and money supply.",["central bank","central banks"]],
+["Interest rates","The cost of borrowing money. A central bank's main rate affects everything from mortgages to company loans, and it is the biggest driver of bond yields, currencies and stock valuations.",["interest rate","interest rates"]],
+["Rate hike / cut / hold","A hike raises the central bank's interest rate, a cut lowers it and a hold leaves it unchanged. Markets often move more on what traders expect next than on the decision itself.",["rate hike","rate hikes","rate cut","rate cuts","hike","hikes"]],
+["Hawkish","Favouring higher interest rates or fewer cuts. Markets tend to see this as tougher policy.",["hawkish"]],
+["Dovish","Favouring lower interest rates or more rate cuts. Markets tend to see this as easier policy.",["dovish"]],
+["Rate expectations","What traders believe the central bank will do with rates, which shows up in futures prices. Data surprises move these expectations, and that is what moves bonds, currencies and stocks.",["rate expectations","rate bets","rate-cut bets"]],
+["Forward guidance","What a central bank says about its future plans. Markets often react to the guidance more than to the decision itself.",["forward guidance"]],
+["Dissent","When a member of a rate-setting committee votes against the majority. A dissent can hint that policy is about to change.",["dissent","dissents","dissented"]],
+["Inflation target","The inflation rate a central bank aims for, usually 2%. Inflation above target makes rate cuts harder and hikes more likely.",["inflation target","2% target","2% goal"]],
+["Higher for longer","The idea that interest rates will stay high for a long time rather than fall soon. Strong data or hot inflation feeds this idea, which is why bond yields and the dollar tend to rise.",["higher for longer","higher-for-longer"]]
+]],
+["Markets and assets",[
+["Stocks (equities)","Shares in companies. Stock prices reflect expected future profits, and higher interest rates make those profits worth less today, so rate worries can push stocks down even on good economic news.",["stocks","equities"],1],
+["S&amp;P 500","An index of 500 large US companies. It is the most common measure of how US stocks are doing.",["S&P 500"]],
+["Nasdaq","A US stock index dominated by big technology companies. Because tech profits lie far in the future, it tends to react strongly to changes in interest rate expectations.",["Nasdaq","Nasdaq 100"]],
+["Megacap tech","The handful of giant tech companies (Apple, Microsoft, Alphabet, Amazon, Nvidia, Meta and Tesla) that make up a big share of the S&amp;P 500 and Nasdaq. When they move, the indexes move.",["megacap","Mag7","big tech"]],
+["Index","A basket of assets tracked as one number, such as the S&amp;P 500 for 500 big US companies.",["index"],1],
+["Earnings","A company's profits, reported every three months. On days when big companies report, earnings can swamp the economic data.",["earnings"]],
+["Valuation","How much investors are willing to pay for a company's profits. Higher interest rates make future profits worth less today, so valuations can fall.",["valuation","valuations"]],
+["Bond","A loan to a government or company that pays interest. A bond's price moves in the opposite direction to its yield.",["bond","bonds","bond prices"]],
+["Bond yield","The yearly return you get for holding a bond. When bond prices fall, yields rise, and when prices rise, yields fall.",["bond yield","bond yields","yield","yields"]],
+["10-year Treasury","The yield on 10-year US government bonds. It is the benchmark for borrowing costs around the world, including US mortgage rates.",["10-year yield","10-year Treasury","10-year bond","10-year"]],
+["2-year yield","The yield on 2-year US government bonds. It tracks what traders expect the Fed to do with rates over the next couple of years, so it reacts fastest to data and Fed comments.",["2-year yield","2-year"]],
+["Treasury auction","When the US government sells new bonds to investors. Weak demand pushes yields up, which can ripple into stocks and the dollar.",["Treasury auction","auction"]],
+["Basis point (bp)","One hundredth of a percentage point. If a yield goes from 4.00% to 4.10%, it moved 10 basis points.",["basis point","basis points","bps","bp"]],
+["US dollar (DXY)","The dollar index measures the dollar against a basket of major currencies such as the euro and the yen. Up means the dollar is getting stronger.",["DXY","US dollar","dollar index","dollar"]],
+["Currency pairs (FX)","Currencies trade in pairs. EUR/USD is the price of one euro in dollars, so if it rises the euro is getting stronger against the dollar. USD/JPY is the price of one dollar in yen. FX is short for foreign exchange.",["EUR/USD","USD/JPY","GBP/USD","USD/CHF","currency pair","FX","forex"]],
+["Gold","A precious metal people buy as a store of value and a safe haven. It pays no interest, so it tends to fall when yields rise and rise when yields fall, but the link is loose.",["gold"],1],
+["Oil","Crude oil. Higher oil prices raise fuel and transport costs, so they feed inflation and can change interest rate expectations. Oil also jumps on wars and supply disruptions.",["oil","crude"]],
+["Commodities","Raw materials such as oil, gold, metals and crops that are traded on markets.",["commodities","commodity"]],
+["Strait of Hormuz","A narrow waterway between Iran and Oman that a big share of the world's oil ships through. Conflict there raises fears for oil supply and pushes oil prices up.",["Strait of Hormuz","Hormuz"]],
+["Futures","Contracts to buy or sell something at a set price on a future date. Many markets are quoted using futures prices, such as COMEX gold.",["futures","COMEX"]],
+["Daily close","The last price of the trading day. This tool measures reactions as the change in the daily close, so everything that happened that day is mixed in.",["daily close","daily closes"]]
+]],
+["News and events",[
+["Tariffs","Taxes a government puts on imported goods. News about tariffs can move markets more than economic data because it changes the outlook for growth, inflation and company profits.",["tariff","tariffs"]],
+["Trade war / truce","A trade war is when countries keep raising tariffs against each other. A truce or a deal pauses or reduces them, which markets usually cheer.",["trade war","truce","trade deal"]],
+["Currency intervention","When a government or central bank steps into the currency market, buying or selling its own currency to move the exchange rate. Japan has done this to support the yen.",["intervention","intervened"]],
+["Geopolitics","Politics and conflict between countries, such as wars or sanctions. Geopolitical shocks can push oil and gold higher and shake stocks.",["geopolitics","geopolitical"]],
+["IPO","Initial public offering: when a private company first sells shares to the public. Very big IPOs can soak up investor money, which can weigh on other stocks.",["IPO"]]
+]],
+["Trading basics",[
+["Bull / bear market","A bull market is a long period of rising prices; a bear market is a long period of falling prices. 'Bullish' means expecting prices to rise and 'bearish' means expecting them to fall.",["bull market","bear market","bullish","bearish"]],
+["Long / short","Going long means buying something to profit if its price rises. Going short means betting on a fall, by selling something you do not own. Losses on a short can be bigger than your original stake.",["long","short"],1],
+["Leverage","Trading with borrowed money so you control a bigger position than your own cash would allow. It magnifies losses as well as gains.",["leverage","leveraged"]],
+["Margin","The deposit you put up to open a leveraged trade. If the trade moves against you and your balance falls too low, the broker can close it (a 'margin call').",["margin","margin call"]],
+["Stop-loss","An order that automatically closes a trade if the price reaches a level you chose, to limit the loss. In fast markets the price can jump past it (see slippage).",["stop-loss","stop loss"]],
+["Spread","The gap between the price you can buy at and the price you can sell at. It is a trading cost, and it often widens around big news.",["spread"],1],
+["Slippage","Getting a worse price than you expected because the market moved before your order was filled. It is common around data releases.",["slippage"]],
+["Pip","The standard small unit of price movement in a currency pair, usually the fourth decimal place (0.0001). Yen pairs use the second decimal.",["pip","pips"]],
+["Volatility","How much and how fast prices move. Data releases and central bank meetings usually raise volatility.",["volatility","volatile"]],
+["Liquidity","How easily you can buy or sell without moving the price. It can thin out around big news, making prices jumpy.",["liquidity"]],
+["Correlation","How closely two things move together. Yields and the dollar often rise together, but correlations change and can break down.",["correlation","correlated"]],
+["Whipsaw","When a price lurches one way and then reverses quickly, catching out traders who chased the first move. Common in the minutes after a data release.",["whipsaw","whipsawed"]],
+["Hedge","A trade placed to offset the risk of another position, like insurance. It limits losses but usually costs something.",["hedge","hedging"]],
+["Trading the news","Trying to profit from price moves right after a data release or headline. It is fast, spreads are wide and prices whipsaw, which is why many traders avoid it.",["trading the news","trade the news"]],
+["Fundamental vs technical analysis","Fundamental analysis looks at the economy, data and company finances to judge value. Technical analysis studies price charts and patterns. This tool is about the fundamental side.",["fundamental analysis","technical analysis"]],
+["Risk management","Deciding in advance how much you can afford to lose on a trade and how you will limit it, for example with position size and stop-losses. Poor risk management is a common reason beginners lose money.",["risk management"]]
+]]
+];
+var GL=[];GG.forEach(function(g){g[1].forEach(function(it){GL.push({g:g[0],t:it[0],d:it[1],a:it[2],x:it[3]})})});
+function rx(s){return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}
+var TIPS=[];GL.forEach(function(it,i){if(it.x)return;
+ var cs=[],ci=[];it.a.slice().sort(function(a,b){return b.length-a.length}).forEach(function(a){(/[A-Z]/.test(a)&&a.length<=5?cs:ci).push(rx(a))});
+ var res=[];if(cs.length)res.push(new RegExp("(^|[^A-Za-z0-9])("+cs.join("|")+")(?![A-Za-z0-9])"));
+ if(ci.length)res.push(new RegExp("(^|[^A-Za-z0-9])("+ci.join("|")+")(?![A-Za-z0-9])","i"));
+ TIPS.push({i:i,res:res})});
+function wrapNode(n,used){
+ var t=n.nodeValue,best=null;
+ TIPS.forEach(function(e){if(used[e.i])return;e.res.forEach(function(re){var m=re.exec(t);if(!m)return;var st=m.index+m[1].length,len=m[2].length;if(!best||st<best.st||(st===best.st&&len>best.len))best={i:e.i,st:st,len:len}})});
+ if(!best)return;used[best.i]=1;
+ var sp=document.createElement("span");sp.className="term";sp.tabIndex=0;sp.setAttribute("role","button");sp.setAttribute("data-g",best.i);sp.textContent=t.substr(best.st,best.len);
+ var after=document.createTextNode(t.substr(best.st+best.len));
+ n.nodeValue=t.substr(0,best.st);n.parentNode.insertBefore(sp,n.nextSibling);n.parentNode.insertBefore(after,sp.nextSibling);wrapNode(after,used)}
+var SKIP=/^(BUTTON|SELECT|OPTION|INPUT|TEXTAREA|SCRIPT|STYLE|H1|H2|H3)$/;
+function linkify(el){
+ var used={},nodes=[],w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:function(n){for(var p=n.parentNode;p&&p!==el.parentNode;p=p.parentNode){if(SKIP.test(p.nodeName)||(p.classList&&(p.classList.contains("tg")||p.classList.contains("term"))))return NodeFilter.FILTER_REJECT}return NodeFilter.FILTER_ACCEPT}});
+ while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(function(n){wrapNode(n,used)})}
+function lk(list){closeTip();list.forEach(function(x){var el=typeof x==="string"?$(x):x;if(el)linkify(el)})}
+var tip=document.createElement("div");tip.id="tip";tip.style.display="none";document.body.appendChild(tip);
+function closeTip(){tip.style.display="none"}
+function openTip(el){
+ var i=+el.getAttribute("data-g"),it=GL[i];
+ tip.innerHTML='<button class="tx" aria-label="Close">×</button><b>'+it.t+'</b><p>'+it.d+'</p><button class="tgo">See in glossary</button>';
+ tip.style.display="block";tip.style.visibility="hidden";
+ var r=el.getBoundingClientRect(),w=Math.min(300,window.innerWidth-24);tip.style.width=w+"px";
+ tip.style.left=Math.max(12,Math.min(window.innerWidth-w-12,r.left+r.width/2-w/2))+"px";
+ var h=tip.offsetHeight,top=r.bottom+8;if(top+h>window.innerHeight-8&&r.top-h-8>8)top=r.top-h-8;tip.style.top=Math.max(8,top)+"px";tip.style.visibility="visible";tip.setAttribute("data-g",i);sy0=window.pageYOffset;
+ tip.querySelector(".tx").onclick=closeTip;
+ tip.querySelector(".tgo").onclick=function(){closeTip();showMode("g");renderGloss(it.a[0]);window.scrollTo(0,0)}}
+document.addEventListener("click",function(e){var t=e.target.closest?e.target.closest(".term"):null;
+ if(t){if(tip.style.display!=="none"&&tip.getAttribute("data-g")===t.getAttribute("data-g")){closeTip()}else openTip(t);return}
+ if(!(e.target.closest&&e.target.closest("#tip")))closeTip()});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeTip();if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("term")){e.preventDefault();e.target.click()}});
+var sy0=0;window.addEventListener("scroll",function(){if(tip.style.display!=="none"&&Math.abs(window.pageYOffset-sy0)>30)closeTip()},{passive:true});
+function renderGloss(f){
+ f=(f||"").toLowerCase();
+ var h='<div class="card"><h2>How it all fits together</h2><ol class="steps"><li>A data release comes out, such as inflation or jobs.</li><li>Traders compare it with what they expected. The gap is the <b>surprise</b>.</li><li>The surprise changes what they expect the central bank to do with <b>interest rates</b>.</li><li>That ripples out: <b>bond yields</b> move first, then the <b>dollar</b>, <b>gold</b> and <b>stocks</b>.</li><li>Often the move is partly done already, and other news mixes in, so real days are messy.</li></ol></div>';
+ h+='<div class="card"><h2>Glossary</h2><p class="n" style="margin:0 0 6px">'+GL.length+' terms. On the other pages, tap any word with a dotted underline to see its meaning without leaving the page.</p><input class="sr" id="gs" placeholder="Search a term" value="'+f.replace(/"/g,"&quot;")+'">';
+ var n=0;
+ GG.forEach(function(g){
+  var rows=GL.filter(function(it){return it.g===g[0]&&(!f||(it.t+" "+it.d+" "+it.a.join(" ")).toLowerCase().indexOf(f)>=0)});
+  if(!rows.length)return;n+=rows.length;h+='<h3 class="gh">'+g[0]+'</h3>';
+  rows.forEach(function(it){h+='<div class="gt"><b>'+it.t+'</b><div>'+it.d+'</div></div>'})});
+ if(!n)h+='<p class="n">No match.</p>';
+ $("gl").innerHTML=h+'</div>';
+ var el=$("gs");el.oninput=function(){var pos=el.selectionStart;renderGloss(el.value);var e2=$("gs");e2.focus();e2.setSelectionRange(pos,pos)};
+}
+$("bx").onclick=function(){showMode("x")};$("bq").onclick=function(){showMode("q")};$("br").onclick=function(){showMode("r")};$("bg").onclick=function(){showMode("g")};
+setInd(0);
+lk([document.querySelector(".sub"),document.querySelector("p.note")]);
+(function(){var b=document.getElementById("theme"),r=document.documentElement;function L(){return r.classList.contains("light")}function lab(){b.setAttribute("aria-label",L()?"Switch to dark mode":"Switch to light mode");var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",L()?"#F5F6F8":"#06060A")}b.addEventListener("click",function(){var l=!L();r.classList.toggle("light",l);try{localStorage.setItem("ict-theme",l?"light":"dark")}catch(e){}lab();});lab()})();
+</script>
+</body>
+</html>

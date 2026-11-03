@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Pulse · Newsquawk market tools</title>
+<meta name="description" content="Free tools for reading the macro picture and the market's moves: economy thermometer, index contribution, data surprises and market clock.">
+<link rel="icon" href="data:,">
+<script>try{var t=localStorage.getItem("ict-theme");if(t?t==="light":matchMedia("(prefers-color-scheme: light)").matches)document.documentElement.classList.add("light")}catch(e){}</script>
+<script src="/nav.js" defer></script>
+<style>
+:root{--bg:#06060A;--card:#0D0E15;--line:#22242E;--text:#FFFFFF;--text2:#CBD5E1;--muted:#8A8FA3;--dim:#5E6273;--accent:#00E0FF;--pink:#FF3B6B;--up:#3DDC97;--down:#FF5C7A;color-scheme:dark}
+:root.light{--bg:#F5F6F8;--card:#FFFFFF;--line:#E1E4EA;--text:#0B0D14;--text2:#3A4150;--muted:#6B7280;--dim:#9AA0AC;--accent:#00B4D8;--pink:#E62E5C;--up:#0E9F6E;--down:#E23D52;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text2);font-family:ui-sans-serif,system-ui,-apple-system,"SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;line-height:1.4}
+body:before{content:"";position:fixed;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#00e0ff,rgba(0,224,255,0) 40%,rgba(0,224,255,0) 60%,#ff3b6b);z-index:20}
+a{color:inherit;text-decoration:none}
+.hd{border-bottom:1px solid var(--line)}
+.top{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:18px;padding:14px max(16px,env(safe-area-inset-left,0px)) 12px}
+.brand{display:flex;align-items:center;gap:12px;flex:none;margin-right:auto}
+.logo{display:block;width:120px;height:auto}
+:root.light .logo{filter:invert(1) hue-rotate(180deg)}
+.name{font-weight:800;font-size:15px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);border-left:1px solid var(--line);padding-left:12px}
+.links{display:flex;gap:2px}
+.links a{font-size:14px;color:var(--text2);padding:7px 10px;border-radius:8px;white-space:nowrap}
+.links a:hover{background:var(--card);color:var(--text)}
+.links a[aria-current]{color:var(--text);background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
+.theme{appearance:none;display:inline-flex;align-items:center;justify-content:center;flex:none;width:30px;height:30px;padding:0;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text2);cursor:pointer}
+.theme svg{width:16px;height:16px}
+.i-moon{display:none}:root.light .i-sun{display:none}:root.light .i-moon{display:block}
+.top .nq-m{margin-left:0}
+@media (min-width:1001px){.top .nq-m{display:none}}
+@media (max-width:1000px){.links{display:none}}
+.wrap{max-width:1100px;margin:0 auto;padding:26px max(16px,env(safe-area-inset-left,0px)) 40px}
+h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--text);letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:62ch}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;min-height:230px;transition:border-color .15s;min-width:0}
+.card:hover{border-color:var(--accent)}
+.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.lbl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+.card h2{margin:0;font-size:20px;color:var(--text)}
+.card p.d{margin:4px 0 14px;font-size:14px;color:var(--muted)}
+.live{margin-top:auto;border-top:1px solid var(--line);padding-top:12px;min-height:118px}
+.big{font-size:22px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.small{font-size:13px;color:var(--text2)}
+.asof{font-size:12px;color:var(--dim);margin-top:6px}
+.wait{font-size:13px;color:var(--dim)}
+.go{margin-top:12px;font-size:14px;font-weight:700;color:var(--accent)}
+.up{color:var(--up)}.dn{color:var(--down)}.pk{color:var(--pink)}.ac{color:var(--accent)}.mu{color:var(--muted)}
+.pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.pl{font-size:11px;font-weight:800;letter-spacing:.04em;padding:3px 7px;border-radius:6px;border:1px solid var(--dim);color:var(--text2)}
+.pl.warm{background:rgba(255,59,107,.14);border-color:var(--pink);color:var(--pink)}
+.pl.hot{background:var(--pink);border-color:var(--pink);color:#06060A}
+.pl.cool{background:rgba(0,224,255,.12);border-color:var(--accent);color:var(--accent)}
+.pl.cold{background:var(--accent);border-color:var(--accent);color:#06060A}
+:root.light .pl.hot,:root.light .pl.cold{color:#fff}
+.mb{display:grid;grid-template-columns:48px 1fr 70px;gap:6px;align-items:center;font-size:12px;margin-top:5px;font-variant-numeric:tabular-nums}
+.mb b{color:var(--text);font-weight:700}
+.mb span.t{height:8px;border-radius:3px;background:var(--up);min-width:2px}
+.mb span.t.n{background:var(--down)}
+.mb em{font-style:normal;text-align:right;color:var(--text2)}
+.sp{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--line)}
+.sp:last-of-type{border-bottom:0}
+.tag{flex:none;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:99px;color:var(--muted)}
+.tag.hi{background:rgba(255,59,107,.14);color:var(--pink)}
+.tag.lo{background:rgba(0,224,255,.12);color:var(--accent)}
+.sess{display:grid;grid-template-columns:70px 1fr;gap:6px 8px;align-items:center;font-size:12px;margin-top:8px}
+.track{position:relative;height:10px;border-radius:99px;background:var(--line)}
+.track i{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--dim)}
+.track i.on{background:var(--accent)}
+.now{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--pink)}
+.hrs{display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin:4px 0 0 78px}
+h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:28px 0 10px;font-weight:600}
+.soon{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.sn{border:1px dashed var(--line);border-radius:12px;padding:12px 14px;min-width:0}
+.sn b{display:block;color:var(--text);font-size:14px}
+.sn span{font-size:12.5px;color:var(--muted)}
+.foot{margin-top:26px;font-size:12px;color:var(--dim);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+@media (max-width:760px){
+ .logo{width:96px}.name{font-size:13px;padding-left:10px}.top{gap:8px}
+ .grid{grid-template-columns:1fr}.card{min-height:0}
+ .soon{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+</head>
+<body>
+<header class="hd"><div class="top">
+ <a class="brand" href="/" aria-label="Home"><img class="logo" alt="Newsquawk" width="120" src="data:image/png;base64,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"><span class="name" id="sitename">Pulse</span></a>
+ <nav class="links" id="links" aria-label="Tools"></nav>
+ <button class="theme" id="theme" type="button" aria-label="Switch light or dark"><svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg><svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1z"/></svg></button>
+</div></header>
+
+<main class="wrap">
+ <h1>The macro and market picture, at a glance</h1>
+ <p class="sub">Free tools for reading the economy and the market's moves. Each card shows the latest figure, so you get the gist without clicking.</p>
+
+ <div class="grid">
+  <a class="card" href="/economy-thermometer/">
+   <div class="lbl">Macro</div><h2>Economy Thermometer</h2>
+   <p class="d">Is each G10 economy running hot or cold? Prices, jobs and growth on one scale.</p>
+   <div class="live" id="c-therm"><p class="wait">Loading…</p></div>
+   <div class="go">Open the thermometer →</div>
+  </a>
+  <a class="card" href="/index-contribution-site/">
+   <div class="lbl">Equities</div><h2>Index Contribution</h2>
+   <p class="d">Which stocks and sectors are driving the S&amp;P 500, Nasdaq 100 and Dow.</p>
+   <div class="live" id="c-index"><p class="wait">Loading…</p></div>
+   <div class="go">Open the tracker →</div>
+  </a>
+  <a class="card" href="/surprises/">
+   <div class="lbl">Data</div><h2>Data Surprises</h2>
+   <p class="d">How the big US releases landed against what economists expected, and how markets reacted.</p>
+   <div class="live" id="c-surp"><p class="wait">Loading…</p></div>
+   <div class="go">Open the surprises →</div>
+  </a>
+  <a class="card" href="/clock/">
+   <div class="lbl">Timing</div><h2>Market Clock</h2>
+   <p class="d">When the big markets open and close, and when the busiest hours are, in London time.</p>
+   <div class="live" id="c-clock"></div>
+   <div class="go">Open the clock →</div>
+  </a>
+  <a class="card" href="/chain-reaction/">
+   <div class="lbl">Explainer</div><h2>Chain Reaction</h2>
+   <p class="d">Pick a market event and follow the chain: what usually happens to stocks, yields, the dollar and gold, and when the chain breaks.</p>
+   <div class="go" style="margin-top:auto">Follow a chain →</div>
+  </a>
+ </div>
+
+ <h3>Coming soon</h3>
+ <div class="soon">
+  <div class="sn"><b>Central banks</b><span>Every G10 rate, the next meeting and the last decision.</span></div>
+  <div class="sn"><b>This week</b><span>The key releases ahead and what's expected.</span></div>
+  <div class="sn"><b>Fed Scenario Planner</b><span>What the next Fed moves could look like.</span></div>
+ </div>
+
+ <div class="foot"><span>Built by Newsquawk. Each tool updates itself automatically.</span><span>For information only, not investment advice.</span></div>
+</main>
+<script>
+var $=function(i){return document.getElementById(i)};
+$("theme").onclick=function(){var l=document.documentElement.classList.toggle("light");try{localStorage.setItem("ict-theme",l?"light":"dark")}catch(e){}};
+document.addEventListener("DOMContentLoaded",function(){var T=window.NQ_TOOLS||[];
+ $("links").innerHTML=T.map(function(t){return '<a href="'+t[1]+'"'+(t[1]==="/"?' aria-current="page"':"")+">"+t[0]+"</a>"}).join("")});
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
+var cap=function(s){return s.charAt(0).toUpperCase()+s.slice(1)};
+var fx=function(v,d){return (v>0?"+":v<0?"−":"")+Math.abs(v).toFixed(d)};
+var fail=function(id){$(id).innerHTML='<p class="wait">Open the tool for the latest figures.</p>'};
+
+/* Economy Thermometer: the US verdict, plus a pill for each G10 economy. */
+fetch("/economy-thermometer/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+ var C=d.countries||[],us=C.filter(function(c){return c.code==="US"})[0]||C[0];if(!us)throw 0;
+ var cls={hot:"pk",warm:"pk",cool:"ac",cold:"ac",normal:""}[us.verdict]||"";
+ var PT={hot:"Inflation well above target",warm:"Inflation above target",normal:"Inflation on target",cool:"Inflation below target",cold:"Inflation well below target"};
+ var JT={hot:"jobs market very tight",warm:"jobs market tight",normal:"jobs market normal",cool:"jobs market soft",cold:"jobs market very soft"};
+ var line=us.prices&&us.jobs?PT[us.prices.state]+", "+JT[us.jobs.state]+".":"";
+ var pills=C.map(function(c){return '<span class="pl '+esc(c.verdict||"")+'" title="'+esc(c.name)+": "+esc(c.verdict||"")+'">'+esc({EA:"EZ",XM:"EZ",GB:"UK"}[c.code]||c.code)+"</span>"}).join("");
+ $("c-therm").innerHTML='<div class="big">'+esc(us.short||"US")+': <span class="'+cls+'">'+esc(cap(us.verdict||"–"))+'</span></div><div class="small">'+esc(line)+'</div><div class="pills">'+pills+"</div>";
+}).catch(function(){fail("c-therm")});
+
+/* Index Contribution: today's S&P 500 move and its three biggest contributors.
+   During the New York session it reads the live sheet, as the tracker does; otherwise the saved last-session copy. */
+(function(){
+ var LIVE="https://docs.google.com/spreadsheets/d/e/2PACX-1vSE9500jiKFvBw_k0q2m8CPaZ3VbZNv0uIYCe-QSnXpbASoqvwr2RW2hocHl5NVQejXIfVe4CdhX67h/pub?gid=454467433&single=true&output=csv";
+ var B="/index-contribution-site/";
+ function parse(t){var out=[],row=[],f="",q=false;for(var i=0;i<t.length;i++){var c=t[i];
+  if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+  else if(c==='"')q=true;else if(c===","){row.push(f);f=""}else if(c==="\n"){row.push(f);out.push(row);row=[];f=""}else if(c!=="\r")f+=c}
+  if(f||row.length){row.push(f);out.push(row)}return out}
+ var num=function(s){var v=parseFloat(String(s==null?"":s).replace(/,/g,""));return isFinite(v)?v:0};
+ var get=function(u){return fetch(u).then(function(r){if(!r.ok)throw 0;return r.text()}).then(parse)};
+ var p=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",weekday:"short",hour:"numeric",minute:"numeric",hourCycle:"h23"}).formatToParts(new Date()).map(function(x){return[x.type,x.value]}));
+ var mins=+p.hour*60+ +p.minute,open=!/Sat|Sun/.test(p.weekday)&&mins>=570&&mins<=975;
+ var src=open?get(LIVE+"&t="+Date.now()).catch(function(){return get(B+"last-session.csv?"+Date.now())}):get(B+"last-session.csv?"+Date.now());
+ Promise.all([src,get(B+"spy-weights.csv?"+Date.now()).catch(function(){return null})]).then(function(a){
+  var rows=a[0],spy=a[1],ix=null,S=[];
+  rows.forEach(function(r){if(r[0]==="IDX_SPX")ix={close:num(r[3]),prev:num(r[7]),pct:num(r[8]),last:r[5]};else if(r[0]==="SPX"&&r[4])S.push({s:r[4],w:num(r[7]),p:num(r[8])})});
+  if(!ix||S.length<400)throw 0;
+  /* Same weights as the tracker: State Street's SPY holdings where they cover the member. */
+  if(spy){var w=new Map();spy.slice(1).forEach(function(r){if(r[0]&&+r[1]>0)w.set(r[0],+r[1])});
+   if(w.size>400){var F=0,M=0;S.forEach(function(x){if(w.has(x.s))F+=w.get(x.s);else M+=x.w});
+    if(F)S.forEach(function(x){if(w.has(x.s))x.w=w.get(x.s)*(100-M)/F})}}
+  S.forEach(function(x){x.pts=x.w/100*x.p/100*ix.prev});
+  var top=S.slice().sort(function(a,b){return Math.abs(b.pts)-Math.abs(a.pts)}).slice(0,3),mx=Math.abs(top[0].pts)||1;
+  var pts=ix.close-ix.prev,cls=pts>=0?"up":"dn";
+  var when=open?"Live, about 15 minutes delayed":"At the "+esc(String(ix.last||"").replace(/ \d\d:\d\d$/,"").replace(/^0/,""))+" close";
+  $("c-index").innerHTML='<div class="big">S&amp;P 500 <span class="'+cls+'">'+fx(ix.pct,2)+'%</span> <span class="small">'+fx(pts,1)+" pts</span></div>"+
+   top.map(function(x){return '<div class="mb"><b>'+esc(x.s)+'</b><span class="t'+(x.pts<0?" n":"")+'" style="width:'+(Math.abs(x.pts)/mx*100).toFixed(1)+'%"></span><em>'+fx(x.pts,1)+" pts</em></div>"}).join("")+
+   '<div class="asof">'+when+"</div>";
+ }).catch(function(){fail("c-index")});
+})();
+
+/* Data Surprises: the three most recent releases on the surprises page, read straight from that page. */
+fetch("/surprises/?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){
+ var i=t.indexOf("var REL=");if(i<0)throw 0;
+ var s=t.slice(i+8),depth=0,end=0,q=false;
+ for(var k=0;k<s.length;k++){var c=s[k];if(q){if(c==="\\")k++;else if(c==='"')q=false;continue}
+  if(c==='"')q=true;else if(c==="["||c==="{")depth++;else if(c==="]"||c==="}"){depth--;if(!depth){end=k+1;break}}}
+ var R=JSON.parse(s.slice(0,end)),L=[];
+ R.forEach(function(r){var x=r.rows&&r.rows[0];if(x&&x[1]!=null&&x[2]!=null)L.push({t:r.title.replace(/ \(.*\)/,""),date:x[0],a:x[1],e:x[2],u:r.u,d:r.d})});
+ L.sort(function(a,b){return a.date<b.date?1:-1});L=L.slice(0,3);if(!L.length)throw 0;
+ var unit=function(v,o){return o.u==="pct"?v.toFixed(o.d==null?1:o.d)+"%":o.u==="k"?Math.round(v)+"k":v.toFixed(1)};
+ var tag=function(o){return o.a>o.e?'<span class="tag hi">Above</span>':o.a<o.e?'<span class="tag lo">Below</span>':'<span class="tag">In line</span>'};
+ var day=function(s){return new Date(s+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short",timeZone:"UTC"})};
+ var f=L[0],word=f.a>f.e?"above":f.a<f.e?"below":"in line with";
+ $("c-surp").innerHTML='<div class="big">Latest: <span class="'+(f.a>f.e?"pk":f.a<f.e?"ac":"")+'">'+esc(f.t)+"</span></div>"+
+  '<div class="small" style="margin-bottom:4px">'+esc(unit(f.a,f)+", "+word+" the "+unit(f.e,f)+" expected")+"</div>"+
+  L.map(function(o){return '<div class="sp"><span>'+esc(day(o.date)+" · "+o.t+" "+unit(o.a,o)+" vs "+unit(o.e,o))+"</span>"+tag(o)+"</div>"}).join("");
+}).catch(function(){fail("c-surp")});
+
+/* Market Clock: which cash markets are open now, on a 24-hour London-time strip. */
+(function(){
+ var M=[["Tokyo","Asia/Tokyo",540,930],["London","Europe/London",480,990],["New York","America/New_York",570,960]];
+ function parts(tz,d){var o=Object.fromEntries(new Intl.DateTimeFormat("en-GB",{timeZone:tz,year:"numeric",month:"numeric",day:"numeric",hour:"numeric",minute:"numeric",weekday:"short",hourCycle:"h23"}).formatToParts(d).map(function(x){return[x.type,x.value]}));
+  return{y:+o.year,m:+o.month,d:+o.day,h:+o.hour,mi:+o.minute,wd:o.weekday}}
+ function off(tz,d){var p=parts(tz,d);return(Date.UTC(p.y,p.m-1,p.d,p.h,p.mi)-Math.floor(d.getTime()/6e4)*6e4)/6e4}
+ var hm=function(m){m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")};
+ function draw(){var now=new Date(),L=parts("Europe/London",now),lm=L.h*60+L.mi,lo=off("Europe/London",now),wk=/Sat|Sun/.test(L.wd);
+  var rows=M.map(function(m){var sh=lo-off(m[1],now),a=m[2]+sh,b=m[3]+sh,lp=parts(m[1],now),cm=lp.h*60+lp.mi;
+   return{n:m[0],a:a,b:b,open:!/Sat|Sun/.test(lp.wd)&&cm>=m[2]&&cm<m[3]}});
+  var openN=rows.filter(function(r){return r.open}).map(function(r){return r.n});
+  var next=null;if(!wk)rows.forEach(function(r){if(!r.open&&r.a>lm&&(!next||r.a<next.a))next=r});
+  var head=wk?'<span class="mu">Weekend: markets closed</span>':openN.length?'<span class="ac">'+openN.join(" &amp; ")+" open</span>":'<span class="mu">Main markets closed</span>';
+  var sub=next?next.n+" opens in "+Math.floor((next.a-lm)/60)+"h "+((next.a-lm)%60)+"m ("+hm(next.a)+")":wk?"Tokyo opens Monday at "+hm(rows[0].a<0?rows[0].a+1440:rows[0].a)+" London time":"All three have closed for the day";
+  var seg=function(a,b,on){var s="",cl=on?"i on":"i";function piece(x,y){x=Math.max(0,x);y=Math.min(1440,y);if(y>x)s+='<'+cl.split(" ")[0]+(on?' class="on"':"")+' style="left:'+(x/14.4).toFixed(2)+"%;width:"+((y-x)/14.4).toFixed(2)+'%"></i>'}
+   piece(a,b);piece(a+1440,b+1440);piece(a-1440,b-1440);return s};
+  $("c-clock").innerHTML='<div class="big">'+hm(lm)+' <span class="small">London</span> · '+head+'</div><div class="small">'+esc(sub)+"</div>"+
+   '<div class="sess">'+rows.map(function(r){return"<span>"+r.n+'</span><div class="track">'+seg(r.a,r.b,r.open)+'<span class="now" style="left:'+(lm/14.4).toFixed(2)+'%"></span></div>'}).join("")+"</div>"+
+   '<div class="hrs"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>';
+ }
+ draw();setInterval(draw,30000);
+})();
+</script>
+</body>
+</html>
