@@ -106,10 +106,10 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
  <div class="about">
   <h3>How to read this</h3>
   <p><b>Rate</b> is the bank's main policy rate. The Fed sets a range, so it shows both ends. The ECB figure is the deposit rate, the one markets watch.</p>
-  <p><b>Last decision</b> is a <span class="dn">hike</span>, a <span class="up">cut</span> or a hold, in basis points (1bp = 0.01%). Cuts are green and hikes red, because cheaper borrowing is good news for stocks and bonds.</p>
+  <p><b>Last decision</b> is a <span class="dn">hike</span>, a <span class="up">cut</span> or a hold, in basis points (1bp = 0.01%). Cuts are green and hikes red, because cheaper borrowing is good news for stocks and bonds. <b>Decided, awaiting data</b> means the bank has announced, but its new rate hasn't reached the free data yet.</p>
   <p><b>Next meeting</b> shows when the decision is announced, in London time. The Bank of Japan has no fixed time, so it shows a rough one (marked *).</p>
  </div>
- <div class="foot"><span>Rates: FRED (Fed, ECB) and the Bank for International Settlements (the rest). The data can lag a decision by a few days. Meeting dates: each bank's published calendar.</span><span class="warn" id="warn"></span></div>
+ <div class="foot"><span>Rates: FRED (Fed, ECB), the banks' own data feeds, and the Bank for International Settlements (BoJ, RBNZ). A new decision can take a day to a week to show. Meeting dates: each bank's published calendar.</span><span class="warn" id="warn"></span></div>
 </main>
 <script>
 var M=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],W=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -125,7 +125,7 @@ function pct(v){return v.toFixed(2)+"%"}
 function rate(b){return b.lower!=null?b.lower.toFixed(2)+"–"+pct(b.rate):pct(b.rate)}
 function kindOf(b){var l=b.last;return !l?null:l.kind=="pending"?(b.prev?b.prev.kind:null):l.kind}
 function move(l){if(!l)return '<span class="mv hd">–</span>';
- if(l.kind=="pending")return '<span class="mv pd">Decided, result not in the data yet</span>';
+ if(l.kind=="pending")return '<span class="mv pd">Decided, awaiting data</span>';
  var u=l.unscheduled?' <span class="un">unscheduled</span>':"";
  return l.bp>0?'<span class="mv dn">Hike +'+l.bp+'bp</span>'+u:l.bp<0?'<span class="mv up">Cut '+l.bp+'bp</span>'+u:'<span class="mv hd">Hold</span>'}
 function lastLine(b){var l=b.last;if(!l)return "";var s=dlab(l.date)+" · "+ago(l.date);
@@ -143,7 +143,7 @@ function render(D){
  else document.getElementById("next").style.display="none";
  var k=B.map(kindOf),n=function(x){return k.filter(function(y){return y==x}).length};
  var hi=B.slice().sort(function(a,b){return b.rate-a.rate})[0],lo=B.slice().sort(function(a,b){return a.rate-b.rate})[0];
- document.getElementById("summary").innerHTML='<div class="sm"><span class="big dn">'+n("hike")+'</span><span>hiked at their last meeting</span></div><div class="sm"><span class="big">'+n("hold")+'</span><span>held</span></div><div class="sm"><span class="big up">'+n("cut")+'</span><span>cut</span></div><div class="sm wide"><span class="small">Highest rate</span><b>'+hi.short+" "+rate(hi)+'</b><span class="small">Lowest rate</span><b>'+lo.short+" "+rate(lo)+'</b></div>';
+ document.getElementById("summary").innerHTML='<div class="sm"><span class="big dn">'+n("hike")+'</span><span>hiked last time</span></div><div class="sm"><span class="big">'+n("hold")+'</span><span>held</span></div><div class="sm"><span class="big up">'+n("cut")+'</span><span>cut</span></div><div class="sm wide"><span class="small">Highest rate</span><b>'+hi.short+" "+rate(hi)+'</b><span class="small">Lowest rate</span><b>'+lo.short+" "+rate(lo)+'</b></div>';
  table(sortKey());
  var ev=[],lim=NOW.getTime()+56*864e5;B.forEach(function(b){(b.upcoming||[]).forEach(function(t){if(Date.parse(t)<=lim)ev.push({b:b,t:t})})});ev.sort(function(a,b){return a.t<b.t?-1:1});
  var g={},ord=[];ev.forEach(function(e){var d=lon(e.t),m=new Date(d);m.setDate(d.getDate()-((d.getDay()+6)%7));var key=m.toDateString();if(!g[key]){g[key]={m:m,e:[]};ord.push(key)}g[key].e.push(e)});
