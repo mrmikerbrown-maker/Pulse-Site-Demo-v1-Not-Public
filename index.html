@@ -122,11 +122,16 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
    <div class="live" id="c-clock"></div>
    <div class="go">Open the clock →</div>
   </a>
+  <a class="card" href="/central-banks/">
+   <div class="lbl">Policy</div><h2>Central banks</h2>
+   <p class="d">Every G10 policy rate, the last decision and the next meeting, in London time.</p>
+   <div class="live" id="c-cb"><p class="wait">Loading…</p></div>
+   <div class="go">Open the tracker →</div>
+  </a>
  </div>
 
  <h3>Coming soon</h3>
  <div class="soon">
-  <div class="sn"><b>Central banks</b><span>Every G10 rate, the next meeting and the last decision.</span></div>
   <div class="sn"><b>Fed Scenario Planner</b><span>What the next Fed moves could look like.</span></div>
  </div>
 
@@ -214,6 +219,21 @@ fetch("/calendar/data/calendar.json?"+Date.now()).then(function(r){if(!r.ok)thro
  $("c-cal").innerHTML='<div class="big">Next: <span class="ac">'+esc(f.c+" "+f.name)+'</span></div><div class="small" style="margin-bottom:4px">'+esc(when(f.t)+" London"+(f.forecast!=null?" · expected "+val(f,f.forecast):""))+"</div>"+
   up.slice(1).map(function(e){return '<div class="sp"><span>'+esc(when(e.t)+" · "+e.c+" "+e.name)+"</span>"+(e.forecast!=null?'<span class="tag">Exp '+esc(val(e,e.forecast))+"</span>":"")+"</div>"}).join("");
 }).catch(function(){fail("c-cal")});
+
+/* Central banks: the next three meetings, each bank's current rate and its last move. */
+fetch("/central-banks/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+ var now=Date.now(),B=(d.banks||[]).filter(function(b){return b.next&&b.next.utc&&Date.parse(b.next.utc)>now-3*36e5}).sort(function(a,b){return a.next.utc<b.next.utc?-1:1});
+ if(!B.length)throw 0;
+ var lon=function(t,o){return new Date(t).toLocaleString("en-GB",Object.assign({timeZone:"Europe/London"},o))};
+ var day=function(t){var k=function(x){return lon(x,{year:"numeric",month:"2-digit",day:"2-digit"})};return k(t)===k(now)?"Today":k(t)===k(now+864e5)?"Tomorrow":lon(t,{weekday:"short",day:"numeric",month:"short"})};
+ var when=function(b){return day(b.next.utc)+(b.next.approx?"":" "+lon(b.next.utc,{hour:"2-digit",minute:"2-digit",hour12:false}))};
+ var rate=function(b){return (b.lower!=null?b.lower.toFixed(2)+"–":"")+b.rate.toFixed(2)+"%"};
+ var lastTxt=function(b){var l=b.last||{};return l.kind==="hike"?'<span class="tag hi">Last +'+l.bp+"bp</span>":l.kind==="cut"?'<span class="tag lo">Last −'+Math.abs(l.bp)+"bp</span>":l.kind==="hold"?'<span class="tag">Last held</span>':""};
+ var f=B[0];
+ $("c-cb").innerHTML='<div class="big">Next: <span class="ac">'+esc(f.short)+'</span> <span class="small">'+esc(when(f)+" London")+"</span></div>"+
+  '<div class="small" style="margin-bottom:4px">'+esc(f.name+" at "+rate(f))+"</div>"+
+  B.slice(0,3).map(function(b){return '<div class="sp"><span>'+esc(when(b)+" · "+b.short+" · "+rate(b))+"</span>"+lastTxt(b)+"</div>"}).join("");
+}).catch(function(){fail("c-cb")});
 
 /* Market Clock: which cash markets are open now, on a 24-hour London-time strip. */
 (function(){
