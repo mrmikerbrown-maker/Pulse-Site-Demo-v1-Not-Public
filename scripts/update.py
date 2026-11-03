@@ -8,7 +8,8 @@ The page (index.html) only draws what is in data.json.
 
 Sources
   Fed (target range) and ECB (deposit facility rate): FRED (St. Louis Fed) daily CSV downloads
-  Everyone else: Bank for International Settlements, central bank policy rates (daily)
+  Everyone else: Bank for International Settlements, central bank policy rates (daily). BIS can be a week
+  or two behind, so where a bank publishes its own free feed we read that too and use whichever is newer.
   Meeting dates and announcement times: config.json, copied from each bank's published calendar
 
 Standard library only. Run with --demo to test on made-up data (no internet needed).
@@ -97,6 +98,101 @@ def bis_daily(areas):
     if not out:
         raise RuntimeError("BIS returned no data")
     return {k: sorted(v) for k, v in out.items()}
+
+
+# ----------------------------------------------------------------------------- banks' own feeds (faster than BIS)
+
+def _rows(text):
+    delim = ";" if text.count(";") > text.count(",") else ","
+    return list(csv.reader(io.StringIO(text), delimiter=delim))
+
+
+def _num(x):
+    try:
+        v = float(str(x).strip().replace('"', ""))
+        return v if math.isfinite(v) else None
+    except ValueError:
+        return None
+
+
+def _date(x, fmts=("%Y-%m-%d", "%d-%b-%Y", "%d %b %Y", "%d/%m/%Y")):
+    x = str(x).strip().replace('"', "")
+    for f in fmts:
+        try:
+            return dt.datetime.strptime(x, f).date()
+        except ValueError:
+            pass
+    return None
+
+
+def fill_daily(points):
+    """Feeds that only list business days or change dates -> one value per calendar day up to today."""
+    points = sorted(p for p in points if p[0] >= dt.date.fromisoformat(START))
+    if not points:
+        raise RuntimeError("no data")
+    out, i, d, v = [], 0, points[0][0], points[0][1]
+    last_day = points[-1][0]
+    while d <= last_day:
+        while i < len(points) and points[i][0] <= d:
+            v = points[i][1]
+            i += 1
+        out.append((d, v))
+        d += dt.timedelta(days=1)
+    return out
+
+
+def own_boc():
+    t = http_get("https://www.bankofcanada.ca/valet/observations/V39079/json?start_date=%s" % START)
+    obs = json.loads(t)["observations"]
+    return [(dt.date.fromisoformat(o["d"]), float(o["V39079"]["v"])) for o in obs if o.get("V39079", {}).get("v")]
+
+
+def own_rba():
+    pts = []
+    for r in _rows(http_get("https://www.rba.gov.au/statistics/tables/csv/f1-data.csv")):
+        if len(r) > 1:
+            d, v = _date(r[0]), _num(r[1])
+            if d and v is not None:
+                pts.append((d, v))
+    return pts
+
+
+def own_norges():
+    t = http_get("https://data.norges-bank.no/api/data/IR/B.KPRA.SD.?format=csv&startPeriod=%s&locale=en" % START)
+    rows = _rows(t)
+    h = rows[0]
+    di, vi = h.index("TIME_PERIOD"), h.index("OBS_VALUE")
+    return [(_date(r[di]), _num(r[vi])) for r in rows[1:] if len(r) > vi and _date(r[di]) and _num(r[vi]) is not None]
+
+
+def own_riksbank():
+    obs = json.loads(http_get("https://api.riksbank.se/swea/v1/Observations/SECBREPOEFF/%s" % START))
+    return [(dt.date.fromisoformat(o["date"]), float(o["value"])) for o in obs if o.get("value") is not None]
+
+
+def own_boe():
+    url = ("https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp?csv.x=yes"
+           "&Datefrom=01/Jan/2019&Dateto=now&SeriesCodes=IUDBEDR&CSVF=TN&UsingCodes=Y&VPD=Y&VFD=N")
+    pts = []
+    for r in _rows(http_get(url)):
+        if len(r) > 1:
+            d, v = _date(r[0]), _num(r[1])
+            if d and v is not None:
+                pts.append((d, v))
+    return pts
+
+
+def own_snb():
+    pts = []
+    for r in _rows(http_get("https://data.snb.ch/api/cube/snbgwdzid/data/csv/en")):
+        if len(r) >= 3 and r[1].strip().strip('"') == "LZ":
+            d, v = _date(r[0]), _num(r[2])
+            if d and v is not None:
+                pts.append((d, v))
+    return pts
+
+
+OWN = {"CAD": own_boc, "AUD": own_rba, "NOK": own_norges, "SEK": own_riksbank, "GBP": own_boe, "CHF": own_snb}
 
 
 # ----------------------------------------------------------------------------- working out the readings
@@ -201,13 +297,29 @@ def main():
                     lower = fred_daily(b["fred_lower"])
                 src = "FRED " + b["fred"]
             else:
-                if b["bis"] not in bis:
+                if b["bis"] in bis:
+                    series, src = bis[b["bis"]], "BIS " + b["bis"]
+                elif b["code"] in OWN and not DEMO:
+                    series, src = [(dt.date.fromisoformat(START), 0.0)], "none"
+                else:
                     raise RuntimeError("no BIS data for %s" % b["bis"])
-                series, src = bis[b["bis"]], "BIS " + b["bis"]
+            if b["code"] in OWN and not DEMO:
+                try:
+                    own = fill_daily(OWN[b["code"]]())
+                    log.append("OK   %-4s own feed: %s%% as of %s" % (b["code"], own[-1][1], own[-1][0]))
+                    if own[-1][0] > series[-1][0]:
+                        # bank's own feed is newer: use it from where it starts, BIS before that
+                        series = [p for p in series if p[0] < own[0][0]] + own
+                        src = "own feed"
+                except Exception as e:  # noqa: BIS figures still stand
+                    log.append("WARN %-4s own feed failed, using BIS: %s" % (b["code"], e))
+            if src == "none":
+                raise RuntimeError("no BIS data and own feed failed")
             block = bank_block(b, series, lower)
+            block["source"] = src
             banks.append(block)
-            log.append("OK   %-4s %-9s %s%% as of %s, last: %s" % (
-                b["code"], b["short"], block["rate"], block["asof"], block["last"]))
+            log.append("OK   %-4s %-9s %s%% as of %s (%s), last: %s" % (
+                b["code"], b["short"], block["rate"], block["asof"], src, block["last"]))
         except Exception as e:  # noqa
             log.append("FAIL %s: %s" % (b["code"], e))
             if b["code"] in old:
