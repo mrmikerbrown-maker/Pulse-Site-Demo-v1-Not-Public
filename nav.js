@@ -22,13 +22,13 @@ function isHere(h){return h==="/"?here==="/":here.indexOf(h)===0}
 var F="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif";
 var css=
 ".nq-hd{display:block;border-bottom:1px solid var(--line);background:var(--bg);position:relative;z-index:40;margin-bottom:18px}"+
-".nq-in{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:14px 16px 12px}"+
+".nq-in{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:14px 16px 12px}"+
 ".nq-br{display:flex;align-items:center;gap:12px;flex:none;text-decoration:none;margin-right:auto}"+
 ".nq-br img{display:block;width:120px;height:auto;margin:0}"+
 ":root.light .nq-br img{filter:invert(1) hue-rotate(180deg)}"+
 ".nq-br span{font:800 15px/1 "+F+";letter-spacing:.16em;text-transform:uppercase;color:var(--accent);border-left:1px solid var(--line);padding:4px 0 4px 12px}"+
 ".nq-ln{display:flex;gap:2px;flex:none}"+
-".nq-ln a,.nq-p a{font:500 14px/1.2 "+F+";color:var(--text2);text-decoration:none;padding:8px 10px;border-radius:8px;white-space:nowrap}"+
+".nq-ln a,.nq-p a{font:500 14px/1.2 "+F+";color:var(--text2);text-decoration:none;padding:8px 9px;border-radius:8px;white-space:nowrap}"+
 ".nq-ln a:hover,.nq-p a:hover{background:var(--card);color:var(--text)}"+
 ".nq-ln a[aria-current]{color:var(--text);background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}"+
 ".nq-b{display:none;appearance:none;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--text2);cursor:pointer;flex:none}"+
@@ -70,7 +70,7 @@ function build(){
  function fit(){var cs=getComputedStyle(document.body);
   hd.style.marginLeft="-"+cs.paddingLeft;hd.style.marginRight="-"+cs.paddingRight;hd.style.marginTop="0px";var tp=hd.getBoundingClientRect().top+scrollY;if(tp>0)hd.style.marginTop=(-tp)+"px";
   hd.classList.remove("nq-n");
-  var need=inn.querySelector(".nq-br").offsetWidth+ln.scrollWidth+slot.offsetWidth+60;
+  var need=inn.querySelector(".nq-br").offsetWidth+ln.scrollWidth+slot.offsetWidth+44;
   if(need>inn.clientWidth)hd.classList.add("nq-n");else{hd.classList.remove("nq-o");b.setAttribute("aria-expanded","false")}}
  fit();addEventListener("resize",fit);
  b.onclick=function(e){e.stopPropagation();var o=hd.classList.toggle("nq-o");b.setAttribute("aria-expanded",o)};

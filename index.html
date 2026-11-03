@@ -213,7 +213,7 @@ fetch("/calendar/data/calendar.json?"+Date.now()).then(function(r){if(!r.ok)thro
  var dayKey=function(t){return lon(t,{year:"numeric",month:"2-digit",day:"2-digit"})};
  var when=function(t){var dk=dayKey(t),today=dayKey(now),tom=dayKey(now+864e5);
   return (dk===today?"Today":dk===tom?"Tomorrow":lon(t,{weekday:"short"}))+" "+lon(t,{hour:"2-digit",minute:"2-digit",hour12:false})};
- var val=function(e,v){return v==null?"":(Math.round(v*1000)/1000)+(e.scale||"")+(e.unit||"")};
+ var val=function(e,v){if(v==null)return"";var n=Math.round(v*1000)/1000,u=e.unit||"";return u==="%"?n+(e.scale||"")+"%":(n<0?"−":"")+u+Math.abs(n)+(e.scale||"")};
  if(!up.length){$("c-cal").innerHTML='<div class="big">No more key releases</div><div class="small">That\'s it for this week. The calendar rolls on to next week automatically.</div>';return}
  var f=up[0];
  $("c-cal").innerHTML='<div class="big">Next: <span class="ac">'+esc(f.c+" "+f.name)+'</span></div><div class="small" style="margin-bottom:4px">'+esc(when(f.t)+" London"+(f.forecast!=null?" · expected "+val(f,f.forecast):""))+"</div>"+
