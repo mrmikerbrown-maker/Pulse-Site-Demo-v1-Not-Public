@@ -8,12 +8,15 @@ UA = {"User-Agent": "Mozilla/5.0"}
 YAHOO = {"eurusd": "EURUSD=X", "gbpusd": "GBPUSD=X", "usdjpy": "JPY=X", "spx": "^GSPC",
          "gold": "GC=F", "vix": "^VIX", "gvz": "^GVZ", "move": "^MOVE"}
 FRED = {"y2": "DGS2", "y10": "DGS10"}
-# FOMC decision days (second day of each meeting). Check against the Fed's calendar.
+# FOMC decision days (second day of each meeting), from federalreserve.gov/monetarypolicy/fomccalendars.htm.
 FOMC = ["2023-11-01", "2023-12-13", "2024-01-31", "2024-03-20", "2024-05-01", "2024-06-12",
         "2024-07-31", "2024-09-18", "2024-11-07", "2024-12-18", "2025-01-29", "2025-03-19",
         "2025-05-07", "2025-06-18", "2025-07-30", "2025-09-17", "2025-10-29", "2025-12-10",
         "2026-01-28", "2026-03-18", "2026-04-29", "2026-06-17", "2026-07-29", "2026-09-16",
-        "2026-10-28", "2026-12-09"]
+        "2026-10-28", "2026-12-09",
+        # 2027 schedule (tentative), Fed press release 5 Sep 2025
+        "2027-01-27", "2027-03-17", "2027-04-28", "2027-06-09", "2027-07-28", "2027-09-15",
+        "2027-10-27", "2027-12-08"]
 ASSETS = ["eurusd", "gbpusd", "usdjpy", "spx", "gold", "y10"]
 
 
