@@ -5,6 +5,9 @@ on:
     - cron: "30 6 * * *"    # every morning, about 06:30-07:30 UK time
     - cron: "30 20 * * *"   # and every evening, to catch same-day Fed/ECB/BoE moves
   workflow_dispatch:         # lets you run it by hand from the Actions tab
+  push:                      # TEMPORARY: test run on the branch before merging
+    branches: ["claude/**"]
+    paths: ["scripts/**", "config.json", ".github/workflows/**"]
 
 permissions:
   contents: write
