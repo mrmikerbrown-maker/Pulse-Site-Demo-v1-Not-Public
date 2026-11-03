@@ -72,7 +72,7 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
 .now{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--pink)}
 .hrs{display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin:4px 0 0 78px}
 h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:28px 0 10px;font-weight:600}
-.soon{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.soon{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .sn{border:1px dashed var(--line);border-radius:12px;padding:12px 14px;min-width:0}
 .sn b{display:block;color:var(--text);font-size:14px}
 .sn span{font-size:12.5px;color:var(--muted)}
@@ -116,12 +116,17 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
    <div class="live" id="c-clock"></div>
    <div class="go">Open the clock →</div>
   </a>
+  <a class="card" href="/calendar/">
+   <div class="lbl">Calendar</div><h2>This week</h2>
+   <p class="d">The key releases and central bank decisions this week, with what's expected, in London time.</p>
+   <div class="live" id="c-cal"><p class="wait">Loading…</p></div>
+   <div class="go">Open the calendar →</div>
+  </a>
  </div>
 
  <h3>Coming soon</h3>
  <div class="soon">
   <div class="sn"><b>Central banks</b><span>Every G10 rate, the next meeting and the last decision.</span></div>
-  <div class="sn"><b>This week</b><span>The key releases ahead and what's expected.</span></div>
   <div class="sn"><b>Fed Scenario Planner</b><span>What the next Fed moves could look like.</span></div>
  </div>
 
@@ -195,6 +200,21 @@ fetch("/surprises/?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.text
   L.map(function(o){return '<div class="sp"><span>'+esc(day(o.date)+" · "+o.t+" "+unit(o.a,o)+" vs "+unit(o.e,o))+"</span>"+tag(o)+"</div>"}).join("");
 }).catch(function(){fail("c-surp")});
 
+/* This week: the next key releases (imp 2) from the calendar, in London time. */
+fetch("/calendar/data/calendar.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+ var now=Date.now(),E=(d.events||[]).filter(function(e){return e.imp===2&&e.t}).sort(function(a,b){return a.t<b.t?-1:1});
+ var up=E.filter(function(e){return Date.parse(e.t)>now-5*60e3}).slice(0,4);
+ var lon=function(t,o){return new Date(t).toLocaleString("en-GB",Object.assign({timeZone:"Europe/London"},o))};
+ var dayKey=function(t){return lon(t,{year:"numeric",month:"2-digit",day:"2-digit"})};
+ var when=function(t){var dk=dayKey(t),today=dayKey(now),tom=dayKey(now+864e5);
+  return (dk===today?"Today":dk===tom?"Tomorrow":lon(t,{weekday:"short"}))+" "+lon(t,{hour:"2-digit",minute:"2-digit",hour12:false})};
+ var val=function(e,v){return v==null?"":(Math.round(v*1000)/1000)+(e.scale||"")+(e.unit||"")};
+ if(!up.length){$("c-cal").innerHTML='<div class="big">No more key releases</div><div class="small">That\'s it for this week. The calendar rolls on to next week automatically.</div>';return}
+ var f=up[0];
+ $("c-cal").innerHTML='<div class="big">Next: <span class="ac">'+esc(f.c+" "+f.name)+'</span></div><div class="small" style="margin-bottom:4px">'+esc(when(f.t)+" London"+(f.forecast!=null?" · expected "+val(f,f.forecast):""))+"</div>"+
+  up.slice(1).map(function(e){return '<div class="sp"><span>'+esc(when(e.t)+" · "+e.c+" "+e.name)+"</span>"+(e.forecast!=null?'<span class="tag">Exp '+esc(val(e,e.forecast))+"</span>":"")+"</div>"}).join("");
+}).catch(function(){fail("c-cal")});
+
 /* Market Clock: which cash markets are open now, on a 24-hour London-time strip. */
 (function(){
  var M=[["Tokyo","Asia/Tokyo",540,930],["London","Europe/London",480,990],["New York","America/New_York",570,960]];
@@ -208,7 +228,8 @@ fetch("/surprises/?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.text
   var openN=rows.filter(function(r){return r.open}).map(function(r){return r.n});
   var next=null;if(!wk)rows.forEach(function(r){if(!r.open&&r.a>lm&&(!next||r.a<next.a))next=r});
   var head=wk?'<span class="mu">Weekend: markets closed</span>':openN.length?'<span class="ac">'+openN.join(" &amp; ")+" open</span>":'<span class="mu">Main markets closed</span>';
-  var sub=next?next.n+" opens in "+Math.floor((next.a-lm)/60)+"h "+((next.a-lm)%60)+"m ("+hm(next.a)+")":wk?"Tokyo opens Monday at "+hm(rows[0].a<0?rows[0].a+1440:rows[0].a)+" London time":"All three have closed for the day";
+  var closing=rows.filter(function(r){return r.open}).sort(function(a,b){return a.b-b.b})[0];
+  var sub=closing&&(!next||closing.b<next.a)?closing.n+" closes in "+Math.floor((closing.b-lm)/60)+"h "+((closing.b-lm)%60)+"m ("+hm(closing.b)+")":next?next.n+" opens in "+Math.floor((next.a-lm)/60)+"h "+((next.a-lm)%60)+"m ("+hm(next.a)+")":wk?"Tokyo opens Monday at "+hm(rows[0].a<0?rows[0].a+1440:rows[0].a)+" London time":"All three have closed for the day";
   var seg=function(a,b,on){var s="",cl=on?"i on":"i";function piece(x,y){x=Math.max(0,x);y=Math.min(1440,y);if(y>x)s+='<'+cl.split(" ")[0]+(on?' class="on"':"")+' style="left:'+(x/14.4).toFixed(2)+"%;width:"+((y-x)/14.4).toFixed(2)+'%"></i>'}
    piece(a,b);piece(a+1440,b+1440);piece(a-1440,b-1440);return s};
   $("c-clock").innerHTML='<div class="big">'+hm(lm)+' <span class="small">London</span> · '+head+'</div><div class="small">'+esc(sub)+"</div>"+
