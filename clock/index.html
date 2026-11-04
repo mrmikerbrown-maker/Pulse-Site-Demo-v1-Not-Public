@@ -12,12 +12,12 @@
 /* Layout: one heat map of 24 London hours x 4 assets, a selected-hour readout below. Newsquawk dark is the house look; a light theme sits under :root.light, switched by the sun/moon button. */
 :root{--bg:#06060A;--card:#0D0E15;--line:#22242E;--text:#FFFFFF;--text2:#CBD5E1;--muted:#8A8FA3;--dim:#5E6273;--accent:#00E0FF;--pink:#FF3B6B;--lw:150px;--hm:0,224,255;--ink:#FFFFFF;--onink:#06060A;color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--text2);font-family:ui-sans-serif,system-ui,-apple-system,"SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;line-height:1.4;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:0 28px}
+body{margin:0;background:var(--bg);color:var(--text2);font-family:ui-sans-serif,system-ui,-apple-system,"SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;line-height:1.4;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:0 28px}
 body:before{content:"";position:fixed;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#00e0ff,rgba(0,224,255,0) 40%,rgba(0,224,255,0) 60%,#ff3b6b);z-index:5}
-.wrap{max-width:820px;margin:0 auto}
+.wrap{max-width:1068px;margin:0 auto;padding-top:8px}
 .logo{display:block;width:150px;height:auto;margin:22px 0 18px}
-h1{font-size:clamp(22px,4.4vw,30px);line-height:1.15;margin:0 0 8px;color:var(--text);text-wrap:balance;letter-spacing:-.01em}
-.sub{color:var(--muted);font-size:14px;margin:0 0 18px;max-width:62ch}
+h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--text);letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:62ch}
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
 .tzb{display:flex;flex-direction:column;gap:12px;margin-bottom:39px;font-size:12px;color:var(--muted)}
 .tzr2{display:flex;align-items:center;justify-content:space-between;gap:10px 16px;flex-wrap:wrap}
