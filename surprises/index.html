@@ -221,7 +221,7 @@ $("m_growth").onclick=function(){mode="growth";calc()};
 var QZ={},TOT=5,XPL=["tabs","info","ctl","msg","grid"];
 var PANES={q:"qz",r:"rl",g:"gl"};
 function showMode(m){closeTip();rpStop();XPL.forEach(function(i){$(i).style.display=m==="x"?"":"none"});["qz","rl","gl"].forEach(function(i){$(i).style.display="none"});if(m!=="x")$(PANES[m]).style.display="block";["x","q","r","g"].forEach(function(k){$("b"+k).className=k===m?"on":""});
- if(m==="q"&&(!QZ.plan||QZ.fin))newSession();if(m==="r"&&!$("rl").innerHTML)renderReal(0);if(m==="g"&&!$("gl").innerHTML)renderGloss()}
+ if(m==="q"&&(!QZ.plan||QZ.fin))newSession();if(m==="r"&&!$("rl").innerHTML)renderReal(0);}
 function newSession(){
  var idx=[0,1,2,3,4].sort(function(){return Math.random()-.5}),fi=Math.floor(Math.random()*TOT);
  QZ={n:0,sc:0,tot:0,q:null,ans:[],done:false,hint:false,plan:[],log:[],fin:false};
@@ -400,152 +400,10 @@ function renderReal(k,i){
  $("rl").querySelectorAll(".tc").forEach(function(b){b.onclick=function(){renderReal(cr,+b.getAttribute("data-i"))}});
  var tl=$("tl"),sl=tl.querySelector(".sel");if(sl)tl.scrollLeft=sl.offsetLeft-tl.clientWidth/2+sl.offsetWidth/2;
 }
-var GG=[
-["The big picture",[
-["Surprise","The actual number minus the expected number. Markets react to the surprise, not to the number itself.",["surprise","surprises"]],
-["Consensus (expected)","The average of what economists forecast a number will be. It is the 'expected' figure in this tool. Different data providers publish slightly different consensus numbers.",["consensus","forecast","forecasts"]],
-["Priced in","Already reflected in market prices because people expected it. A number that matches expectations is already priced in, so it usually moves markets less.",["priced in","priced-in"]],
-["Textbook reaction","The usual reaction you would expect from the rule of thumb: hotter or stronger data means interest rates stay higher, so yields and the dollar rise and gold falls. Real days often break the rule.",["textbook"]],
-["Print","Trader slang for a data release or its number. A 'hot print' means a higher-than-expected figure.",["print","prints"]],
-["Beat / miss","A 'beat' means the number came in above the forecast and a 'miss' means below. Whether that is good or bad news depends on the data and on what the market is worried about.",["beat","beats","miss","misses"]],
-["Risk-on / risk-off","Risk-on: traders feel confident and buy stocks and other riskier assets. Risk-off: they get nervous and sell them, often buying safer things such as government bonds, the dollar or gold.",["risk-on","risk-off","risk appetite"]],
-["Safe haven","An asset people tend to buy when they are nervous, such as US government bonds, the dollar, the Swiss franc or gold. It is a tendency, not a guarantee.",["safe haven","safe-haven","safe havens"]],
-["Rally / selloff","A rally is a sharp rise in prices. A selloff is a sharp fall, usually because many people are selling at once.",["rally","rallied","selloff","sell-off"]]
-]],
-["Economic data",[
-["CPI (inflation)","Consumer Price Index. It measures how fast the prices of everyday goods and services are rising compared with a year ago. This is what most people mean by 'inflation'.",["CPI","inflation","consumer price index"]],
-["Core inflation","Inflation leaving out food and energy, which jump around a lot. Central banks watch it because it shows the underlying trend. A report can have a calm headline but a surprising core number, or the other way round.",["core inflation","core CPI","core measure"]],
-["Headline figure","The main top-line number in a report. The details underneath, such as core inflation, wages or revisions, can tell a different story from the headline.",["headline"]],
-["Month-on-month / year-on-year","Month-on-month (m/m) compares with the previous month. Year-on-year (y/y) compares with the same month a year earlier. Inflation is usually quoted year-on-year and retail sales month-on-month.",["month-on-month","year-on-year","m/m","y/y"]],
-["Nonfarm payrolls","The monthly count of jobs the US economy added, not including farm work. Often called 'the jobs report'. It usually comes out on the first Friday of the month.",["nonfarm payrolls","payrolls","jobs report","NFP"]],
-["Unemployment rate","The share of people who want a job but do not have one. A rising rate can signal a weakening economy, which may raise bets on interest rate cuts.",["unemployment rate","unemployment"]],
-["Wages","How fast workers' pay is growing. Fast wage growth can keep inflation high, so markets read it in the jobs report alongside the headline jobs number.",["wages","wage growth","average hourly earnings"]],
-["PMI","Purchasing Managers' Index: a monthly survey of company managers about how business is going. 50 is the line between growing and shrinking.",["PMI","PMIs"]],
-["ISM","The Institute for Supply Management, a US group that publishes the best-known US PMI surveys. The services version used in this tool covers service companies such as retailers, banks and restaurants.",["ISM"]],
-["Contraction / expansion","Shrinking or growing. A PMI above 50 means expansion (businesses growing); below 50 means contraction (businesses shrinking).",["contraction","expansion","contracting","expanding"]],
-["Retail sales","How much shoppers spent in shops and online last month compared with the month before.",["retail sales"]],
-["GDP","Gross Domestic Product: the total size of the economy. The headline figure is how fast it grew over the last quarter, shown as a yearly rate.",["GDP"]],
-["Advance estimate","The first estimate of GDP, published about a month after the quarter ends. It is revised twice later, so the final number can differ.",["advance estimate","advance GDP","first estimate"]],
-["Revision","A later correction to a number that was already published. Revisions can be big and sometimes matter more than the original headline.",["revision","revisions","revised"]],
-["PCE","Personal Consumption Expenditures price index: another inflation measure, and the one the Fed officially targets. It comes out after CPI.",["PCE"]],
-["Recession","A period when the economy shrinks and jobs and spending fall. Fear of one can push stocks down.",["recession"]],
-["Stagflation","Weak growth and high inflation at the same time. It is awkward for central banks because cutting rates to help growth could make inflation worse.",["stagflation"]],
-["Government shutdown","When the US government runs out of funding and parts of it stop work. A shutdown can disrupt or delay official data, as it did for the November 2025 inflation report.",["government shutdown","shutdown"]],
-["Economic calendar","A schedule of upcoming data releases and central bank events, usually showing the forecast and the previous figure. Traders plan around it.",["economic calendar"]]
-]],
-["Central banks and rates",[
-["The Fed","The Federal Reserve, the US central bank. It aims to keep inflation low and unemployment low, and it sets the main US interest rate, which influences borrowing costs across the whole economy.",["the Fed","Federal Reserve","Fed"]],
-["FOMC","The Federal Open Market Committee: the group inside the Fed that votes on interest rates, about eight times a year. Decision days are often volatile.",["FOMC"]],
-["Fed Chair","The head of the Fed. The press conference after each decision is closely watched, and a hawkish or dovish tone can move markets even when rates do not change.",["Fed Chair","Chair Warsh","Warsh","Powell"]],
-["Central bank","An institution, such as the Fed, the European Central Bank or the Bank of England, that controls a country's interest rates and money supply.",["central bank","central banks"]],
-["Interest rates","The cost of borrowing money. A central bank's main rate affects everything from mortgages to company loans, and it is the biggest driver of bond yields, currencies and stock valuations.",["interest rate","interest rates"]],
-["Rate hike / cut / hold","A hike raises the central bank's interest rate, a cut lowers it and a hold leaves it unchanged. Markets often move more on what traders expect next than on the decision itself.",["rate hike","rate hikes","rate cut","rate cuts","hike","hikes"]],
-["Hawkish","Favouring higher interest rates or fewer cuts. Markets tend to see this as tougher policy.",["hawkish"]],
-["Dovish","Favouring lower interest rates or more rate cuts. Markets tend to see this as easier policy.",["dovish"]],
-["Rate expectations","What traders believe the central bank will do with rates, which shows up in futures prices. Data surprises move these expectations, and that is what moves bonds, currencies and stocks.",["rate expectations","rate bets","rate-cut bets"]],
-["Forward guidance","What a central bank says about its future plans. Markets often react to the guidance more than to the decision itself.",["forward guidance"]],
-["Dissent","When a member of a rate-setting committee votes against the majority. A dissent can hint that policy is about to change.",["dissent","dissents","dissented"]],
-["Inflation target","The inflation rate a central bank aims for, usually 2%. Inflation above target makes rate cuts harder and hikes more likely.",["inflation target","2% target","2% goal"]],
-["Higher for longer","The idea that interest rates will stay high for a long time rather than fall soon. Strong data or hot inflation feeds this idea, which is why bond yields and the dollar tend to rise.",["higher for longer","higher-for-longer"]]
-]],
-["Markets and assets",[
-["Stocks (equities)","Shares in companies. Stock prices reflect expected future profits, and higher interest rates make those profits worth less today, so rate worries can push stocks down even on good economic news.",["stocks","equities"],1],
-["S&amp;P 500","An index of 500 large US companies. It is the most common measure of how US stocks are doing.",["S&P 500"]],
-["Nasdaq","A US stock index dominated by big technology companies. Because tech profits lie far in the future, it tends to react strongly to changes in interest rate expectations.",["Nasdaq","Nasdaq 100"]],
-["Megacap tech","The handful of giant tech companies (Apple, Microsoft, Alphabet, Amazon, Nvidia, Meta and Tesla) that make up a big share of the S&amp;P 500 and Nasdaq. When they move, the indexes move.",["megacap","Mag7","big tech"]],
-["Index","A basket of assets tracked as one number, such as the S&amp;P 500 for 500 big US companies.",["index"],1],
-["Earnings","A company's profits, reported every three months. On days when big companies report, earnings can swamp the economic data.",["earnings"]],
-["Valuation","How much investors are willing to pay for a company's profits. Higher interest rates make future profits worth less today, so valuations can fall.",["valuation","valuations"]],
-["Bond","A loan to a government or company that pays interest. A bond's price moves in the opposite direction to its yield.",["bond","bonds","bond prices"]],
-["Bond yield","The yearly return you get for holding a bond. When bond prices fall, yields rise, and when prices rise, yields fall.",["bond yield","bond yields","yield","yields"]],
-["10-year Treasury","The yield on 10-year US government bonds. It is the benchmark for borrowing costs around the world, including US mortgage rates.",["10-year yield","10-year Treasury","10-year bond","10-year"]],
-["2-year yield","The yield on 2-year US government bonds. It tracks what traders expect the Fed to do with rates over the next couple of years, so it reacts fastest to data and Fed comments.",["2-year yield","2-year"]],
-["Treasury auction","When the US government sells new bonds to investors. Weak demand pushes yields up, which can ripple into stocks and the dollar.",["Treasury auction","auction"]],
-["Basis point (bp)","One hundredth of a percentage point. If a yield goes from 4.00% to 4.10%, it moved 10 basis points.",["basis point","basis points","bps","bp"]],
-["US dollar (DXY)","The dollar index measures the dollar against a basket of major currencies such as the euro and the yen. Up means the dollar is getting stronger.",["DXY","US dollar","dollar index","dollar"]],
-["Currency pairs (FX)","Currencies trade in pairs. EUR/USD is the price of one euro in dollars, so if it rises the euro is getting stronger against the dollar. USD/JPY is the price of one dollar in yen. FX is short for foreign exchange.",["EUR/USD","USD/JPY","GBP/USD","USD/CHF","currency pair","FX","forex"]],
-["Gold","A precious metal people buy as a store of value and a safe haven. It pays no interest, so it tends to fall when yields rise and rise when yields fall, but the link is loose.",["gold"],1],
-["Oil","Crude oil. Higher oil prices raise fuel and transport costs, so they feed inflation and can change interest rate expectations. Oil also jumps on wars and supply disruptions.",["oil","crude"]],
-["Commodities","Raw materials such as oil, gold, metals and crops that are traded on markets.",["commodities","commodity"]],
-["Strait of Hormuz","A narrow waterway between Iran and Oman that a big share of the world's oil ships through. Conflict there raises fears for oil supply and pushes oil prices up.",["Strait of Hormuz","Hormuz"]],
-["Futures","Contracts to buy or sell something at a set price on a future date. Many markets are quoted using futures prices, such as COMEX gold.",["futures","COMEX"]],
-["Daily close","The last price of the trading day. This tool measures reactions as the change in the daily close, so everything that happened that day is mixed in.",["daily close","daily closes"]]
-]],
-["News and events",[
-["Tariffs","Taxes a government puts on imported goods. News about tariffs can move markets more than economic data because it changes the outlook for growth, inflation and company profits.",["tariff","tariffs"]],
-["Trade war / truce","A trade war is when countries keep raising tariffs against each other. A truce or a deal pauses or reduces them, which markets usually cheer.",["trade war","truce","trade deal"]],
-["Currency intervention","When a government or central bank steps into the currency market, buying or selling its own currency to move the exchange rate. Japan has done this to support the yen.",["intervention","intervened"]],
-["Geopolitics","Politics and conflict between countries, such as wars or sanctions. Geopolitical shocks can push oil and gold higher and shake stocks.",["geopolitics","geopolitical"]],
-["IPO","Initial public offering: when a private company first sells shares to the public. Very big IPOs can soak up investor money, which can weigh on other stocks.",["IPO"]]
-]],
-["Trading basics",[
-["Bull / bear market","A bull market is a long period of rising prices; a bear market is a long period of falling prices. 'Bullish' means expecting prices to rise and 'bearish' means expecting them to fall.",["bull market","bear market","bullish","bearish"]],
-["Long / short","Going long means buying something to profit if its price rises. Going short means betting on a fall, by selling something you do not own. Losses on a short can be bigger than your original stake.",["long","short"],1],
-["Leverage","Trading with borrowed money so you control a bigger position than your own cash would allow. It magnifies losses as well as gains.",["leverage","leveraged"]],
-["Margin","The deposit you put up to open a leveraged trade. If the trade moves against you and your balance falls too low, the broker can close it (a 'margin call').",["margin","margin call"]],
-["Stop-loss","An order that automatically closes a trade if the price reaches a level you chose, to limit the loss. In fast markets the price can jump past it (see slippage).",["stop-loss","stop loss"]],
-["Spread","The gap between the price you can buy at and the price you can sell at. It is a trading cost, and it often widens around big news.",["spread"],1],
-["Slippage","Getting a worse price than you expected because the market moved before your order was filled. It is common around data releases.",["slippage"]],
-["Pip","The standard small unit of price movement in a currency pair, usually the fourth decimal place (0.0001). Yen pairs use the second decimal.",["pip","pips"]],
-["Volatility","How much and how fast prices move. Data releases and central bank meetings usually raise volatility.",["volatility","volatile"]],
-["Liquidity","How easily you can buy or sell without moving the price. It can thin out around big news, making prices jumpy.",["liquidity"]],
-["Correlation","How closely two things move together. Yields and the dollar often rise together, but correlations change and can break down.",["correlation","correlated"]],
-["Whipsaw","When a price lurches one way and then reverses quickly, catching out traders who chased the first move. Common in the minutes after a data release.",["whipsaw","whipsawed"]],
-["Hedge","A trade placed to offset the risk of another position, like insurance. It limits losses but usually costs something.",["hedge","hedging"]],
-["Trading the news","Trying to profit from price moves right after a data release or headline. It is fast, spreads are wide and prices whipsaw, which is why many traders avoid it.",["trading the news","trade the news"]],
-["Fundamental vs technical analysis","Fundamental analysis looks at the economy, data and company finances to judge value. Technical analysis studies price charts and patterns. This tool is about the fundamental side.",["fundamental analysis","technical analysis"]],
-["Risk management","Deciding in advance how much you can afford to lose on a trade and how you will limit it, for example with position size and stop-losses. Poor risk management is a common reason beginners lose money.",["risk management"]]
-]]
-];
-var GL=[];GG.forEach(function(g){g[1].forEach(function(it){GL.push({g:g[0],t:it[0],d:it[1],a:it[2],x:it[3]})})});
-function rx(s){return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}
-var TIPS=[];GL.forEach(function(it,i){if(it.x)return;
- var cs=[],ci=[];it.a.slice().sort(function(a,b){return b.length-a.length}).forEach(function(a){(/[A-Z]/.test(a)&&a.length<=5?cs:ci).push(rx(a))});
- var res=[];if(cs.length)res.push(new RegExp("(^|[^A-Za-z0-9])("+cs.join("|")+")(?![A-Za-z0-9])"));
- if(ci.length)res.push(new RegExp("(^|[^A-Za-z0-9])("+ci.join("|")+")(?![A-Za-z0-9])","i"));
- TIPS.push({i:i,res:res})});
-function wrapNode(n,used){
- var t=n.nodeValue,best=null;
- TIPS.forEach(function(e){if(used[e.i])return;e.res.forEach(function(re){var m=re.exec(t);if(!m)return;var st=m.index+m[1].length,len=m[2].length;if(!best||st<best.st||(st===best.st&&len>best.len))best={i:e.i,st:st,len:len}})});
- if(!best)return;used[best.i]=1;
- var sp=document.createElement("span");sp.className="term";sp.tabIndex=0;sp.setAttribute("role","button");sp.setAttribute("data-g",best.i);sp.textContent=t.substr(best.st,best.len);
- var after=document.createTextNode(t.substr(best.st+best.len));
- n.nodeValue=t.substr(0,best.st);n.parentNode.insertBefore(sp,n.nextSibling);n.parentNode.insertBefore(after,sp.nextSibling);wrapNode(after,used)}
-var SKIP=/^(BUTTON|SELECT|OPTION|INPUT|TEXTAREA|SCRIPT|STYLE|H1|H2|H3)$/;
-function linkify(el){
- var used={},nodes=[],w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,{acceptNode:function(n){for(var p=n.parentNode;p&&p!==el.parentNode;p=p.parentNode){if(SKIP.test(p.nodeName)||(p.classList&&(p.classList.contains("tg")||p.classList.contains("term"))))return NodeFilter.FILTER_REJECT}return NodeFilter.FILTER_ACCEPT}});
- while(w.nextNode())nodes.push(w.currentNode);nodes.forEach(function(n){wrapNode(n,used)})}
-function lk(list){closeTip();list.forEach(function(x){var el=typeof x==="string"?$(x):x;if(el)linkify(el)})}
-var tip=document.createElement("div");tip.id="tip";tip.style.display="none";document.body.appendChild(tip);
-function closeTip(){tip.style.display="none"}
-function openTip(el){
- var i=+el.getAttribute("data-g"),it=GL[i];
- tip.innerHTML='<button class="tx" aria-label="Close">×</button><b>'+it.t+'</b><p>'+it.d+'</p><button class="tgo">See in glossary</button>';
- tip.style.display="block";tip.style.visibility="hidden";
- var r=el.getBoundingClientRect(),w=Math.min(300,window.innerWidth-24);tip.style.width=w+"px";
- tip.style.left=Math.max(12,Math.min(window.innerWidth-w-12,r.left+r.width/2-w/2))+"px";
- var h=tip.offsetHeight,top=r.bottom+8;if(top+h>window.innerHeight-8&&r.top-h-8>8)top=r.top-h-8;tip.style.top=Math.max(8,top)+"px";tip.style.visibility="visible";tip.setAttribute("data-g",i);sy0=window.pageYOffset;
- tip.querySelector(".tx").onclick=closeTip;
- tip.querySelector(".tgo").onclick=function(){closeTip();showMode("g");renderGloss(it.a[0]);window.scrollTo(0,0)}}
-document.addEventListener("click",function(e){var t=e.target.closest?e.target.closest(".term"):null;
- if(t){if(tip.style.display!=="none"&&tip.getAttribute("data-g")===t.getAttribute("data-g")){closeTip()}else openTip(t);return}
- if(!(e.target.closest&&e.target.closest("#tip")))closeTip()});
-document.addEventListener("keydown",function(e){if(e.key==="Escape")closeTip();if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("term")){e.preventDefault();e.target.click()}});
-var sy0=0;window.addEventListener("scroll",function(){if(tip.style.display!=="none"&&Math.abs(window.pageYOffset-sy0)>30)closeTip()},{passive:true});
-function renderGloss(f){
- f=(f||"").toLowerCase();
- var h='<div class="card"><h2>How it all fits together</h2><ol class="steps"><li>A data release comes out, such as inflation or jobs.</li><li>Traders compare it with what they expected. The gap is the <b>surprise</b>.</li><li>The surprise changes what they expect the central bank to do with <b>interest rates</b>.</li><li>That ripples out: <b>bond yields</b> move first, then the <b>dollar</b>, <b>gold</b> and <b>stocks</b>.</li><li>Often the move is partly done already, and other news mixes in, so real days are messy.</li></ol></div>';
- h+='<div class="card"><h2>Glossary</h2><p class="n" style="margin:0 0 6px">'+GL.length+' terms. On the other pages, tap any word with a dotted underline to see its meaning without leaving the page.</p><input class="sr" id="gs" placeholder="Search a term" value="'+f.replace(/"/g,"&quot;")+'">';
- var n=0;
- GG.forEach(function(g){
-  var rows=GL.filter(function(it){return it.g===g[0]&&(!f||(it.t+" "+it.d+" "+it.a.join(" ")).toLowerCase().indexOf(f)>=0)});
-  if(!rows.length)return;n+=rows.length;h+='<h3 class="gh">'+g[0]+'</h3>';
-  rows.forEach(function(it){h+='<div class="gt"><b>'+it.t+'</b><div>'+it.d+'</div></div>'})});
- if(!n)h+='<p class="n">No match.</p>';
- $("gl").innerHTML=h+'</div>';
- var el=$("gs");el.oninput=function(){var pos=el.selectionStart;renderGloss(el.value);var e2=$("gs");e2.focus();e2.setSelectionRange(pos,pos)};
-}
-$("bx").onclick=function(){showMode("x")};$("bq").onclick=function(){showMode("q")};$("br").onclick=function(){showMode("r")};$("bg").onclick=function(){showMode("g")};
+/* Glossary words and pop-ups now come from the shared /glossary.js (loaded by nav.js). */
+function lk(){if(window.NQG&&NQG.scan)setTimeout(NQG.scan,0)}
+function closeTip(){if(window.NQG&&NQG.close)NQG.close()}
+$("bx").onclick=function(){showMode("x")};$("bq").onclick=function(){showMode("q")};$("br").onclick=function(){showMode("r")};$("bg").onclick=function(){location.href="/glossary/"};
 setInd(0);
 lk([document.querySelector(".sub"),document.querySelector("p.note")]);
 (function(){var b=document.getElementById("theme"),r=document.documentElement;function L(){return r.classList.contains("light")}function lab(){b.setAttribute("aria-label",L()?"Switch to dark mode":"Switch to light mode");var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",L()?"#F5F6F8":"#06060A")}b.addEventListener("click",function(){var l=!L();r.classList.toggle("light",l);try{localStorage.setItem("ict-theme",l?"light":"dark")}catch(e){}lab();});lab()})();
