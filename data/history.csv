@@ -13,3 +13,9 @@ tv1001686073801,2026-11-03T21:45:00Z,NZ,Unemployment Rate,Q3,5.7,5.5,5.6,%,,medi
 tv1001661337801,2026-11-04T08:30:00Z,SE,Riksbank rate decision,,2,2,1.75,%,,key
 tv1001658355302,2026-11-04T10:00:00Z,EU,Core Inflation Rate YoY Flash,Oct,2.5,2.5,2.5,%,,medium
 tv1001658355304,2026-11-04T10:00:00Z,EU,Inflation Rate YoY Flash,Oct,4,4,3.8,%,,key
+tv1001659136201,2026-11-04T13:15:00Z,US,ADP Employment Change,Oct,86,69,86,,K,medium
+tv1001661925603,2026-11-04T13:30:00Z,CA,Balance of Trade,Sep,5.35,4.1,4.95,C$,B,medium
+tv1001661641402,2026-11-04T13:30:00Z,US,Balance of Trade,Sep,-105,-108,-105.7,$,B,medium
+tv1001659458203,2026-11-04T15:00:00Z,US,ISM Services PMI,Oct,54.5,54.8,54.9,,,key
+tv1001692990206,2026-11-04T15:30:00Z,US,EIA Crude Oil Stocks Change,w/o Oct 26,-0.865,1.75,-1.892,,M,medium
+tv1001692990208,2026-11-04T15:30:00Z,US,EIA Gasoline Stocks Change,w/o Oct 26,-0.222,-0.75,3.87,,M,medium
