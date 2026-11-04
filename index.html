@@ -33,11 +33,14 @@ body:before{content:"";position:fixed;left:0;right:0;top:0;height:3px;background
 header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px}
 h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0;color:var(--text);letter-spacing:-.01em;text-wrap:balance}
 .sub{color:var(--muted);font-size:14px;margin:0;max-width:62ch}
-.tabs{display:flex;gap:6px}
-.chip{appearance:none;font:inherit;font-size:13px;padding:6px 11px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);cursor:pointer}
-.chip:hover{border-color:var(--accent)}
-.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#06060A;font-weight:700}
+/* All button groups share one look (same as the Index move / Weights switch) so they line up */
+.tabs{display:inline-flex;align-self:flex-start;gap:3px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px}
+.chip{appearance:none;font:inherit;font-size:13px;font-weight:600;padding:6px 12px;border-radius:7px;border:0;background:none;color:var(--text2);cursor:pointer;white-space:nowrap}
+.chip:hover{color:var(--text)}
+.chip[aria-pressed="true"]{background:var(--accent);color:#06060A}
 .chip:focus-visible{outline:2px solid var(--text);outline-offset:1px}
+.top{margin-bottom:-6px}
+@media (max-width:560px){.bl{flex-basis:100%}.tabs,#per{display:flex;align-self:stretch;width:100%}.tabs .chip,#per button{flex:1;padding-left:6px;padding-right:6px}}
 .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 .strip>div{min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card)}
 .strip .k{font-size:12px;color:var(--muted)}
@@ -64,9 +67,9 @@ svg text{fill:var(--text2);font-family:inherit}
 @keyframes pulse{50%{opacity:.25}}
 @media (prefers-reduced-motion:reduce){.badge.live i{animation:none}}
 .prow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}.prow[hidden]{display:none}.since{font-size:12px;color:var(--muted)}.seg button:disabled{opacity:.4;cursor:default}
-.seg{display:inline-flex;gap:2px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:2px}
-.seg button{appearance:none;font:inherit;font-size:13px;padding:5px 12px;border:0;border-radius:7px;background:none;color:var(--text2);cursor:pointer}
-.seg button:hover{color:var(--text)}.seg button[aria-pressed="true"]{background:var(--accent);color:#06060A;font-weight:700}
+.seg{display:inline-flex;gap:3px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{appearance:none;font:inherit;font-size:13px;font-weight:600;padding:6px 12px;border:0;border-radius:7px;background:none;color:var(--text2);cursor:pointer;white-space:nowrap}
+.seg button:hover{color:var(--text)}.seg button[aria-pressed="true"]{background:var(--accent);color:#06060A}
 .seg button:focus-visible,.sel:focus-visible,.dl:focus-visible{outline:2px solid var(--text);outline-offset:1px}
 .sel{appearance:none;-webkit-appearance:none;font:inherit;font-size:13px;color:var(--text);background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238A8FA3' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center;border:1px solid var(--line);border-radius:9px;padding:6px 30px 6px 11px;cursor:pointer}
 .sel:hover{border-color:var(--accent)}
