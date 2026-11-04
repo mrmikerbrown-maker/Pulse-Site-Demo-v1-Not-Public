@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="theme-color" content="#06060A">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Glossary | Newsquawk</title>
+<meta name="description" content="Plain-English meanings of the market and economics words used across the site.">
+<script>try{var t=localStorage.getItem("ict-theme");if(t?t==="light":matchMedia("(prefers-color-scheme: light)").matches)document.documentElement.classList.add("light")}catch(e){}</script>
+<style>
+:root{box-sizing:border-box;color-scheme:dark;--bg:#06060A;--card:#0D0E15;--text:#FFFFFF;--text2:#CBD5E1;--muted:#8A8FA3;--line:#22242E;--accent:#00E0FF}
+:root.light{--bg:#F5F6F8;--card:#FFFFFF;--line:#E1E4EA;--text:#0B0D14;--text2:#3A4150;--muted:#6B7280;--accent:#00B4D8;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text2);font-family:ui-sans-serif,system-ui,-apple-system,"SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;line-height:1.45}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:3px;z-index:60;background:linear-gradient(90deg,#00e0ff,rgba(0,224,255,0) 40%,rgba(0,224,255,0) 60%,#ff3b6b)}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px 40px}
+h1{font-size:clamp(24px,4.4vw,32px);line-height:1.15;font-weight:800;color:var(--text);margin:6px 0 8px;letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:15px;margin:0 0 18px;max-width:66ch}
+.sub .eg{border-bottom:1.5px dotted var(--accent);color:var(--text2)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.bar{position:sticky;top:0;z-index:20;background:var(--bg);padding:10px 0 10px;margin:0 0 6px;border-bottom:1px solid var(--line)}
+.sr{width:100%;font:inherit;font-size:16px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--text)}
+.sr:focus{outline:none;border-color:var(--accent)}
+.chips{display:flex;gap:6px;overflow-x:auto;margin-top:10px;padding-bottom:2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips a{flex:none;font-size:13px;color:var(--text2);text-decoration:none;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--card);white-space:nowrap}
+.chips a:hover{border-color:var(--accent);color:var(--text)}
+.chips a span{color:var(--muted);margin-left:4px}
+.how{margin:18px 0 6px}
+.how h2{font-size:16px;color:var(--text);margin:0 0 8px}
+.how ol{margin:0;padding-left:20px;font-size:14px}.how li{margin:3px 0}.how b{color:var(--text)}
+.grp{scroll-margin-top:130px}
+.grp h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:26px 0 8px;font-weight:700}
+.list{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:700px){.list{grid-template-columns:1fr}}
+.gt{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;scroll-margin-top:140px;position:relative}
+.gt h3{font-size:15px;color:var(--text);margin:0 0 4px;padding-right:26px}
+.gt p{margin:0;font-size:14px}
+.gt .lk{position:absolute;top:10px;right:10px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;border-radius:6px;color:var(--muted);text-decoration:none;opacity:0;font-size:14px}
+.gt:hover .lk,.gt .lk:focus{opacity:1}.gt .lk:hover{color:var(--accent);background:var(--bg)}
+.gt.hit{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.none{color:var(--muted);font-size:14px;margin:18px 0}
+.n{font-size:13px;color:var(--muted);margin:28px 0 0}
+a.cta{color:var(--accent);font-weight:700;text-decoration:none}a.cta:hover{text-decoration:underline}
+.theme{appearance:none;display:inline-flex;align-items:center;justify-content:center;flex:none;width:30px;height:30px;padding:0;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text2);cursor:pointer}
+.theme:hover{color:var(--text)}.theme svg{width:15px;height:15px}.theme .i-moon{display:none}:root.light .theme .i-sun{display:none}:root.light .theme .i-moon{display:block}
+</style>
+<script>window.NQG_NOLINK=true</script>
+<script src="/glossary.js"></script>
+<script src="/nav.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+<h1>Glossary</h1>
+<p class="sub" id="sub">Plain-English meanings of the market and economics words used across the site. On every page, a word with a <span class="eg">dotted underline</span> shows its meaning when you hover over it, or tap it on a phone.</p>
+<div class="bar"><input class="sr" id="q" type="search" placeholder="Search a term, e.g. hawkish, CPI, basis point" aria-label="Search the glossary" autocomplete="off"><nav class="chips" id="chips" aria-label="Sections"></nav></div>
+<div class="card how" id="how"><h2>How it all fits together</h2><ol><li>A data release comes out, such as inflation or jobs.</li><li>Traders compare it with what they expected. The gap is the <b>surprise</b>.</li><li>The surprise changes what they expect the central bank to do with <b>interest rates</b>.</li><li>That ripples out: <b>bond yields</b> move first, then the <b>dollar</b>, <b>gold</b> and <b>stocks</b>.</li><li>Often the move is partly done already, and other news mixes in, so real days are messy.</li></ol></div>
+<div id="out"></div>
+<p class="n">Missing a word? Tell us and we'll add it. <a class="cta" href="https://newsquawk.com" target="_blank" rel="noopener">Take a 1-week trial &rarr; newsquawk.com</a></p>
+</div>
+<script>
+(function(){
+var G=window.NQG,q=document.getElementById("q"),out=document.getElementById("out"),chips=document.getElementById("chips"),how=document.getElementById("how");
+function txt(s){var d=document.createElement("div");d.innerHTML=s;return d.textContent}
+function gid(g){return "s-"+G.slug(g)}
+function render(f){
+ f=(f||"").trim().toLowerCase();var h="",c="",n=0;
+ G.groups.forEach(function(g){
+  var rows=G.terms.filter(function(it){return it.g===g[0]&&(!f||txt(it.t+" "+it.d+" "+it.a.join(" ")).toLowerCase().indexOf(f)>=0)});
+  if(!rows.length)return;n+=rows.length;
+  rows.sort(function(a,b){return txt(a.t).localeCompare(txt(b.t))});
+  c+='<a href="#'+gid(g[0])+'">'+g[0]+'<span>'+rows.length+'</span></a>';
+  h+='<section class="grp" id="'+gid(g[0])+'"><h2>'+g[0]+'</h2><div class="list">';
+  rows.forEach(function(it){h+='<article class="gt" id="'+it.id+'"><h3>'+it.t+'</h3><p>'+it.d+'</p><a class="lk" href="#'+it.id+'" aria-label="Link to '+txt(it.t).replace(/"/g,"")+'">#</a></article>'});
+  h+='</div></section>'});
+ out.innerHTML=n?h:'<p class="none">No term matches that. Try a shorter word.</p>';
+ chips.innerHTML=c;how.style.display=f?"none":"";
+}
+function go(){
+ var id=decodeURIComponent(location.hash.slice(1));if(!id)return;
+ var el=document.getElementById(id);
+ if(!el&&q.value){q.value="";render("");el=document.getElementById(id)}
+ if(!el)return;
+ document.querySelectorAll(".gt.hit").forEach(function(x){x.classList.remove("hit")});
+ if(el.classList.contains("gt"))el.classList.add("hit");
+ el.scrollIntoView({block:el.classList.contains("gt")?"center":"start"})}
+document.getElementById("sub").querySelector(".eg").textContent="dotted underline";
+document.getElementById("sub").innerHTML=document.getElementById("sub").innerHTML.replace("Plain-English meanings of the market","Plain-English meanings of "+G.terms.length+" market");
+render("");
+q.addEventListener("input",function(){render(q.value)});
+addEventListener("hashchange",go);
+if(document.readyState==="complete")setTimeout(go,50);else addEventListener("load",function(){setTimeout(go,50)});
+})();
+</script>
+</body>
+</html>
