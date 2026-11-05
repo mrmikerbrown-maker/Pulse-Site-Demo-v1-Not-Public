@@ -1,6 +1,6 @@
 Index,Google ticker,Sector,Ref mcap $bn (NDX rows: QQQ weight % / price on weights date x1000),Symbol,Name,In top 50,Weight %,% chg,Dow pts,Check: sum of members (pts),Check: weights sum %,"Prev close (NDX rows, rolls the weights)","Company name (static, for the site's stock lookup)"
-IDX_SPX,,,"7,688.62",SPX,04 Nov 16:51,,"7,568.92",1.581467369,,119.4145253,100,,
-IDX_NDX,,,"28,437.17",NDX,04 Nov 17:15,,"28,180.26",0.9116665354,,256.4927478,100,,
+IDX_SPX,,,"7,688.62",SPX,04 Nov 16:51,,"7,568.92",1.581467369,,119.4094645,100,,
+IDX_NDX,,,"28,437.17",NDX,04 Nov 17:15,,"28,180.26",0.9116665354,,256.4144442,100,,
 IDX_DOW,,,"53,356.12",DOW,04 Nov 16:51,,"51,786.72",3.030506663,,"1,575.96",100,,
 DIVISOR,,,,DOW,,,0.168227,,,,,,
 SPX,NASDAQ:NVDA,IT,4931.8,NVDA,NVIDIA Corporation,TRUE,7.667818432,-3.17,,,,,NVIDIA Corporation
@@ -55,7 +55,7 @@ SPX,NYSE:IBM,IT,243.7,IBM,International Business Machines Corporation,TRUE,0.362
 SPX,NYSE:GEV,IND,227.1,GEV,GE Vernova Inc.,TRUE,0.3720998996,-9.33,,,,,GE Vernova Inc.
 SPX,NYSE:ANET,IT,213,ANET,,FALSE,0.3102811714,5.11,,,,,"Arista Networks, Inc."
 SPX,NASDAQ:LIN,MAT,236.1,LIN,Linde plc,TRUE,0.3577477741,2.58,,,,,Linde plc
-SPX,NASDAQ:KLAC,IT,205.8,KLAC,,FALSE,0.2997927937,-4.1,,,,,KLA Corporation
+SPX,NASDAQ:KLAC,IT,205.8,KLAC,,FALSE,0.2997927937,-4.13,,,,,KLA Corporation
 SPX,NYSE:AXP,FIN,214,AXP,,FALSE,0.3117378905,2.2,,,,,American Express Company
 SPX,NYSE:C,FIN,205.7,C,,FALSE,0.2996471218,1.65,,,,,"Citigroup, Inc."
 SPX,NASDAQ:ADI,IT,202.1,ADI,,FALSE,0.294402933,-3.23,,,,,"Analog Devices, Inc."
@@ -455,7 +455,7 @@ SPX,NYSE:AIZ,FIN,14.4,AIZ,,FALSE,0.02097675525,4.15,,,,,"Assurant, Inc."
 SPX,NASDAQ:AKAM,IT,13.3,AKAM,,FALSE,0.01937436422,-0.69,,,,,"Akamai Technologies, Inc."
 SPX,NYSE:WY,RE,14.7,WY,,FALSE,0.02141377098,5.71,,,,,Weyerhaeuser Company
 SPX,NYSE:SOLV,HC,13.8,SOLV,,FALSE,0.02010272378,5.42,,,,,Solventum Corporation
-SPX,NYSE:IT,IT,14.4,IT,,FALSE,0.02097675525,1.45,,,,,"Gartner, Inc."
+SPX,NYSE:IT,IT,14.4,IT,,FALSE,0.02097675525,1.56,,,,,"Gartner, Inc."
 SPX,NYSE:AVY,MAT,13.8,AVY,,FALSE,0.02010272378,3.84,,,,,Avery Dennison Corporation
 SPX,NASDAQ:REG,RE,13.7,REG,,FALSE,0.01995705187,2.22,,,,,Regency Centers Corporation
 SPX,NYSE:MAA,RE,13.6,MAA,,FALSE,0.01981137996,4.09,,,,,"Mid-America Apartment Communities, Inc."
@@ -533,7 +533,7 @@ NDX,NASDAQ:NFLX,COM,18.375095,NFLX,"Netflix, Inc.",TRUE,1.197850156,4.68,,,,63.4
 NDX,NASDAQ:AMGN,HC,2.390384,AMGN,Amgen Inc.,TRUE,1.133339775,3.73,,,,461.26,Amgen Inc.
 NDX,NASDAQ:ARM,IT,1.901773,ARM,Arm Holdings PLC,TRUE,0.3958301953,-5.28,,,,202.49,Arm Holdings plc
 NDX,NASDAQ:LIN,MAT,2.024252,LIN,Linde plc,TRUE,1.06438643,2.58,,,,511.55,Linde plc
-NDX,NASDAQ:KLAC,IT,5.768835,KLAC,KLA Corporation,TRUE,0.9262235304,-4.1,,,,156.2,KLA Corporation
+NDX,NASDAQ:KLAC,IT,5.768835,KLAC,KLA Corporation,TRUE,0.9262235304,-4.13,,,,156.2,KLA Corporation
 NDX,NASDAQ:SHOP,IT,5.335547,SHOP,Shopify Inc.,TRUE,0.7819045897,7.34,,,,142.57,Shopify Inc.
 NDX,NASDAQ:ADI,IT,2.122382,ADI,"Analog Devices, Inc.",TRUE,0.9158035137,-3.23,,,,419.79,"Analog Devices, Inc."
 NDX,NASDAQ:GILD,HC,5.447321,GILD,"Gilead Sciences, Inc.",TRUE,0.937705906,4.19,,,,167.47,"Gilead Sciences, Inc."
