@@ -20,3 +20,12 @@ tv1001659458203,2026-11-04T15:00:00Z,US,ISM Services PMI,Oct,54.5,54.8,54.9,,,ke
 tv1001692990206,2026-11-04T15:30:00Z,US,EIA Crude Oil Stocks Change,w/o Oct 26,-0.865,1.75,-1.892,,M,medium
 tv1001692990208,2026-11-04T15:30:00Z,US,EIA Gasoline Stocks Change,w/o Oct 26,-0.222,-0.75,3.87,,M,medium
 tv1001680887601,2026-11-05T00:30:00Z,AU,Balance of Trade,Sep,2.826,0.81,0.184,A$,B,key
+tv1001661516402,2026-11-05T07:00:00Z,SE,CPI with fixed interest rate MoM Flash,Oct,0,0.3,0.9,%,,medium
+tv1001661516601,2026-11-05T07:00:00Z,SE,CPIF ex Energy YoY Prel,Oct,0.1,0.5,0.5,%,,medium
+tv1001661516404,2026-11-05T07:00:00Z,SE,Core Inflation Rate MoM Flash,Oct,-0.2,0.2,0.1,%,,medium
+tv1001696354701,2026-11-05T08:00:00Z,CH,Unemployment Rate s.a,Oct,3.1,3.1,3.1,%,,medium
+tv1001651403801,2026-11-05T09:00:00Z,NO,Norges Bank rate decision,,4.5,4.5,4.5,%,,key
+tv1001641500101,2026-11-05T12:00:00Z,GB,BoE MPC Vote Cut,Nov,0,0,0,,,medium
+tv1001641500102,2026-11-05T12:00:00Z,GB,BoE MPC Vote Hike,Nov,9,7,3,,,medium
+tv1001641500103,2026-11-05T12:00:00Z,GB,BoE MPC Vote Unchanged,Nov,0,2,6,,,medium
+tv1001641499801,2026-11-05T12:00:00Z,GB,BoE rate decision,Nov,4,4,3.75,%,,key
