@@ -36,3 +36,12 @@ tv1001658908601,2026-11-06T07:00:00Z,DE,Industrial Production MoM,Sep,0.7,0,1,%,
 tv1001677156601,2026-11-06T07:00:00Z,GB,House Price Index MoM,Oct,-0.6,0.1,-0.1,%,,medium
 tv1001677156602,2026-11-06T07:00:00Z,GB,Lloyds House Price Index YoY,Oct,-1.2,-0.3,-0.1,%,,medium
 tv1001659120801,2026-11-06T10:00:00Z,EU,Retail Sales MoM,Sep,-0.7,-0.1,0.4,%,,medium
+tv1001662534201,2026-11-06T13:30:00Z,CA,Employment Change,Oct,-4.7,13.6,-68.3,,K,medium
+tv1001662534205,2026-11-06T13:30:00Z,CA,Unemployment Rate,Oct,6.7,6.5,6.5,%,,key
+tv1001626876701,2026-11-06T13:30:00Z,US,Average Hourly Earnings MoM,Oct,0.4,0.3,0.3,%,,medium
+tv1001626876702,2026-11-06T13:30:00Z,US,Average Hourly Earnings YoY,Oct,3.1,2.9,3.2,%,,medium
+tv1001626876706,2026-11-06T13:30:00Z,US,Non Farm Payrolls,Oct,165,65,60,,K,key
+tv1001626876709,2026-11-06T13:30:00Z,US,Unemployment Rate,Oct,4.1,4.2,4.2,%,,key
+tv1001659628601,2026-11-06T15:00:00Z,CA,Ivey PMI,Oct,56.4,,61.9,,,key
+tv1001659628602,2026-11-06T15:00:00Z,CA,Ivey PMI s.a,Oct,58.3,,58.2,,,key
+tv1001652126805,2026-11-06T15:00:00Z,US,Michigan Consumer Sentiment Prel,Nov,51,48,46.3,,,key
