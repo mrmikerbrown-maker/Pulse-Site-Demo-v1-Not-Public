@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-06T14:14:23Z",
+ "generated": "2026-11-07T12:57:13Z",
  "demo": false,
  "schema": 3,
  "history_years": 10,
@@ -86,21 +86,16 @@
     "stale": false
    },
    "jobs": {
-    "value": 4.2,
-    "asof": "2026-09",
-    "asof_label": "Sep 2026",
+    "value": 4.1,
+    "asof": "2026-10",
+    "asof_label": "Oct 2026",
     "state": "normal",
     "range_lo": 3.7,
     "range_hi": 4.4,
-    "pos": 71.2,
+    "pos": 73.3,
     "zone_l": 67.1,
     "zone_r": 81.6,
     "trail": [
-     {
-      "k": "Sep 2025",
-      "v": 4.4,
-      "pos": 67.1
-     },
      {
       "k": "Nov 2025",
       "v": 4.5,
@@ -150,12 +145,14 @@
       "k": "Aug 2026",
       "v": 4.1,
       "pos": 73.3
+     },
+     {
+      "k": "Sep 2026",
+      "v": 4.2,
+      "pos": 71.2
      }
     ],
-    "ago": {
-     "label": "Sep 2025",
-     "value": 4.4
-    },
+    "ago": null,
     "kept": false,
     "stale": false
    },
