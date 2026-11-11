@@ -8,7 +8,9 @@ For every scheduled FOMC decision since Feb 1994 (when the Fed started announcin
                2024 on    30-day fed funds futures, daily settlements (Kuttner method). This script adds each
                           new meeting by itself once its futures prices are in.
   msg_bp     the "message": the day's 2-year yield move that the decision surprise doesn't explain.
-  the day's close-to-close move in each market.
+  each market's move around the decision: S&P 500 and Treasury yields close to close on the day; FX (ECB
+  reference rates, fixed before the decision) and gold (COMEX settlement, also before it) from that day's
+  fix to the next day's.
 
 Then, per market: move = a + b_target * target_bp + b_msg * msg_bp, fitted over normal times
 (mid-2007 to 2009 left out: the crisis swamped everything). The leftover spread gives the likely range.
@@ -18,7 +20,7 @@ import numpy as np, pandas as pd, requests
 from build_data import fetch, get_fomc_dates, MCODE
 
 START = "1994-02-01"
-YAHOO = {"eurusd": "EURUSD=X", "gbpusd": "GBPUSD=X", "usdjpy": "JPY=X", "spx": "^GSPC", "gold": "GC=F"}
+YAHOO = {"spx": "^GSPC", "gold": "GC=F"}   # Yahoo daily FX closes are snapshotted at uneven times, so FX comes from the ECB
 MARKETS = ["y2", "y10", "eurusd", "gbpusd", "usdjpy", "spx", "gold"]
 CRISIS = ("2007-07-01", "2009-12-31")
 CSV = "fomc_surprises.csv"
@@ -45,6 +47,37 @@ def treasury():
     df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%Y")
     df = df.dropna().sort_values("Date").drop_duplicates("Date").set_index("Date")
     return df["2 Yr"].astype(float), df["10 Yr"].astype(float)
+
+
+def ecb_fx():
+    """ECB reference rates (fixed about 14:15 Frankfurt each business day) as EURUSD, GBPUSD and USDJPY."""
+    import zipfile
+    z = zipfile.ZipFile(io.BytesIO(fetch("https://www.ecb.europa.eu/stats/eurofxref/eurofxref-hist.zip").content))
+    df = pd.read_csv(z.open(z.namelist()[0]), na_values=["N/A"])
+    df["Date"] = pd.to_datetime(df["Date"])
+    df = df.set_index("Date").sort_index()
+    return pd.DataFrame({"eurusd": df["USD"], "gbpusd": df["USD"] / df["GBP"], "usdjpy": df["JPY"] / df["USD"]})
+
+
+def move(s, day, after, bp=False):
+    """Change in a series around a Fed decision (about 19:00 London).
+    after=False: close on the day vs the day before (closes after the decision: S&P 500, Treasury yields).
+    after=True:  first price after the day vs the price on the day (prices fixed before the decision:
+                 ECB FX rates at 14:15 Frankfurt, COMEX gold settlement at 13:30 New York)."""
+    s = s.dropna()
+    if after:
+        a, b = s[s.index <= day], s[s.index > day]
+        if a.empty or b.empty or a.index[-1] < day - pd.Timedelta(days=4) or b.index[0] > day + pd.Timedelta(days=4):
+            return None
+        x0, x1 = a.iloc[-1], b.iloc[0]
+    else:
+        if day not in s.index:
+            return None
+        a = s[s.index < day]
+        if a.empty or a.index[-1] < day - pd.Timedelta(days=5):
+            return None
+        x0, x1 = a.iloc[-1], s.loc[day]
+    return float((x1 - x0) * 100) if bp else float(np.log(x1 / x0) * 100)
 
 
 def new_surprise(day, fomc):
@@ -117,23 +150,21 @@ def fit(t):
 
 def main():
     ev = add_new_meetings()
-    d = pd.DataFrame({k: yahoo(tk) for k, tk in YAHOO.items()})
-    d["y2"], d["y10"] = treasury()
-    d = d.sort_index()
-    chg = pd.DataFrame(index=d.index)
-    for k in YAHOO:
-        chg[k] = np.log(d[k]).diff() * 100            # % move, close to close
-    for k in ("y2", "y10"):
-        chg[k] = d[k].diff() * 100                     # bp
+    px = {k: yahoo(tk) for k, tk in YAHOO.items()}
+    fx = ecb_fx()
+    y2, y10 = treasury()
     ev = ev[ev["date"] >= START].copy()
     rows = []
     for _, e in ev.iterrows():
-        ts = pd.Timestamp(e["date"])
-        if ts not in chg.index or pd.isna(chg.at[ts, "y2"]):
-            print("No market data for", e["date"])
+        day = pd.Timestamp(e["date"])
+        r = {"date": e["date"], "target_bp": float(e["target_bp"]),
+             "y2": move(y2, day, False, True), "y10": move(y10, day, False, True),
+             "eurusd": move(fx["eurusd"], day, True), "gbpusd": move(fx["gbpusd"], day, True),
+             "usdjpy": move(fx["usdjpy"], day, True), "spx": move(px["spx"], day, False), "gold": move(px["gold"], day, True)}
+        if r["y2"] is None:
+            print("No 2-year yield for", e["date"], "- skipped (data for the latest meeting may not be in yet)")
             continue
-        rows.append({"date": e["date"], "target_bp": float(e["target_bp"]),
-                     **{k: (None if pd.isna(chg.at[ts, k]) else float(chg.at[ts, k])) for k in MARKETS}})
+        rows.append(r)
     t = pd.DataFrame(rows)
     t, f, msd = fit(t)
     for k, v in f.items():
@@ -148,7 +179,9 @@ def main():
            "n": int(f["y2"]["n"]), "from": f["y2"]["from"], "last_meeting": t["date"].iloc[-1],
            "crisis_left_out": list(CRISIS), "msg_sd": msd, "fit": f, "events": events,
            "sources": "Decision surprises: SF Fed monetary policy surprises (Bauer-Swanson) to 2023, then 30-day "
-                      "fed funds futures. Market moves: Yahoo Finance and US Treasury, close to close on the day."}
+                      "fed funds futures. Market moves: S&P 500 (Yahoo Finance) and Treasury yields (US Treasury) close to close "
+                      "on the day; FX (ECB reference rates) and gold (COMEX settlement, Yahoo) from the fix before the "
+                      "decision to the next one after it."}
     with open("fomc.json", "w") as fh:
         json.dump(out, fh, separators=(",", ":"))
     print("Saved fomc.json:", len(events), "meetings, last", out["last_meeting"])

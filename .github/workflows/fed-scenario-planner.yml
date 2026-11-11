@@ -18,8 +18,6 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pandas numpy requests
-      - run: python probe/ts.py
-      - run: exit 1
       - run: python build_data.py
       # Fed-day history: adds each new meeting's surprise and refits the market reactions.
       # If it fails, the last good fomc.json stays and the pricing above is still saved.
