@@ -8,13 +8,13 @@ def get(u):
     except Exception as e:
         print(f"FAIL {u} -> {e}"); return b""
 h=get("https://www.eurex.com/ex-en/data/trading-files/product-and-price-report").decode("utf-8","ignore")
-links=sorted(set(re.findall(r'"(/resource/blob/[^"]+\.zip)"',h)),key=lambda l:l.rsplit("/",1)[1][-12:])
+links=sorted(set(re.findall(r'(?:https://www\.eurex\.com)?(/resource/blob/[^"\x27\s]+\.zip)',h)),key=lambda l:l.rsplit("/",1)[1][-12:])
 names={}
 for l in links: names.setdefault(l.rsplit("/",1)[1][:16],[]).append(l)
 print("report types:",{k:len(v) for k,v in names.items()})
 for l in links: print("  ",l.rsplit("/",1)[1])
 # text around each link (labels)
-for m in re.finditer(r'"(/resource/blob/[^"]+\.zip)"',h):
+for m in re.finditer(r'(?:https://www\.eurex\.com)?(/resource/blob/[^"\x27\s]+\.zip)',h):
     s=re.sub(r'<[^>]+>|\s+',' ',h[max(0,m.start()-400):m.start()])[-150:]
     print("  label:",s,"->",m.group(1).rsplit("/",1)[1]); 
 for kind in ("cb001","cb002"):
