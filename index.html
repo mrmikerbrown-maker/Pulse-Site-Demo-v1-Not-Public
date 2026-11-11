@@ -128,9 +128,15 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
    <div class="live" id="c-cb"><p class="wait">Loading…</p></div>
    <div class="go">Open the tracker →</div>
   </a>
+  <a class="card" href="fed-pricing/">
+   <div class="lbl">Fed</div><h2>Fed Pricing</h2>
+   <p class="d">How many hikes or cuts the market prices for each Fed meeting, from fed funds futures.</p>
+   <div class="live" id="c-fedp"><p class="wait">Loading…</p></div>
+   <div class="go">Open the pricing →</div>
+  </a>
   <a class="card" href="fed-scenario-planner/">
    <div class="lbl">Fed</div><h2>Fed Scenario Planner</h2>
-   <p class="d">What the market is pricing for the next Fed decision, and how FX, stocks, yields and gold could react.</p>
+   <p class="d">How FX, stocks, yields and gold could react to the next Fed decision, from dovish to hawkish surprises.</p>
    <div class="live" id="c-fed"><p class="wait">Loading…</p></div>
    <div class="go">Open the planner →</div>
   </a>
@@ -236,6 +242,17 @@ fetch("central-banks/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;r
   '<div class="small" style="margin-bottom:4px">'+esc(f.name+" at "+rate(f))+"</div>"+
   B.slice(0,3).map(function(b){return '<div class="sp"><span>'+esc(when(b)+" · "+b.short+" · "+rate(b))+"</span>"+lastTxt(b)+"</div>"}).join("");
 }).catch(function(){fail("c-cb")});
+
+/* Fed Pricing: bp priced for the next meeting and where the path peaks (or troughs). */
+fetch("fed-scenario-planner/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+ var P=d.path;if(!P||!P.rates||!P.rates.length)throw 0;
+ var md=function(s,o){return new Date(s+"T12:00:00Z").toLocaleDateString("en-GB",Object.assign({timeZone:"UTC"},o)).replace("Sept","Sep")};
+ var e=P.effr,R=P.rates,nb=(R[0]-e)*100,pk=0;R.forEach(function(r,i){if(Math.abs(r-e)>Math.abs(R[pk]-e))pk=i});
+ var tb=(R[pk]-e)*100,sg=function(x){return(x>0?"+":x<0?"−":"")+Math.abs(x).toFixed(0)},cl=function(x){return x>0?"pk":x<0?"ac":""};
+ $("c-fedp").innerHTML='<div class="big">'+esc(md(P.meetings[0],{day:"numeric",month:"short"}))+': <span class="'+cl(nb)+'">'+sg(nb)+'bp</span> <span class="small">priced</span></div>'+
+  '<div class="small">'+(R[pk]>=e?"Peak ":"Low ")+R[pk].toFixed(2)+"% by "+esc(md(P.meetings[pk],{month:"short",year:"numeric"}))+" ("+sg(tb)+"bp, "+(tb/25*100).toFixed(0)+"%)</div>"+
+  '<div class="small mu">Effective fed funds rate '+e.toFixed(2)+"%</div>";
+}).catch(function(){fail("c-fedp")});
 
 /* Fed Scenario Planner: what fed funds futures price for the next FOMC. */
 fetch("fed-scenario-planner/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
