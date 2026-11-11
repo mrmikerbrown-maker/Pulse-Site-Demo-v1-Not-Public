@@ -18,4 +18,7 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pandas numpy requests openpyxl
-      - run: python probe/probe.py
+      - run: python fomc_history.py
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash ../.github/save.sh "Fed-day history (test)" fomc.json
