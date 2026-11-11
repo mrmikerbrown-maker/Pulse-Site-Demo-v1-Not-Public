@@ -18,7 +18,4 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install pandas numpy requests
-      - run: python build_data.py
-      - env:
-          GH_TOKEN: ${{ github.token }}
-        run: bash ../.github/save.sh "Update Fed planner data" data.json
+      - run: python probe/probe.py
