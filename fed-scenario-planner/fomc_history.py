@@ -55,13 +55,23 @@ def surprises():
     url = next(l for l in links if re.search(r"\.xlsx?($|\?)", l, re.I)).replace("&amp;", "&")
     url = url if url.startswith("http") else "https://www.frbsf.org" + url
     x = pd.read_excel(io.BytesIO(fetch(url).content), sheet_name=None)
-    sh = next(k for k in x if k.lower().startswith("fomc") and "update" in k.lower())
-    df = x[sh]
-    df = df[(df["Unscheduled"] == 0) & df["FF1"].notna()].copy()
-    df["date"] = pd.to_datetime(df["Date"]).dt.normalize()
-    df["target_bp"] = df["FF1"].astype(float) * 100
-    df["source"] = "SF Fed (" + sh + ")"
-    sf = df[["date", "target_bp", "source"]]
+    parts = []
+    for k, df in x.items():
+        print("SF sheet", repr(k), df.shape, list(df.columns)[:8])
+        if not {"Date", "FF1"} <= set(df.columns):
+            continue
+        dd = pd.to_datetime(df["Date"], errors="coerce")
+        print("   dates", dd.min(), "to", dd.max(), "FF1 non-null", int(df["FF1"].notna().sum()),
+              "Unscheduled values", df["Unscheduled"].value_counts(dropna=False).to_dict() if "Unscheduled" in df else "-")
+        if "fomc" not in k.lower():
+            continue
+        df = df.assign(date=dd.dt.normalize())
+        if "Unscheduled" in df:
+            df = df[df["Unscheduled"].fillna(0) == 0]
+        df = df[df["FF1"].notna() & df["date"].notna()]
+        parts.append(pd.DataFrame({"date": df["date"], "target_bp": df["FF1"].astype(float) * 100, "source": "SF Fed (" + k + ")"}))
+    sf = pd.concat(parts).drop_duplicates("date", keep="last").sort_values("date")
+    print("SF Fed scheduled meetings:", len(sf), sf["date"].min().date(), "to", sf["date"].max().date())
     rec = pd.read_csv("fomc_recent.csv", parse_dates=["date"])
     rec = rec[rec["date"] > sf["date"].max()]
     out = pd.concat([sf, rec]).sort_values("date")
