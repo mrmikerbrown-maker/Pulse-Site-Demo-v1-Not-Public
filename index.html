@@ -92,13 +92,13 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
  <p class="sub">Free tools for reading the economy and the market's moves. Each card shows the latest figure, so you get the gist without clicking.</p>
 
  <div class="grid">
-  <a class="card" href="/calendar/">
+  <a class="card" href="calendar/">
    <div class="lbl">Calendar</div><h2>This week</h2>
    <p class="d">The key releases and central bank decisions this week, with what's expected, in London time.</p>
    <div class="live" id="c-cal"><p class="wait">Loading…</p></div>
    <div class="go">Open the calendar →</div>
   </a>
-  <a class="card" href="/index-contribution-site/">
+  <a class="card" href="index-contribution-site/">
    <div class="lbl">Equities</div><h2>Index Contribution</h2>
    <p class="d">Which stocks and sectors are driving the S&amp;P 500, Nasdaq 100 and Dow.</p>
    <div class="live" id="c-index"><p class="wait">Loading…</p></div>
@@ -110,7 +110,7 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
    <div class="live" id="c-surp"><p class="wait">Loading…</p></div>
    <div class="go">Open the surprises →</div>
   </a>
-  <a class="card" href="/economy-thermometer/">
+  <a class="card" href="economy-thermometer/">
    <div class="lbl">Macro</div><h2>Economy Thermometer</h2>
    <p class="d">Is each G10 economy running hot or cold? Prices, jobs and growth on one scale.</p>
    <div class="live" id="c-therm"><p class="wait">Loading…</p></div>
@@ -122,7 +122,7 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
    <div class="live" id="c-clock"></div>
    <div class="go">Open the clock →</div>
   </a>
-  <a class="card" href="/central-banks/">
+  <a class="card" href="central-banks/">
    <div class="lbl">Policy</div><h2>Central banks</h2>
    <p class="d">Every G10 policy rate, the last decision and the next meeting, in London time.</p>
    <div class="live" id="c-cb"><p class="wait">Loading…</p></div>
@@ -145,7 +145,7 @@ var fx=function(v,d){return (v>0?"+":v<0?"−":"")+Math.abs(v).toFixed(d)};
 var fail=function(id){$(id).innerHTML='<p class="wait">Open the tool for the latest figures.</p>'};
 
 /* Economy Thermometer: the US verdict, plus a pill for each G10 economy. */
-fetch("/economy-thermometer/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+fetch("economy-thermometer/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
  var C=d.countries||[],us=C.filter(function(c){return c.code==="US"})[0]||C[0];if(!us)throw 0;
  var cls={hot:"pk",warm:"pk",cool:"ac",cold:"ac",normal:""}[us.verdict]||"";
  var PT={hot:"Inflation well above target",warm:"Inflation above target",normal:"Inflation on target",cool:"Inflation below target",cold:"Inflation well below target"};
@@ -159,7 +159,7 @@ fetch("/economy-thermometer/data.json?"+Date.now()).then(function(r){if(!r.ok)th
    During the New York session it reads the live sheet, as the tracker does; otherwise the saved last-session copy. */
 (function(){
  var LIVE="https://docs.google.com/spreadsheets/d/e/2PACX-1vSE9500jiKFvBw_k0q2m8CPaZ3VbZNv0uIYCe-QSnXpbASoqvwr2RW2hocHl5NVQejXIfVe4CdhX67h/pub?gid=454467433&single=true&output=csv";
- var B="/index-contribution-site/";
+ var B="index-contribution-site/";
  function parse(t){var out=[],row=[],f="",q=false;for(var i=0;i<t.length;i++){var c=t[i];
   if(q){if(c==='"'){if(t[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
   else if(c==='"')q=true;else if(c===","){row.push(f);f=""}else if(c==="\n"){row.push(f);out.push(row);row=[];f=""}else if(c!=="\r")f+=c}
@@ -206,7 +206,7 @@ fetch("surprises/?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.text(
 }).catch(function(){fail("c-surp")});
 
 /* This week: the next key releases (imp 2) from the calendar, in London time. */
-fetch("/calendar/data/calendar.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+fetch("calendar/data/calendar.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
  var now=Date.now(),E=(d.events||[]).filter(function(e){return e.imp===2&&e.t}).sort(function(a,b){return a.t<b.t?-1:1});
  var up=E.filter(function(e){return Date.parse(e.t)>now-5*60e3}).slice(0,4);
  var lon=function(t,o){return new Date(t).toLocaleString("en-GB",Object.assign({timeZone:"Europe/London"},o))};
@@ -221,7 +221,7 @@ fetch("/calendar/data/calendar.json?"+Date.now()).then(function(r){if(!r.ok)thro
 }).catch(function(){fail("c-cal")});
 
 /* Central banks: the next three meetings, each bank's current rate and its last move. */
-fetch("/central-banks/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+fetch("central-banks/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
  var now=Date.now(),B=(d.banks||[]).filter(function(b){return b.next&&b.next.utc&&Date.parse(b.next.utc)>now-3*36e5}).sort(function(a,b){return a.next.utc<b.next.utc?-1:1});
  if(!B.length)throw 0;
  var lon=function(t,o){return new Date(t).toLocaleString("en-GB",Object.assign({timeZone:"Europe/London"},o))};

@@ -1,0 +1,21 @@
+name: "Index Contribution: save SPY weights"
+on:
+  schedule:
+    # Once each weekday at 13:15 UTC, before the US open in summer and winter
+    - cron: "15 13 * * 1-5"
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+jobs:
+  spy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: index-contribution-site
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/spy.py
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash ../.github/save.sh "Save SPY weights" spy-weights.csv spy-weights-prev.csv

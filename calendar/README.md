@@ -1,12 +1,12 @@
 # This week's economic calendar
 
-Live page: https://mrmikerbrown-maker.github.io/calendar/
+Live page: https://mrmikerbrown-maker.github.io/Pulse-Site-Demo-v1-Not-Public/calendar/
 
 - `index.html` — the page. Reads `data/calendar.json`. Times shown in London time.
 - `scripts/fetch.py` — fetches the week (Mon–Fri; from Saturday it loads the coming week).
   Main source: TradingView's public calendar feed (actual, consensus, previous).
   Backup: the ForexFactory weekly feed (no actuals). No API key, no Claude tokens.
-- `.github/workflows/update.yml` — runs the fetch every 15 minutes on weekdays (every 30 minutes overnight for Asia),
+- `.github/workflows/calendar.yml` (at the top of the repo) — runs the fetch every 15 minutes on weekdays (every 30 minutes overnight for Asia),
   and commits only when something changed.
 - `data/history.csv` — every released number with its consensus, kept forever. Data Surprises can read this.
 

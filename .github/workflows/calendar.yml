@@ -1,4 +1,4 @@
-name: Update calendar
+name: "Calendar: update this week"
 on:
   schedule:
     # Every 15 minutes on weekdays, 05:00-21:45 UTC (06:00-22:45 London in winter).
@@ -13,6 +13,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  pages: write
 concurrency:
   group: calendar
   cancel-in-progress: false
@@ -21,9 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: python3 scripts/fetch.py
-      - run: |
-          git add data/
-          git diff --cached --quiet && exit 0
-          git -c user.name="github-actions[bot]" -c user.email="41898208+github-actions[bot]@users.noreply.github.com" commit -m "Update calendar"
-          git push
+      - run: python3 calendar/scripts/fetch.py
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .github/save.sh "Update calendar" calendar/data/
