@@ -1,8 +1,8 @@
 {
- "generated": "2026-11-11T10:55:30Z",
+ "generated": "2026-11-11T11:50:58Z",
  "history_last_date": "2026-11-10",
  "vols": {
-  "vix": 18.64,
+  "vix": 18.57,
   "gvz": 24.43,
   "move": 92.4,
   "eurusd": 4.77,
@@ -120,10 +120,10 @@
   "cut": 0,
   "hike": 1,
   "hold": 0,
-  "net_bp": 28.9,
+  "net_bp": 28.2,
   "effr": 3.88,
   "contract": "ZQZ26.CBT",
-  "price": 95.91500091552734,
+  "price": 95.91999816894531,
   "asof": "2026-11-11",
   "source": "30-day fed funds futures via Yahoo (delayed); 25bp steps assumed"
  },
@@ -142,15 +142,15 @@
   "effr": 3.88,
   "asof": "2026-11-11",
   "rates": [
-   4.1689,
-   4.315,
-   4.4811,
-   4.54,
-   4.6186,
-   4.63,
+   4.1618,
+   4.32,
+   4.4861,
+   4.55,
+   4.6286,
    4.64,
    4.64,
-   4.585
+   4.645,
+   4.6
   ],
   "compare": {
    "1w ago": {
@@ -182,7 +182,8 @@
     ]
    }
   },
-  "source": "CBOT 30-day fed funds futures via Yahoo (delayed)"
+  "source": "CBOT 30-day fed funds futures via Yahoo (delayed)",
+  "effr_date": "2026-11-09"
  },
  "next_event": {
   "date": "2026-12-09",
