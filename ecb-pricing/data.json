@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-11T14:42:43Z",
+ "generated": "2026-11-11T14:44:40Z",
  "path": {
   "base": 2.445,
   "base_period": "2026-11-04",
@@ -65,8 +65,13 @@
   },
   "source": "Eurex ECB Dated \u20acSTR Futures (FEMP), daily settlement"
  },
- "problems": [
-  "estr",
-  "dfr"
- ]
+ "estr": {
+  "value": 2.442,
+  "date": "2026-11-10"
+ },
+ "dfr": {
+  "value": 2.5,
+  "date": "2026-11-11"
+ },
+ "problems": []
 }
