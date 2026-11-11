@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Economic Calendar</title>
+<script>try{var t=localStorage.getItem("ict-theme");if(t?t==="light":matchMedia("(prefers-color-scheme: light)").matches)document.documentElement.classList.add("light")}catch(e){}</script>
+<script src="../nav.js" defer></script>
+<style>
+:root{--bg:#06060A;--card:#0D0E15;--line:#22242E;--text:#FFFFFF;--text2:#CBD5E1;--muted:#8A8FA3;--dim:#5E6273;--accent:#00E0FF;--pink:#FF3B6B;--up:#3DDC97;--down:#FF5C7A;--gold:#FFC24D;color-scheme:dark}
+:root.light{--bg:#F5F6F8;--card:#FFFFFF;--line:#E1E4EA;--text:#0B0D14;--text2:#3A4150;--muted:#6B7280;--dim:#9AA0AC;--accent:#00B4D8;--pink:#E62E5C;--up:#0E9F6E;--down:#E23D52;--gold:#C98A00;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text2);font-family:ui-sans-serif,system-ui,-apple-system,"SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;line-height:1.4}
+body:before{content:"";position:fixed;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#00e0ff,rgba(0,224,255,0) 40%,rgba(0,224,255,0) 60%,#ff3b6b);z-index:20}
+a{color:inherit;text-decoration:none}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 22px}
+.logo{display:block;width:150px;height:auto}
+:root.light .logo{filter:invert(1) hue-rotate(180deg)}
+.theme{appearance:none;display:inline-flex;align-items:center;justify-content:center;flex:none;width:30px;height:30px;padding:0;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text2);cursor:pointer}
+.theme:hover{color:var(--text)}
+.theme svg{width:15px;height:15px}
+.i-moon{display:none}:root.light .i-sun{display:none}:root.light .i-moon{display:block}
+@media (max-width:760px){.logo{width:120px}}
+/* page */
+.wrap{max-width:1100px;margin:0 auto;padding:8px 16px 40px}
+h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--text);letter-spacing:-.01em}
+.sub{color:var(--muted);font-size:15px;margin:0 0 20px;max-width:66ch}
+.next{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:12px;padding:14px 16px;margin:0 0 18px}
+.next .k{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:800}
+.next .w{font-size:17px;font-weight:700;color:var(--text)}
+.next .m{font-size:13px;color:var(--muted)}
+.next .cd{margin-left:auto;font-size:22px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.next .cd small{display:block;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;text-align:right}
+.ctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 18px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{appearance:none;font:inherit;font-size:13px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text2);cursor:pointer}
+.chip.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+.seg{margin-left:auto;display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{appearance:none;font:inherit;font-size:13px;padding:6px 12px;border:0;background:var(--card);color:var(--text2);cursor:pointer}
+.seg button.on{background:var(--accent);color:#06060A;font-weight:700}
+.day{margin:0 0 18px;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.dh{display:flex;align-items:baseline;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+.dh b{color:var(--text);font-size:15px}
+.dh .tag{font-size:10px;font-weight:800;letter-spacing:.12em;background:var(--pink);color:#fff;padding:2px 7px;border-radius:5px}
+.dh .n{margin-left:auto;font-size:12px;color:var(--muted)}
+table{width:100%;table-layout:fixed;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:right;padding:9px 16px 7px}
+th:nth-child(-n+3){text-align:left}
+td{padding:11px 16px;border-top:1px solid var(--line);font-size:14px;text-align:right;white-space:nowrap}
+td.t{text-align:left;color:var(--text);font-weight:700}
+td.c{text-align:left}
+td.e{text-align:left;white-space:normal;color:var(--text)}
+.md{display:inline-block;width:6px;height:6px;border-radius:50%;border:1.5px solid var(--muted);margin:0 7px 1px 0;vertical-align:middle}
+td.e span{display:block;font-size:12px;color:var(--muted)}
+.pc{display:none!important}
+.cc{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.04em;padding:3px 6px;border-radius:5px;border:1px solid var(--line);color:var(--text2);min-width:30px;text-align:center}
+td.a{font-weight:800;color:var(--text)}
+td.f{color:var(--text)}
+td.p{color:var(--muted)}
+tr.past td{opacity:.62}
+tr.past td.a,tr.past td.r{opacity:1}
+tr.soon td{background:rgba(0,224,255,.06)}
+:root.light tr.soon td{background:rgba(0,180,216,.08)}
+.res{display:inline-block;font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px}
+.res.ab{color:var(--up);background:rgba(61,220,151,.12)}
+.res.be{color:var(--down);background:rgba(255,92,122,.12)}
+.res.il{color:var(--muted);background:rgba(138,143,163,.14)}
+.res.pend{color:var(--dim);font-weight:600;background:none;padding:0}
+.empty{color:var(--muted);font-size:14px;padding:18px 0}
+.chip.all{font-weight:700}
+.about{margin-top:24px;font-size:13px;color:var(--muted);max-width:76ch}
+.about b{color:var(--text2)}
+.foot{margin-top:26px;font-size:12px;color:var(--dim);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+@media (max-width:760px){
+ .next .cd{margin-left:0}
+ .next .cd small{text-align:left}
+ .seg{margin-left:0}
+ thead{display:none}
+ table,tbody{display:block}
+ colgroup{display:none}
+ tr{display:grid;grid-template-columns:52px 1fr auto;grid-template-areas:"t e e" "t a f" "t r p";column-gap:10px;row-gap:3px;padding:11px 14px;border-top:1px solid var(--line)}
+ td{border:0;padding:0;font-size:13px}
+ td.t{grid-area:t;width:auto}
+ td.c{display:none}
+ td.e{grid-area:e;font-size:14px}
+ td.e .pc{display:inline-block!important;margin-left:0!important}
+ tr.soon{background:rgba(0,224,255,.06)}
+ tr.soon td,:root.light tr.soon td{background:none}
+ :root.light tr.soon{background:rgba(0,180,216,.08)}
+ td.e .cc{margin-right:6px;font-size:10px;padding:2px 5px;min-width:0}
+ td.e span{display:inline;margin-left:4px}
+ td.a{grid-area:a;text-align:left}
+ td.f{grid-area:f}
+ td.p{grid-area:p}
+ td.r{grid-area:r;text-align:left}
+ td[data-l]:before{content:attr(data-l);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-right:6px}
+}
+</style>
+</head>
+<body>
+
+<main class="wrap">
+<div class="top"><img class="logo" alt="Newsquawk" width="120" src="data:image/png;base64,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"><button class="theme" id="theme" type="button" aria-label="Switch light/dark"><svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg><svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1z"/></svg></button></div>
+ <h1>This week's economic calendar</h1>
+ <p class="sub">The releases that move markets this week, with what economists expect (the consensus). All times are London time. When a number lands, you'll see straight away whether it beat or missed.</p>
+ <div class="next" id="next"></div>
+ <div class="ctl">
+  <div class="chips" id="chips"></div>
+  <div class="seg" id="seg"><button data-i="2">Key releases</button><button data-i="1">Key + medium</button></div>
+ </div>
+ <div id="days"><p class="empty">Loading this week's calendar…</p></div>
+ <p class="about"><b>How to read it.</b> <b>Consensus</b> is the average forecast from economists polled before the release. <b>Previous</b> is last period's figure. <b>Result</b> shows how far the actual number landed from the consensus. A small circle before a name marks a medium-importance release; the rest are key releases. Pick as many countries as you like, and the page remembers your choice. A big gap is a surprise, and surprises are what move prices. See <a class="ac" href="#">Data Surprises</a> for how markets have reacted to past surprises.</p>
+ <div class="foot"><span>Built by Newsquawk</span><span id="src">Checked every 15 minutes on weekdays. Not investment advice.</span></div>
+</main>
+<script>
+document.getElementById("theme").onclick=function(){var l=document.documentElement.classList.toggle("light");try{localStorage.setItem("ict-theme",l?"light":"dark")}catch(e){}};
+var CN={US:"United States",EU:"Eurozone",DE:"Germany",GB:"United Kingdom",JP:"Japan",CN:"China",CA:"Canada",AU:"Australia",NZ:"New Zealand",CH:"Switzerland",NO:"Norway",SE:"Sweden"};
+var CC={US:"US",EU:"EZ",DE:"DE",GB:"UK",JP:"JP",CN:"CN",CA:"CA",AU:"AU",NZ:"NZ",CH:"CH",NO:"NO",SE:"SE"};
+var ORDER=["US","EU","DE","GB","JP","CN","CA","AU","NZ","CH","NO","SE"];
+function load(k,d){try{var v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+var picked=load("cal-countries",null); // null = all
+var imp=load("cal-imp",2);
+var DATA=null,EV=[];
+var tf=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/London",hour:"2-digit",minute:"2-digit"});
+var df=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/London",weekday:"long",day:"numeric",month:"short"});
+var sf=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/London",weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+var kf=new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/London"});
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function decs(x){if(x==null)return 0;var s=String(x);return s.indexOf(".")<0?0:Math.min(2,s.split(".")[1].length)}
+function pre(u){return u&&u!=="%"&&u.length<=3&&/[$£€¥]/.test(u)?u:""}
+function fmt(x,o){if(x==null)return"–";var n=Math.abs(x).toFixed(o.dp);return (x<0?"−":"")+pre(o.unit)+n+(o.unit==="%"?"%":"")+(o.scale||"")}
+function prep(o){o.dp=o.rate?2:Math.max(decs(o.actual),decs(o.forecast),decs(o.previous));o.date=new Date(o.t);return o}
+function shown(o){return o.imp>=imp&&(!picked||picked.indexOf(o.c)>=0)}
+function res(o,now){
+ if(o.actual==null)return'<span class="res pend">'+(o.date<now&&now-o.date<6*36e5?"awaiting":"")+'</span>';
+ if(o.rate){var bp=o.previous==null?null:Math.round((o.actual-o.previous)*100),w=bp==null?"Set at "+fmt(o.actual,o):bp>0?"Hiked "+bp+"bp":bp<0?"Cut "+(-bp)+"bp":"Held";
+  if(o.forecast==null)return'<span class="res il">'+w+'</span>';
+  var g=Math.round((o.actual-o.forecast)*100);return'<span class="res '+(g===0?"il":g>0?"ab":"be")+'">'+w+(g===0?", as expected":", "+(g>0?"+":"−")+Math.abs(g)+"bp vs consensus")+'</span>'}
+ if(o.forecast==null)return'<span class="res il">no consensus</span>';
+ var g=o.actual-o.forecast;
+ if(Math.abs(g)<Math.pow(10,-o.dp)/2)return'<span class="res il">In line</span>';
+ return'<span class="res '+(g>0?"ab":"be")+'">'+(g>0?"▲ +":"▼ ")+fmt(Math.abs(g),{dp:o.dp,unit:o.unit==="%"?"%":"",scale:o.scale})+(g>0?" above":" below")+'</span>'}
+function drawNext(now){
+ var el=document.getElementById("next"),up=EV.filter(function(o){return shown(o)&&o.date>now})[0];
+ if(!up){el.style.display="none";return}el.style.display="";
+ var ms=up.date-now,d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5),m=Math.floor(ms%36e5/6e4);
+ var same=EV.filter(function(o){return shown(o)&&o.t===up.t}).map(function(o){return CC[o.c]+" "+esc(o.name)});
+ el.innerHTML='<div><div class="k">Next up</div><div class="w">'+same.slice(0,3).join(" · ")+(same.length>3?" +"+(same.length-3)+" more":"")+'</div><div class="m">'+df.format(up.date)+", "+tf.format(up.date)+" London · consensus "+fmt(up.forecast,up)+", previous "+fmt(up.previous,up)+'</div></div><div class="cd">'+(d?d+"d "+h+"h":h?h+"h "+m+"m":m+"m")+"<small>to go</small></div>"}
+function draw(){
+ var now=new Date(),ev=EV.filter(shown);drawNext(now);
+ var box=document.getElementById("days");
+ if(!ev.length){box.innerHTML='<p class="empty">Nothing on the calendar for these countries this week.</p>';return}
+ var g={},order=[];ev.forEach(function(o){var k=kf.format(o.date);if(!g[k]){g[k]=[];order.push(k)}g[k].push(o)});
+ var today=kf.format(now),nextT=(ev.filter(function(o){return o.date>now})[0]||{}).t,html="";
+ order.forEach(function(k){var rows=g[k];
+  html+='<section class="day"><div class="dh"><b>'+df.format(rows[0].date)+'</b>'+(k===today?'<span class="tag">TODAY</span>':'')+'<span class="n">'+rows.length+" release"+(rows.length>1?"s":"")+'</span></div><table><colgroup><col style="width:76px"><col style="width:60px"><col><col style="width:110px"><col style="width:120px"><col style="width:110px"><col style="width:230px"></colgroup><thead><tr><th>Time</th><th></th><th>Release</th><th>Actual</th><th>Consensus</th><th>Previous</th><th>Result</th></tr></thead><tbody>';
+  rows.forEach(function(o){var past=o.date<=now;
+   html+='<tr class="'+(past?"past":"")+(o.t===nextT?" soon":"")+'"><td class="t">'+tf.format(o.date)+'</td><td class="c"><span class="cc" title="'+CN[o.c]+'">'+CC[o.c]+'</span></td><td class="e"><span class="cc pc">'+CC[o.c]+'</span>'+(o.imp===2?'':'<i class="md" title="Medium importance"></i>')+esc(o.name)+'<span>'+esc(o.period)+'</span></td><td class="a" data-l="Actual">'+fmt(o.actual,o)+'</td><td class="f" data-l="Cons">'+fmt(o.forecast,o)+'</td><td class="p" data-l="Prev">'+fmt(o.previous,o)+'</td><td class="r">'+res(o,now)+'</td></tr>'});
+  html+='</tbody></table></section>'});
+ box.innerHTML=html}
+function chips(){
+ var cs=ORDER.filter(function(c){return !DATA||DATA.countries.indexOf(c)>=0});
+ var h='<button class="chip all'+(!picked?" on":"")+'" data-c="ALL">All</button>'+cs.map(function(c){return'<button class="chip'+(picked&&picked.indexOf(c)>=0?" on":"")+'" data-c="'+c+'" aria-pressed="'+!!(picked&&picked.indexOf(c)>=0)+'">'+CN[c]+'</button>'}).join("");
+ document.getElementById("chips").innerHTML=h;
+ [].forEach.call(document.querySelectorAll("#seg button"),function(b){b.classList.toggle("on",+b.dataset.i===imp)})}
+document.getElementById("chips").onclick=function(e){var b=e.target.closest(".chip");if(!b)return;var c=b.dataset.c;
+ if(c==="ALL")picked=null;else{picked=picked?picked.slice():[];var i=picked.indexOf(c);if(i<0)picked.push(c);else picked.splice(i,1);if(!picked.length)picked=null}
+ save("cal-countries",picked);chips();draw()};
+document.getElementById("seg").onclick=function(e){var b=e.target.closest("button");if(!b)return;imp=+b.dataset.i;save("cal-imp",imp);chips();draw()};
+function fetchData(){
+ fetch("data/calendar.json?"+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+  DATA=d;EV=d.events.map(prep);chips();draw();
+  document.getElementById("src").textContent="Source: "+(d.source==="TradingView"?"TradingView economic calendar":d.source+" weekly calendar (backup source, no actuals)")+". Last change "+sf.format(new Date(d.checked))+" London. Checked every 15 minutes on weekdays. Not investment advice."
+ }).catch(function(){if(!DATA)document.getElementById("days").innerHTML='<p class="empty">Could not load the calendar. Try again in a minute.</p>'})}
+chips();fetchData();setInterval(fetchData,5*60e3);setInterval(function(){if(DATA)draw()},30e3);
+</script>
+</body>
+</html>

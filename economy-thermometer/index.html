@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="icon" href="data:,">
+<title>Is the Economy Hot or Cold</title>
+<script>try{var t=localStorage.getItem("ict-theme");if(t?t==="light":matchMedia("(prefers-color-scheme: light)").matches)document.documentElement.classList.add("light")}catch(e){}</script>
+<style>
+/* Layout: G10 overview table (one row per economy), then a detail card for the selected economy with three strips (prices, jobs, growth) and the interest-rate box. Newsquawk dark is the house look; a light theme sits under :root.light, switched by the sun/moon button. */
+:root{--bg:#06060A;--card:#0D0E15;--line:#22242E;--text:#FFFFFF;--text2:#CBD5E1;--muted:#8A8FA3;--dim:#5E6273;--accent:#00E0FF;--pink:#FF3B6B;--ink:#FFFFFF;--onink:#06060A;--gold:#FFC24D;--hole:#06060A;--axis:#2a2d3a;--up:#3DDC97;--down:#FF5C7A;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text2);font-family:ui-sans-serif,system-ui,-apple-system,"SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;line-height:1.4;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:0 28px}
+body:before{content:"";position:fixed;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#00e0ff,rgba(0,224,255,0) 40%,rgba(0,224,255,0) 60%,#ff3b6b);z-index:5}
+.wrap{max-width:1068px;margin:0 auto;padding-top:8px}
+.logo{display:block;width:150px;height:auto;margin:22px 0 18px}
+h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--text);letter-spacing:-.01em;text-wrap:balance}
+.sub{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:62ch}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.demo{display:none;margin:0 0 12px;border:1px dashed var(--pink);color:var(--pink);border-radius:8px;padding:8px 12px;font-size:13px}
+.demo.on{display:block}
+.lbl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+/* overview */
+.ov{display:flex;flex-direction:column;gap:4px}
+.hd,.rw{display:grid;grid-template-columns:minmax(84px,1.5fr) repeat(3,minmax(0,1fr)) minmax(48px,.8fr) minmax(0,1.5fr);gap:6px;align-items:center}
+.hd{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);padding:0 10px 4px}
+.rw{appearance:none;font:inherit;text-align:left;color:var(--text2);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer;width:100%}
+.rw:hover{border-color:var(--accent)}
+.rw.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.rw:focus-visible{outline:2px solid var(--text);outline-offset:1px}
+.rw .nm{font-weight:700;color:var(--text);font-size:14px}
+.rw .rt{font-size:13px;color:var(--text2);font-variant-numeric:tabular-nums}
+.pl{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 0;border-radius:6px;text-align:center;width:100%;max-width:70px;border:1px solid var(--line);color:var(--muted)}
+.pl.hot{background:var(--pink);border-color:var(--pink);color:#06060A}
+.pl.warm{background:rgba(255,59,107,.14);border-color:var(--pink);color:var(--pink)}
+.pl.normal{color:var(--text2);border-color:var(--dim)}
+.pl.cool{background:rgba(0,224,255,.12);border-color:var(--accent);color:var(--accent)}
+.pl.cold{background:var(--accent);border-color:var(--accent);color:#06060A}
+.pl.none{border-style:dashed;color:var(--dim)}
+.vd{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.vd.hot{background:var(--pink);border-color:var(--pink);color:#06060A}
+.vd.warm{background:rgba(255,59,107,.14);border-color:var(--pink);color:var(--pink)}
+.vd.normal{color:var(--text2);border-color:var(--dim)}
+.vd.cool{background:rgba(0,224,255,.12);border-color:var(--accent);color:var(--accent)}
+.vd.cold{background:var(--accent);border-color:var(--accent);color:#06060A}
+/* detail */
+.dt{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
+.dh{display:flex;align-items:center;justify-content:space-between;gap:10px 14px;flex-wrap:wrap}
+.dh b{font-size:20px;color:var(--text)}
+.sum{font-size:14.5px;color:var(--text2);margin:6px 0 0}
+.g{padding:14px 0 6px;border-top:1px solid var(--line);margin-top:14px}
+.gt{display:flex;flex-direction:column;gap:2px;margin-bottom:38px}
+.gt b{font-size:16px;color:var(--text)}
+.gt .v{margin-left:8px;font-weight:800;font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.v.hot,.v.warm{color:var(--pink)}.v.cool,.v.cold{color:var(--accent)}.v.normal{color:var(--muted)}
+.gt>span{font-size:12.5px;color:var(--muted)}
+.old{color:var(--pink)}
+.bar{position:relative;height:12px;border-radius:99px;background:linear-gradient(90deg,#0b6b7a 0%,#00E0FF 8%,#1c2a33 32%,#2a2d3a 50%,#33242c 68%,#FF3B6B 92%,#a01c3e 100%);margin:0 6px}
+.bar.rev{background:linear-gradient(270deg,#0b6b7a 0%,#00E0FF 8%,#1c2a33 32%,#2a2d3a 50%,#33242c 68%,#FF3B6B 92%,#a01c3e 100%)}
+/* Time is separate from the thermometer's value axis. */
+.trend{margin-top:16px;padding-top:10px;border-top:1px solid var(--line)}
+.trend-head,.trend-dates{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted)}
+.trend-head output{color:var(--text2);font-variant-numeric:tabular-nums;text-align:right}
+.trend-plot{position:relative;height:120px;margin:24px 14px 38px 48px;border-left:1px solid var(--dim);border-bottom:1px solid var(--dim)}
+.trend-plot svg{display:block;width:100%;height:100%;overflow:visible}
+.trend-point{position:absolute;transform:translate(-50%,-50%);width:24px;height:28px;background:transparent;border:0;padding:0;cursor:pointer;border-radius:6px}
+.trend-point:focus-visible{outline:2px solid var(--accent)}
+.trend-dates span:last-child{color:var(--text);text-align:right}
+.trend-y{position:absolute;right:calc(100% + 8px);transform:translateY(-50%);font-size:11px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.trend-x{position:absolute;top:calc(100% + 8px);transform:translateX(-50%);font-size:10px;color:var(--muted);text-align:center;white-space:nowrap;line-height:1.3}
+.trend-grid{position:absolute;left:0;right:0;height:1px;background:var(--line);pointer-events:none}
+.trend-tip{display:none;position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);padding:6px 9px;border-radius:6px;background:var(--text);color:var(--bg);font:600 12px ui-sans-serif,system-ui,sans-serif;white-space:nowrap;box-shadow:0 2px 10px #06060A;pointer-events:none;z-index:3}
+.trend-point:hover .trend-tip,.trend-point:focus .trend-tip{display:block}
+.trend-point:first-of-type .trend-tip{left:-12px;transform:none}
+.trend-point:last-of-type .trend-tip{left:auto;right:-12px;transform:none}
+.trend-point:hover,.trend-point:focus{z-index:4}
+.gt>.ago{font-size:12px;color:var(--dim)}
+.zone{position:absolute;top:-4px;bottom:-4px;border:1.5px solid var(--text2);border-radius:6px;background:rgba(255,255,255,.07)}
+.zl{position:absolute;top:20px;font-size:11px;color:var(--text2);transform:translateX(-50%);white-space:nowrap}
+.mk{position:absolute;top:-9px;width:4px;height:30px;background:var(--ink);border-radius:2px;box-shadow:0 0 0 2px var(--card);transform:translateX(-50%)}
+.mv{position:absolute;top:-26px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--onink);font-weight:800;font-size:13px;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.mk.l .mv{left:-6px;transform:none}.mk.r .mv{left:auto;right:-6px;transform:none}
+.ends{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:26px;letter-spacing:.08em;text-transform:uppercase}
+.rate{display:flex;align-items:center;gap:16px;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:12px 14px;margin-top:14px}
+.rate .n{font-size:26px;font-weight:800;color:var(--text);white-space:nowrap}
+.rate p{margin:0;font-size:13.5px;color:var(--text2)}
+.rate small{color:var(--muted);font-size:12px;display:block;margin-top:6px}
+.rate b{color:var(--text)}
+.empty{color:var(--muted);font-size:14px;padding:6px 0}
+.note{font-size:12px;color:var(--muted);margin:14px 0 0;max-width:72ch}.note p{margin:0 0 8px}.note summary{cursor:pointer;color:var(--accent);display:inline-block}.note ul{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:8px}.note b{color:var(--text2);font-weight:600}
+.cta{display:inline-block;margin-top:18px;color:var(--accent);font-weight:700;text-decoration:none}.cta:hover{text-decoration:underline}
+/* over time: the compass */
+.wrap.wide{max-width:1100px}
+.tabs{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px;margin:0 0 14px}
+.tabs button{appearance:none;font:inherit;font-size:14px;border:0;background:none;color:var(--muted);padding:7px 22px;border-radius:8px;cursor:pointer}
+.tabs button.on{background:var(--line);color:var(--text);font-weight:600}
+.tabs button:focus-visible{outline:2px solid var(--accent)}
+.cmp{display:grid;grid-template-columns:270px minmax(0,1fr);gap:16px;align-items:start}
+.cmp .side{display:flex;flex-direction:column;gap:12px}
+.box{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{appearance:none;font:inherit;font-size:13px;border:1px solid var(--line);background:none;color:var(--muted);border-radius:99px;padding:5px 11px;cursor:pointer}
+.chips button.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+.chips button:focus-visible{outline:2px solid var(--text)}
+.story{font-size:15.5px;line-height:1.5;color:var(--text);margin:0}
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;border-radius:8px;touch-action:manipulation}
+.chart .yl{font-size:12px;color:var(--muted);margin:0 0 6px}
+.chart .xl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px}
+.defs{font-size:12.5px;color:var(--muted);margin:10px 0 0;line-height:1.5}.defs b{color:var(--text2);font-weight:600}
+.tip{position:absolute;pointer-events:none;background:var(--text2);color:var(--bg);border-radius:8px;padding:8px 11px;font-size:12.5px;line-height:1.45;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.5);z-index:6;display:none}
+.tip b{display:block;font-size:13px}
+.hit{fill:transparent;cursor:pointer;outline:none}
+.hit:focus-visible{stroke:var(--text);stroke-width:2}
+.c-q{font:700 11px ui-sans-serif,system-ui,sans-serif;letter-spacing:.08em;fill:var(--muted)}
+.c-t{font:11px ui-sans-serif,system-ui,sans-serif;fill:var(--muted)}
+.c-a{font:12px ui-sans-serif,system-ui,sans-serif;fill:var(--text2)}
+.c-tb{font:600 12px ui-sans-serif,system-ui,sans-serif;fill:var(--ink);fill-opacity:.7}
+.c-s{font:700 13px ui-sans-serif,system-ui,sans-serif;fill:var(--ink)}
+@media (max-width:760px){.cmp{grid-template-columns:minmax(0,1fr);gap:12px}.cmp .side{display:contents}.cmp .side>.box{order:1}.cmp .side>.box+.box{order:2}.cmp .chart{order:3}.cmp .side>.box.opts{order:4}}
+@media (max-width:560px){
+ .card{padding:12px}.hd{grid-template-columns:minmax(0,1.3fr) repeat(3,minmax(0,.8fr));padding:0 8px 4px}.hd span:nth-child(n+5){display:none}
+ .rw{grid-template-columns:minmax(0,1.3fr) repeat(3,minmax(0,.8fr));row-gap:6px;padding:8px}
+ .rw .rt{display:none}.rw .vd{grid-column:1/-1;justify-self:start}
+ .rw .nm{font-size:13px}.pl{font-size:10px;letter-spacing:.02em}
+ .rate{flex-direction:column;align-items:flex-start;gap:6px}
+}
+.an{margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.an h3{margin:0 0 4px;font-size:15px}.an .sub{margin:0 0 12px;color:var(--muted);font-size:13px}
+.an-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.an-c{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:12px}
+.an-c b{display:block;font-size:14px}.an-c .gi{color:var(--muted);font-size:12px;margin:2px 0 8px}
+.an-cy{display:block;font-weight:400;color:var(--muted);font-size:12px;margin:2px 0 0 26px}
+.an-c table{width:100%;border-collapse:collapse;font-size:13px}.an-c th{font-weight:500;color:var(--muted);text-align:right;padding:2px 0}.an-c th:first-child{text-align:left}
+.an-c td{text-align:right;padding:3px 0;font-variant-numeric:tabular-nums}.an-c td:first-child{text-align:left;color:var(--text2)}
+.an-c td.up{color:var(--up)}.an-c td.dn{color:var(--down)}.an-c td.na{color:var(--muted)}
+.an-n{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--gold);color:#06060A;font-size:12px;font-weight:700;margin-right:6px}
+.an .note{margin:12px 0 0;color:var(--muted);font-size:12px}
+@media(max-width:760px){.an-g{grid-template-columns:1fr}}
+.tbar{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.econ{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.econ::-webkit-scrollbar{display:none}
+.econ button{flex:none}
+.ctrls{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.grp>.lbl{margin:0;white-space:nowrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:99px;padding:2px}
+.seg button{appearance:none;font:inherit;font-size:13px;border:0;background:none;color:var(--muted);border-radius:99px;padding:4px 12px;cursor:pointer}
+.seg button.on{background:var(--line);color:var(--text);font-weight:600}
+.chips button .ct{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:9px;background:var(--gold);color:#06060A;font-size:11px;font-weight:700;margin-left:6px;padding:0 4px}
+.cmp2{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:18px;align-items:start}
+.side2{display:flex;flex-direction:column;gap:12px}
+.key{display:grid;gap:7px;font-size:12.5px;color:var(--text2)}.key div{display:flex;align-items:center;gap:8px}.key svg{flex:none}
+details.about{font-size:12.5px;color:var(--muted)}details.about summary{cursor:pointer;color:var(--text2)}details.about p{margin:8px 0 0;line-height:1.5}
+@media (max-width:760px){.cmp2{grid-template-columns:minmax(0,1fr)}.side2{display:contents}.side2 .storybox{order:-1}.ctrls{gap:10px 16px}}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:22px 0 18px}.top .logo{margin:0}
+:root.light .logo{filter:invert(1) hue-rotate(180deg)}
+.theme{appearance:none;display:inline-flex;align-items:center;justify-content:center;flex:none;width:30px;height:30px;padding:0;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text2);cursor:pointer}
+.theme:hover{color:var(--text)}.theme:focus-visible{outline:2px solid var(--text);outline-offset:1px}
+.theme svg{width:15px;height:15px}.theme .i-moon{display:none}:root.light .theme .i-sun{display:none}:root.light .theme .i-moon{display:block}
+:root.light{--bg:#F5F6F8;--card:#FFFFFF;--line:#E1E4EA;--text:#0B0D14;--text2:#3A4150;--muted:#6B7280;--dim:#A0A6B2;--accent:#00B4D8;--pink:#E62E5C;
+  --ink:#0B0D14;--onink:#FFFFFF;--gold:#E8A600;--hole:#FFFFFF;--axis:#C9CED8;--up:#0E9F6E;--down:#E23D52;color-scheme:light}
+:root.light .bar{background:linear-gradient(90deg,#007C93 0%,#00B4D8 8%,#CDEFF6 32%,#ECEEF2 50%,#FAD6DF 68%,#E62E5C 92%,#A3173B 100%)}
+:root.light .bar.rev{background:linear-gradient(270deg,#007C93 0%,#00B4D8 8%,#CDEFF6 32%,#ECEEF2 50%,#FAD6DF 68%,#E62E5C 92%,#A3173B 100%)}
+:root.light .zone{background:rgba(11,13,20,.05)}
+:root.light .trend-tip{box-shadow:0 2px 10px rgba(11,13,20,.18)}
+:root.light .tip{box-shadow:0 4px 16px rgba(11,13,20,.18)}
+:root.light .an-c{background:rgba(11,13,20,.02)}
+:root.light .pl.warm,:root.light .vd.warm{background:rgba(230,46,92,.10)}
+:root.light .pl.cool,:root.light .vd.cool{background:rgba(0,180,216,.10)}
+</style>
+<script src="../nav.js" defer></script>
+</head>
+<body>
+<div class="wrap">
+<div class="top"><img class="logo" src="data:image/png;base64,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" alt="Newsquawk" width="150"><button class="theme" id="theme" type="button" aria-label="Switch to light mode"><svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg><svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1z"/></svg></button></div>
+<h1>Is the economy hot or cold?</h1>
+<p class="sub" id="sub">Central banks raise interest rates when an economy runs hot and cut them when it runs cold. Here is where each major economy sits right now. Tap a country for the detail.</p>
+<div class="tabs" role="tablist" aria-label="View"><button type="button" role="tab" id="tab-now" class="on" aria-selected="true">Today</button><button type="button" role="tab" id="tab-time" aria-selected="false">Over time</button></div>
+<div class="card">
+<div class="demo" id="demo">Example data: made-up numbers, only for checking the layout.</div>
+<div id="v-now"><div class="ov" id="ov" role="group" aria-label="Economies"></div>
+<div class="dt" id="dt" aria-live="polite"></div></div>
+<div id="v-time" hidden></div>
+</div>
+<div class="note"><p id="upd"></p><details><summary>How to read this</summary><ul>
+<li><b>Hot, warm, in line, cool, cold:</b> prices are compared with the central bank's own inflation target. Unemployment and growth are compared with that country's last 10 years. If the latest reading falls within the middle half of those readings it is rated "in line", and the further outside it falls, the hotter or colder it is rated.</li>
+<li><b>Prices</b> are headline consumer price inflation, the change over the last 12 months. <b>Jobs</b> is the unemployment rate, so low unemployment counts as hot (its bar runs the other way, so the number rises left to right). <b>Growth</b> is GDP growth on the previous quarter, after inflation and not annualised, so US figures look smaller than the annualised number usually quoted.</li>
+<li><b>Trend lines</b> run from older readings on the left to the latest on the right, marked by a white dot. Hover, tap or focus a point for its date and value. Dates run along the bottom and percentage values up the left. Each chart uses its own scale and covers about a year; gaps mean missing observations. Higher means a higher reported number, including unemployment.</li>
+<li><b>Targets used:</b> 2% for the US, euro area, UK, Japan, Norway and Sweden (within half a point of the target counts as in line), 1 to 3% for Canada and New Zealand, 2 to 3% for Australia and 0 to 2% for Switzerland. The Fed targets a slightly different measure of inflation (PCE) that usually runs a little lower than the CPI shown here.</li>
+<li><b>Timing:</b> each figure is the latest published, so the dates differ between countries and indicators. Some are a few months old. Unemployment follows the international survey-based definition, so the Swiss figure is higher than the registered rate quoted locally.</li>
+<li><b>Interest rate:</b> the central bank's main policy rate. For the US it is the upper end of the Fed's target range. "Usually" matters: central banks look at many things, and this is a summary, not a forecast. Not trading advice.</li>
+<li><b>Over time</b> plots inflation against either growth or unemployment, one dot per quarter (growth) or per month (unemployment). The trail runs from the start of the chosen business cycle to now, with arrows showing the direction of travel. The centre of the chart is the inflation target and the country's 10-year median for growth or unemployment. Growth there is year on year, not on the previous quarter, because quarterly figures jump around too much to draw a readable path. Ringed dots are recessions: the official NBER dates for the US and, elsewhere, two or more quarters in a row of falling GDP. Hollow dots are off the scale and pinned to the edge; hover or tap one for its real value. The <b>Textbook cycle</b> button adds a dashed loop showing how a cycle runs in theory: recovery, boom, late cycle, downturn. It is a guide to the shape, not a forecast. The <b>Past matches</b> button (growth view only) marks the quarter in each past business cycle closest to today and adds a panel below the chart. It looks at growth and inflation together, counting only quarters when inflation was moving the same way as now. Each gap is scaled by how much that measure usually swings in that country, and a cycle that never came close gives no match. For each match it shows what the main stock index, the 10-year government bond yield and the currency did over the next 3 and 12 months.</li>
+<li><b>Sources:</b> Bank for International Settlements, OECD and national statistics offices via FRED, Eurostat and the US Bureau of Economic Analysis.</li></ul></details></div>
+<a class="cta" href="https://newsquawk.com">Take a 1-week trial → newsquawk.com</a>
+</div>
+<script>
+var C={};function pal(){var t=getComputedStyle(document.documentElement);"ink muted accent gold pink hole axis".split(" ").forEach(function(k){C[k]=t.getPropertyValue("--"+k).trim()})}pal();
+var $=function(i){return document.getElementById(i)};
+var SC={cold:-2,cool:-1,normal:0,warm:1,hot:2};
+var W={hot:"Hot",warm:"Warm",normal:"In line",cool:"Cool",cold:"Cold"};
+var VW={hot:"Running hot",warm:"Running warm",normal:"Balanced",cool:"Running cool",cold:"Running cold"};
+var D=null,sel=0;
+function num(x,min){var s=(+x).toFixed(3).replace(/0+$/,"").replace(/\.$/,"");var d=(s.split(".")[1]||"").length;return d<min?(+x).toFixed(min):s}
+function f1(x){return (+x).toFixed(1)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function pill(b){return b?'<span class="pl '+b.state+'">'+W[b.state]+'</span>':'<span class="pl none">n/a</span>'}
+function overview(){var h='<div class="hd"><span>Economy</span><span>Prices</span><span>Jobs</span><span>Growth</span><span>Interest Rate</span><span>Overall</span></div>';
+ D.countries.forEach(function(c,i){h+='<button type="button" class="rw'+(i===sel?" on":"")+'" data-i="'+i+'" aria-pressed="'+(i===sel)+'"><span class="nm">'+esc(c.short)+'</span>'+pill(c.prices)+pill(c.jobs)+pill(c.growth)+'<span class="rt">'+(c.rate?num(c.rate.value,2)+"%":"n/a")+'</span><span>'+(c.verdict?'<span class="vd '+c.verdict+'">'+VW[c.verdict]+'</span>':'')+'</span></button>'});
+ $("ov").innerHTML=h}
+function trend(title,b){
+ var months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+ function time(k){var m=k.match(/^Q([1-4]) (\d{4})$/);if(m)return +m[2]*12+(+m[1]-1)*3;var a=k.split(" ");return +a[1]*12+months.indexOf(a[0])}
+ var points=(b.trail||[]).filter(function(t){return Number.isFinite(t.v)}).concat([{k:b.asof_label,v:b.value}]);
+ if(points.length<2)return '<div class="trend"><span class="empty">Not enough history to show a trend.</span></div>';
+ var first=time(points[0].k),last=time(b.asof_label),vals=points.map(function(t){return t.v}),lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals),pad=Math.max((hi-lo)*.2,.1);
+ lo-=pad;hi+=pad;
+ var raw=(hi-lo)/4,power=Math.pow(10,Math.floor(Math.log10(raw))),fraction=raw/power,tick=(fraction<=1?1:fraction<=2?2:fraction<=2.5?2.5:fraction<=5?5:10)*power;
+ tick=Math.max(.1,tick);lo=Math.floor(lo/tick)*tick;hi=Math.ceil(hi/tick)*tick;
+ var axes="";
+ for(var v=lo;v<=hi+tick*.01;v+=tick){var ytick=100-(v-lo)/(hi-lo)*100;
+ axes+='<span class="trend-y" style="top:'+ytick+'%">'+f1(Math.abs(v)<.00001?0:v)+'%</span><div class="trend-grid" style="top:'+ytick+'%"></div>'}
+ var count=Math.min(4,last-first);
+ for(var n=0;n<=count;n++){var tm=first+Math.round((last-first)*n/count),quarter=/^Q/.test(b.asof_label),date=quarter?'Q'+(Math.floor((tm%12)/3)+1):months[tm%12];
+ axes+='<span class="trend-x" style="left:'+((tm-first)/(last-first)*100)+'%">'+date+'<br>'+Math.floor(tm/12)+'</span>'}
+ var path="",buttons="",dots="",previous=null,step=/^Q/.test(b.asof_label)?3:1;
+ points.forEach(function(t,i){var tm=time(t.k),x=(tm-first)/(last-first)*100,y=100-(t.v-lo)/(hi-lo)*100,latest=i===points.length-1,label=t.k+": "+f1(t.v)+"%"+(latest?" · latest":"");
+ path+=(previous===null||tm-previous>step?"M":"L")+(x*7).toFixed(2)+","+(y*1.2).toFixed(2)+" ";previous=tm;
+ dots+='<circle cx="'+(x*7)+'" cy="'+(y*1.2)+'" r="'+(latest?4:2.5)+'" fill="'+(latest?C.ink:C.muted)+'"/>';
+ buttons+='<button type="button" class="trend-point" style="left:'+x+'%;top:'+y+'%" aria-label="'+esc(title+", "+label)+'" data-reading="'+esc(label)+'" ><span class="trend-tip" aria-hidden="true">'+esc(label)+'</span></button>';
+ });
+ return '<div class="trend"><div class="trend-head"><span>Recent trend · '+f1(Math.min.apply(null,vals))+'–'+f1(Math.max.apply(null,vals))+'%</span><output aria-live="polite">'+esc(b.asof_label)+': '+f1(b.value)+'% · latest</output></div><div class="trend-plot">'+axes+'<svg style="position:relative" viewBox="0 0 700 120" preserveAspectRatio="none" aria-hidden="true"><path d="'+path+'" fill="none" stroke="'+C.accent+'" stroke-width="2" vector-effect="non-scaling-stroke"/>'+dots+'</svg>'+buttons+'</div><div class="trend-dates"><span>'+esc(points[0].k)+'</span><span>'+esc(b.asof_label)+' · latest →</span></div></div>';
+}
+function strip(title,b,detail,left,right,zoneText,flip){
+ if(!b)return '<div class="g"><div class="gt"><b>'+title+'</b><span>No data yet.</span></div></div>';
+ var bp=flip?100-b.pos:b.pos,zl=flip?100-b.zone_r:b.zone_l,zr=flip?100-b.zone_l:b.zone_r;var pos=Math.max(1.5,Math.min(98.5,bp));var cls=pos<10?" l":pos>90?" r":"";
+ var old=b.stale?' <span class="old">(older data)</span>':"";
+ return '<div class="g"><div class="gt"><b>'+title+'<span class="v '+b.state+'">'+W[b.state]+'</span></b><span>'+detail+" ("+esc(b.asof_label)+")"+old+'</span>'+'</div>'+
+ '<div class="bar'+(flip?" rev":"")+'"><div class="zone" style="left:'+zl+'%;width:'+(zr-zl)+'%"></div>'+'<div class="zl" style="left:'+((zl+zr)/2)+'%">'+zoneText+'</div><div class="mk'+cls+'" style="left:'+pos+'%"><div class="mv">'+f1(b.value)+'%</div></div></div>'+
+ '<div class="ends"><span>'+left+'</span><span>'+right+'</span></div>'+trend(title,b)+'</div>'}
+var PT={hot:"Inflation is well above the central bank's target",warm:"Inflation is above the central bank's target",normal:"Inflation is in line with the central bank's target",cool:"Inflation is below the central bank's target",cold:"Inflation is well below the central bank's target"};
+var JT={hot:"Unemployment is very low",warm:"Unemployment is low",normal:"Unemployment is in line with its 10-year average",cool:"Unemployment is high",cold:"Unemployment is very high"};
+var GT={hot:"Growth is unusually strong",warm:"Growth is strong",normal:"Growth is in line with its 10-year average",cool:"Growth is weak",cold:"Growth is very weak"};
+function summary(c){if(!(c.prices&&c.jobs&&c.growth))return "";return PT[c.prices.state]+". "+JT[c.jobs.state]+". "+GT[c.growth.state]+"."}
+function meaning(c){if(!(c.prices&&c.jobs&&c.growth))return "";
+ var ps=SC[c.prices.state],as=(SC[c.jobs.state]+SC[c.growth.state])/2;
+ if(ps>=1)return as>=0?"With prices high and the economy solid, central banks usually keep rates high, or raise them.":"Prices are high but the economy is softening, which is a hard spot. Central banks have to weigh fighting inflation against supporting growth.";
+ if(ps<=-1)return as<=0?"With prices weak and the economy soft, central banks usually cut rates to help.":"Prices are weak even though the economy is fine, which gives central banks room to cut rates.";
+ if(as>=1)return "The economy is running hot even though prices are on target. Central banks usually watch closely in case inflation follows.";
+ if(as<=-1)return "The economy is soft with prices on target, so central banks usually lean towards lower rates.";
+ return "Things look fairly balanced, so central banks usually have little reason to change rates."}
+function rateBox(c){if(!c.rate)return "";var r=c.rate,ch=r.last_change,t;
+ if(ch)t=esc(c.bank_short||"The central bank")+(ch.bp>0?" raised":" cut")+" rates by "+Math.abs(ch.bp)+"bp in "+esc(ch.asof_label);else t="No change since "+esc(r.since_label);
+ var m=meaning(c);
+ return '<div class="rate"><div class="n">'+num(r.value,2)+'%</div><div><p><b>'+esc(c.bank)+" interest rate</b></p><p>"+t+"</p>"+(m?'<small>What this usually means</small><p>'+m+"</p>":"")+"</div></div>"}
+function detail(){var c=D.countries[sel];if(!c){$("dt").innerHTML="";return}
+ var p=c.prices,j=c.jobs,g=c.growth;
+ var h='<div class="dh"><b>'+esc(c.name)+"</b>"+(c.verdict?'<span class="vd '+c.verdict+'">'+VW[c.verdict]+"</span>":"")+"</div>";
+ var s=summary(c);if(s)h+='<p class="sum">'+s+"</p>";
+ h+=strip("Prices",p,p?"Inflation "+f1(p.value)+"% year on year. Target: "+esc(p.target):"","Low inflation","High inflation",p?"target "+esc(p.target):"");
+ h+=strip("Jobs",j,j?"Unemployment "+f1(j.value)+"%. Typical 10-year range: "+f1(j.range_lo)+" to "+f1(j.range_hi)+"%":"","Low unemployment","High unemployment","typical range",true);
+ h+=strip("Growth",g,g?"GDP "+(g.value<0?"shrank ":"grew ")+f1(Math.abs(g.value))+"% on the previous quarter. Typical 10-year range: "+f1(g.range_lo)+" to "+f1(g.range_hi)+"%":"","Weak growth","Strong growth","typical range");
+ h+=rateBox(c);$("dt").innerHTML=h}
+function render(){if(!D||!D.countries||!D.countries.length){$("ov").innerHTML='<p class="empty">The first data update has not run yet. Check back soon.</p>';$("dt").innerHTML="";return}
+ $("demo").className="demo"+(D.demo?" on":"");
+ if(D.generated){var d=new Date(D.generated);$("upd").textContent="Data checked "+d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})+". Each figure shows the date it refers to."}
+ else $("upd").textContent="";
+ if(CV.tab==="time")renderTime();else{overview();detail()}}
+$("ov").addEventListener("click",function(e){var b=e.target.closest(".rw");if(!b)return;sel=+b.getAttribute("data-i");overview();detail()});
+function showReading(e){var point=e.target.closest(".trend-point");if(point)point.closest(".trend").querySelector("output").textContent=point.getAttribute("data-reading")}
+$("dt").addEventListener("click",showReading);
+$("dt").addEventListener("focusin",showReading);
+/* Over time: the economic compass. Inflation (up) against growth or unemployment (across), one trail per business cycle. */
+var CV={mode:"growth",cs:null,tab:"now",tb:false,pm:false};
+var CCOL=["#00E0FF","#B08CFF","#FFB547","#5E8BFF","#FF7AC6","#8A8FA3"],CCOL_L=["#00A3C4","#7C5CE0","#D98A00","#3D6BE0","#D9449E","#6B7280"];
+function cycCol(v,i){return (document.documentElement.classList.contains("light")?CCOL_L:CCOL)[Math.min(v.cycles.length-1-i,CCOL.length-1)]}
+var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function quarterSpan(k){var m=k.match(/^Q([1-4]) (\d{4})$/);if(!m)return k;var q=+m[1];return k+" ("+MON[q*3-3]+"–"+MON[q*3-1]+")"}
+function niceStep(span){var raw=span/6,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function p95(a){a=a.slice().sort(function(x,y){return x-y});return a.length?a[Math.min(a.length-1,Math.floor(a.length*.95))]:0}
+function quad(dx,dy,un){if(un)dx=-dx;return dy>=0?(dx>=0?"overheating":"stagflation"):(dx>=0?"sweet spot":"slowdown")}
+function moved(a,b,up,down,flat){var d=b-a;return Math.abs(d)<.3?flat+" around "+f1(b)+"%":(d>0?up:down)+" from "+f1(a)+"% to "+f1(b)+"%"}
+function story(c,v,pts,un,current){
+ var nm={US:"the US",GB:"the UK",EA:"the eurozone"}[c.code]||esc(c.name);
+ var first=pts[0],last=pts[pts.length-1],peak=pts.reduce(function(m,p){return p[2]>m[2]?p:m},first);
+ var back=v.freq==="M"?12:4,ago=pts.length>back?pts[pts.length-1-back]:first;
+ var s=(current?"Since "+first[0]:"From "+first[0]+" to "+last[0])+(peak===first?", inflation in "+nm+(current?" has come":" came")+" down from a peak of "+f1(peak[2])+"%. ":", inflation in "+nm+" peaked at "+f1(peak[2])+"% in "+peak[0]+". ");
+ s+=(current?"Over the last year":"In the final year")+" inflation "+(current?"has ":"")+moved(ago[2],last[2],current?"risen":"rose",current?"fallen":"fell",current?"held":"held")+", while "+(un?"unemployment "+(current?"has ":"")+moved(ago[1],last[1],current?"risen":"rose",current?"fallen":"fell","held"):"growth "+(current?"has ":"")+moved(ago[1],last[1],current?"picked up":"picked up",current?"slowed":"slowed","held"))+". ";
+ var dx=last[1]-v.x_center,dy=last[2]-c.compass.infl_center,near=Math.abs(dy)<1&&Math.abs(dx)<(un?.5:1);
+ s+=(Math.abs(dy)<.5&&Math.abs(dx)<(un?.3:.5))?(current?"That leaves it":"It ended")+" close to the centre of the chart, near balance.":(current?(near?"That has it edging towards the ":"That puts it in the "):(near?"It ended edging towards the ":"It ended in the "))+quad(dx,dy,un)+" corner.";
+ return s}
+function anPaths(v){var a=v.last_time;if(!a)return [];return a.rows.map(function(r){return [r.i].concat(r.path).map(function(k){return v.pts[k]}).filter(Boolean)})}
+function cyclePts(v,i){var cy=v.cycles[i];return v.pts.slice(cy.from,cy.to+1)}
+function compassChart(c,v,un){
+ var box=$("cchart"),Wd=Math.max(300,Math.min(680,box.clientWidth||600)),Ht=Math.round(Wd*(Wd<480?1.02:.9));
+ var last=v.cycles.length-1,G=CV.cs.map(function(i){return {i:i,pts:cyclePts(v,i),col:cycCol(v,i),cur:i===last}}),pts=[].concat.apply([],G.map(function(g){return g.pts}));
+ var AM=un||!CV.pm?[]:anPaths(v),sp=pts.concat([].concat.apply([],AM));
+ var xc=v.x_center,yc=c.compass.infl_center;
+ var hx=Math.max(un?1.5:2,p95(sp.map(function(p){return Math.abs(p[1]-xc)}))*1.2),hy=Math.max(3,p95(sp.map(function(p){return Math.abs(p[2]-yc)}))*1.2);
+ var M=8,X=function(x){return Wd/2+(x-xc)/hx*(Wd/2-M)},Y=function(y){return Ht/2-(y-yc)/hy*(Ht/2-M)};
+ function P(p){var cx=X(p[1]),cy=Y(p[2]),off=cx<M||cx>Wd-M||cy<M||cy>Ht-M;return [Math.max(M,Math.min(Wd-M,cx)),Math.max(M,Math.min(Ht-M,cy)),off]}
+ var s='<defs>'+G.map(function(g){return '<marker id="ar'+g.i+'" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="'+g.col+'"/></marker>'}).join("")+'<marker id="aran" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="'+C.gold+'"/></marker></defs>';
+ var hot="rgba(255,59,107,.16)",warm="rgba(255,59,107,.08)",cool="rgba(0,224,255,.12)",calm="rgba(0,224,255,.05)";
+ var Q=un?[["OVERHEATING",hot,0,0,"start"],["STAGFLATION",warm,1,0,"end"],["SWEET SPOT",calm,0,1,"start"],["SLOWDOWN",cool,1,1,"end"]]:[["STAGFLATION",warm,0,0,"start"],["OVERHEATING",hot,1,0,"end"],["SLOWDOWN",cool,0,1,"start"],["SWEET SPOT",calm,1,1,"end"]];
+ Q.forEach(function(q){s+='<rect x="'+(q[2]*Wd/2)+'" y="'+(q[3]*Ht/2)+'" width="'+Wd/2+'" height="'+Ht/2+'" fill="'+q[1]+'"/><text class="c-q" x="'+(q[2]?Wd-10:10)+'" y="'+(q[3]?Ht-10:20)+'" text-anchor="'+q[4]+'">'+q[0]+'</text>'});
+ var st=niceStep(2*hy);for(var t=Math.ceil((yc-hy)/st)*st;t<=yc+hy;t+=st){var y=Y(t);if(y>30&&y<Ht-48)s+='<line x1="0" x2="'+Wd+'" y1="'+y+'" y2="'+y+'" stroke="'+C.ink+'" stroke-opacity=".05"/><text class="c-t" x="6" y="'+(y-4)+'">'+(+t.toFixed(1))+'%</text>'}
+ st=niceStep(2*hx);for(t=Math.ceil((xc-hx)/st)*st;t<=xc+hx;t+=st){var x=X(t);if(x>34&&x<Wd-34)s+='<line y1="0" y2="'+Ht+'" x1="'+x+'" x2="'+x+'" stroke="'+C.ink+'" stroke-opacity=".05"/><text class="c-t" x="'+x+'" y="'+(Ht-28)+'" text-anchor="middle">'+(+t.toFixed(1))+'%</text>'}
+ s+='<line x1="'+Wd/2+'" x2="'+Wd/2+'" y1="0" y2="'+Ht+'" stroke="'+C.axis+'"/><line y1="'+Ht/2+'" y2="'+Ht/2+'" x1="0" x2="'+Wd+'" stroke="'+C.axis+'"/>';
+ if(CV.tb){var rx=(Wd/2-M)*.62,ry=(Ht/2-M)*.6,sg=un?-1:1,TB=function(t){return [Wd/2+sg*rx*Math.cos(t),Ht/2-ry*Math.sin(t)]},d="";
+  for(var k=0;k<=72;k++){var q=TB(k/36*Math.PI);d+=(k?"L":"M")+q[0].toFixed(1)+","+q[1].toFixed(1)}
+  s+='<path d="'+d+'" fill="none" stroke="'+C.ink+'" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="5 5"/>';
+  [.25,.75,1.25,1.75].forEach(function(f){var a=TB(f*Math.PI),b=TB(f*Math.PI+.08);
+   s+='<path d="M-6,-5 L4,0 L-6,5 z" fill="'+C.ink+'" fill-opacity=".6" transform="translate('+a[0].toFixed(1)+","+a[1].toFixed(1)+") rotate("+(Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI).toFixed(0)+')"/>'});
+  [[1.5,"1 Recovery"],[0,"2 Boom"],[.5,"3 Late cycle"],[1,"4 Downturn"]].forEach(function(L){var a=TB(L[0]*Math.PI),ox=Math.round(Math.cos(L[0]*Math.PI))*sg,oy=-Math.round(Math.sin(L[0]*Math.PI));
+   s+='<text class="c-tb" x="'+(a[0]-ox*12).toFixed(1)+'" y="'+(a[1]+(ox?4:oy*16+4)).toFixed(1)+'" text-anchor="'+(ox?(ox>0?"end":"start"):"middle")+'">'+L[1]+"</text>"})}
+ var every=v.freq==="M"?3:1,dots="",hits="",marks="",AP=[],APP=[],few=G.length<=3&&G.length<v.cycles.length;
+ function lbl(q,word,date,col,below){var right=q[0]>Wd-170;return '<text class="c-a" x="'+(right?q[0]-12:q[0]+12)+'" y="'+Math.max(34,Math.min(Ht-50,q[1]+(below?(q[1]>Ht-60?-14:22):(q[1]<40?22:-12))))+'" text-anchor="'+(right?"end":"start")+'"><tspan fill="'+col+'" font-weight="700">'+word+'</tspan> '+esc(date)+'</text>'}
+ G.forEach(function(g,gi){var gp=g.pts,n=gp.length,PP=gp.map(P);
+  for(var i=1;i<n;i++){var a=PP[i-1],b=PP[i],op=(.3+.7*i/n).toFixed(2),long=Math.hypot(b[0]-a[0],b[1]-a[1])>26&&i%every===0;
+   s+='<path d="M'+a[0].toFixed(1)+","+a[1].toFixed(1)+" L"+((a[0]+b[0])/2).toFixed(1)+","+((a[1]+b[1])/2).toFixed(1)+" L"+b[0].toFixed(1)+","+b[1].toFixed(1)+'" fill="none" stroke="'+g.col+'" stroke-width="2.2" opacity="'+op+'" stroke-linejoin="round"'+(long?' marker-mid="url(#ar'+g.i+')"':"")+"/>"}
+  gp.forEach(function(p,i){var q=PP[i],o=(.35+.65*i/n).toFixed(2);
+   if(p[3])dots+='<circle cx="'+q[0]+'" cy="'+q[1]+'" r="5.5" fill="none" stroke="'+C.pink+'" stroke-width="1.6" opacity="'+o+'"/>';
+   if(i>0&&i<n-1)dots+=q[2]?'<circle cx="'+q[0]+'" cy="'+q[1]+'" r="3.5" fill="'+C.hole+'" stroke="'+g.col+'" stroke-width="1.5" opacity="'+o+'"/>':'<circle cx="'+q[0]+'" cy="'+q[1]+'" r="'+(v.freq==="M"?1.8:2.4)+'" fill="'+g.col+'" opacity="'+o+'"/>';
+   hits+='<circle class="hit" tabindex="0" data-i="'+AP.length+'" cx="'+q[0]+'" cy="'+q[1]+'" r="'+(v.freq==="M"?7:10)+'" aria-label="'+esc(p[0])+'"/>';AP.push(p);APP.push(q)});
+  var a0=PP[0],z=PP[n-1],joined=gi>0&&G[gi-1].i===g.i-1,showS=few?!joined:gi===0,showE=few||gi===G.length-1;
+  if(!joined)marks+='<circle cx="'+a0[0]+'" cy="'+a0[1]+'" r="6" fill="'+C.hole+'" stroke="'+C.pink+'" stroke-width="2.5"/>';
+  if(showS)marks+=lbl(a0,"START",gp[0][0],C.pink,true);
+  if(g.cur)marks+='<circle cx="'+z[0]+'" cy="'+z[1]+'" r="12" fill="none" stroke="'+C.ink+'" opacity=".35"/><circle cx="'+z[0]+'" cy="'+z[1]+'" r="7" fill="'+C.ink+'"/><text class="c-s" x="'+(z[0]<60?z[0]+16:z[0]-16)+'" y="'+(z[1]+4)+'" text-anchor="'+(z[0]<60?"start":"end")+'">NOW</text>';
+  else{marks+='<circle cx="'+z[0]+'" cy="'+z[1]+'" r="10" fill="none" stroke="'+g.col+'" opacity=".45"/><circle cx="'+z[0]+'" cy="'+z[1]+'" r="6" fill="'+g.col+'"/>';if(showE)marks+=lbl(z,"END",gp[n-1][0],C.ink,false)}});
+ var an="";AM.forEach(function(path,j){var Q=path.map(P);
+  if(Q.length>1){an+='<path d="'+Q.map(function(q,k){return (k?"L":"M")+q[0].toFixed(1)+","+q[1].toFixed(1)}).join(" ")+'" fill="none" stroke="'+C.gold+'" stroke-width="1.6" stroke-dasharray="4 4" opacity=".7" marker-end="url(#aran)"/>';
+  Q.slice(1,-1).forEach(function(q){an+='<circle cx="'+q[0]+'" cy="'+q[1]+'" r="2.4" fill="'+C.gold+'" opacity=".7"/>'});
+  var z=Q[Q.length-1],clash=AM.some(function(p){var s=P(p[0]);return Math.abs(s[0]-z[0])<70&&Math.abs(s[1]-z[1])<22});an+='<text class="c-a" x="'+(z[0]>Wd-80?z[0]-10:z[0]+10)+'" y="'+(z[1]+(clash?-12:4))+'" text-anchor="'+(z[0]>Wd-80?"end":"start")+'" style="fill:var(--gold)">+1 yr</text>'}
+  marks+='<circle cx="'+Q[0][0]+'" cy="'+Q[0][1]+'" r="10" fill="'+C.gold+'" stroke="'+C.hole+'" stroke-width="2"/><text x="'+Q[0][0]+'" y="'+(Q[0][1]+4)+'" text-anchor="middle" style="font:700 12px ui-sans-serif,system-ui,sans-serif;fill:#06060A">'+(j+1)+'</text>'});
+ dots=an+dots;
+ box.innerHTML='<svg viewBox="0 0 '+Wd+" "+Ht+'" width="'+Wd+'" height="'+Ht+'" role="img" aria-label="'+esc(c.name)+' inflation against '+(un?"unemployment":"growth")+'">'+s+dots+marks+hits+'</svg><div class="tip" id="ctip"></div>';
+ box._pts=AP;box._PP=APP;box._un=un;box._W=Wd}
+function tipShow(e){var h=e.target.closest&&e.target.closest(".hit");var box=$("cchart"),tip=$("ctip");if(!h||!tip){if(tip)tip.style.display="none";return}
+ var i=+h.getAttribute("data-i"),p=box._pts[i],q=box._PP[i],un=box._un,c=D.countries[sel];
+ tip.innerHTML="<b>"+esc(un&&c.compass.unemp.freq==="M"?p[0]:quarterSpan(p[0]))+"</b>Inflation (CPI YoY"+(c.compass[un?"unemp":"growth"].freq==="Q"?", quarter avg":"")+"): "+f1(p[2])+"%<br>"+(un?"Unemployment: ":"GDP growth (YoY): ")+f1(p[1])+"%"+(p[3]?"<br>Recession":"")+(q[2]?"<br>Off the chart":"");
+ tip.style.display="block";var svg=box.querySelector("svg"),k=svg.clientWidth/box._W,left=q[0]*k+14,top=q[1]*k+12+(box.querySelector(".yl")?0:0);
+ if(left+tip.offsetWidth>svg.clientWidth)left=q[0]*k-14-tip.offsetWidth;if(top+tip.offsetHeight>svg.clientHeight)top=q[1]*k-12-tip.offsetHeight;
+ tip.style.left=Math.max(0,left)+"px";tip.style.top=Math.max(0,top)+"px"}
+function anBox(c){var v=c.compass.growth,a=v.last_time;if(!a||CV.mode==="unemp"||!CV.pm)return "";var AM=anPaths(v),nm={US:"the US",EA:"the eurozone",GB:"the UK"}[c.code]||c.name,N=a.names;
+ function f(x,u,dp,inv){if(x==null)return '<td class="na">n/a</td>';var g=inv?x<0:x>0;return '<td class="'+(x===0?"":g?"up":"dn")+'">'+(x>0?"+":"")+x.toFixed(dp)+u+"</td>"}
+ var crit="quarters when growth and inflation were both close to today's levels, with inflation "+a.dir+" as it is now";
+ if(!a.rows.length)return '<div class="an"><h3>Last time '+esc(nm)+' looked like this</h3><p class="sub">No past cycle in the last 20 years looked like this. We looked for '+crit+', and none came close enough to compare.</p></div>';
+ return '<div class="an"><h3>Last time '+esc(nm)+' looked like this</h3><p class="sub">The closest '+crit+', taking at most one from each past business cycle. '+(a.rows.length>1?"Each one is":"It is")+' numbered on the chart, with a dashed line showing where the economy went over the next year.</p><div class="an-g">'+
+ a.rows.map(function(r,i){var p=AM[i],s=p[0],e=p.length>4?p[4]:null;return '<div class="an-c"><b><span class="an-n">'+(i+1)+"</span> "+esc(s[0])+'<span class="an-cy">'+esc(r.cyc)+' cycle</span></b><div class="gi">Growth '+f1(s[1])+'%, inflation '+f1(s[2])+'%</div>'+(e?'<div class="gi">A year later: growth '+f1(e[1])+'%, inflation '+f1(e[2])+'%</div>':"")+'<table><tr><th></th><th>3 months</th><th>12 months</th></tr>'+
+  '<tr><td>'+esc(N.stocks)+'</td>'+f(r.stocks[0],"%",1)+f(r.stocks[1],"%",1)+'</tr><tr><td>'+esc(N.yield)+'</td>'+f(r.yield[0],"bp",0,1)+f(r.yield[1],"bp",0,1)+'</tr><tr><td>'+esc(N.fx)+'</td>'+f(r.fx[0],"%",2)+f(r.fx[1],"%",2)+"</tr></table></div>"}).join("")+
+ '</div><p class="note">Stocks and currencies: month-end closes from the end of the matched quarter. Yields: monthly averages. n/a means no data for that period. Past episodes are not a forecast: the same starting point has led to very different outcomes.</p></div>'}
+function renderTime(){var c=D.countries[sel],el=$("v-time");
+ var chips='<div class="chips" role="group" aria-label="Economy">'+D.countries.map(function(x,i){return '<button type="button" data-c="'+i+'" class="'+(i===sel?"on":"")+'" aria-pressed="'+(i===sel)+'">'+esc(x.short)+"</button>"}).join("")+"</div>";
+ if(!c.compass){el.innerHTML='<div class="cmp"><div class="side"><div class="box"><p class="lbl">Economy</p>'+chips+'</div></div><p class="empty">No history for '+esc(c.name)+' yet. It appears after the next daily update.</p></div>';return}
+ var un=CV.mode==="unemp",v=c.compass[un?"unemp":"growth"];
+ var last=v.cycles.length-1;
+ if(!CV.cs||CV.cs.some(function(i){return i>last}))CV.cs=[last];
+ var all=CV.cs.length===v.cycles.length,top=CV.cs[CV.cs.length-1],cur=all||top===last,pts=all?v.pts:cyclePts(v,top);
+ var cyc=v.cycles.map(function(cy,i){var on=CV.cs.indexOf(i)>=0,col=cycCol(v,i);return '<button type="button" data-y="'+i+'" class="'+(on?"on":"")+'" aria-pressed="'+on+'"'+(on?' style="border-color:'+col+';color:'+col+'"':"")+'>'+(i===last?"This cycle":cy.label)+"</button>"}).reverse().join("")+'<button type="button" data-y="all" class="'+(all?"on":"")+'" aria-pressed="'+all+'">All '+Math.round(v.pts.length/(v.freq==="M"?12:4))+" years</button>";
+ var also=all?[]:CV.cs.filter(function(i){return i!==top}).map(function(i){return v.cycles[i].label});
+ var tgt=c.compass.infl_center,quarterly=un&&v.freq==="Q";
+ var defs=un?"<b>Across:</b> unemployment rate, "+(quarterly?"quarterly":"monthly")+", against its 10-year median of "+f1(v.x_center)+"%. <b>Up:</b> CPI inflation, year on year"+(quarterly?", averaged over each quarter":", monthly")+", against the "+esc(c.compass.target)+" target"+(c.compass.target.indexOf("to")>0?" (midpoint "+f1(tgt)+"%)":"")+"."
+  :"<b>Across:</b> real GDP growth, year on year, against its 10-year median of "+f1(v.x_center)+"%. <b>Up:</b> CPI inflation, year on year, averaged over the three months of each quarter to match quarterly GDP, against the "+esc(c.compass.target)+" target"+(c.compass.target.indexOf("to")>0?" (midpoint "+f1(tgt)+"%)":"")+".";
+ if(quarterly)defs+=" "+esc(c.name)+" only publishes "+(c.code==="CH"?"unemployment":c.code==="AU"?"inflation":"inflation and unemployment")+" quarterly, so this view has one dot per quarter.";
+ defs+=" Ringed dots are recessions ("+(c.compass.rec_rule==="nber"?"official NBER dates":"two or more quarters in a row of falling GDP")+"). Hollow dots are off the scale.";
+  var lt=v.last_time,npm=!un&&lt?lt.rows.length:0,pmOn=CV.pm&&!un&&lt;
+ var key='<div class="key">'+
+  '<div><svg width="22" height="10"><line x1="1" y1="5" x2="21" y2="5" stroke="'+cycCol({cycles:[0]},0)+'" stroke-width="2"/></svg>Path of the economy, one dot per '+(v.freq==="M"?"month":"quarter")+'</div>'+
+  '<div><svg width="22" height="12"><circle cx="11" cy="6" r="5" fill="none" stroke="'+C.pink+'" stroke-width="1.6"/></svg>Recession</div>'+
+  (CV.tb?'<div><svg width="22" height="10"><line x1="1" y1="5" x2="21" y2="5" stroke="'+C.ink+'" stroke-opacity=".5" stroke-dasharray="4 3"/></svg>Textbook cycle (illustrative)</div>':"")+
+  (pmOn?'<div><svg width="22" height="12"><circle cx="11" cy="6" r="6" fill="'+C.gold+'"/></svg>Past match, and the year after it</div>':"")+'</div>';
+ el.innerHTML='<div class="tbar"><div class="econ chips" role="group" aria-label="Economy">'+D.countries.map(function(x,i){return '<button type="button" data-c="'+i+'" class="'+(i===sel?"on":"")+'" aria-pressed="'+(i===sel)+'">'+esc(x.short)+"</button>"}).join("")+'</div>'+
+  '<div class="ctrls"><div class="grp"><span class="lbl">Inflation vs</span><div class="seg"><button type="button" data-m="growth" class="'+(un?"":"on")+'">Growth</button><button type="button" data-m="unemp" class="'+(un?"on":"")+'">Unemployment</button></div></div>'+
+  '<div class="grp"><span class="lbl">Cycles</span><div class="chips" id="ccyc">'+cyc+'</div></div>'+
+  '<div class="grp"><span class="lbl">Add</span><div class="chips"><button type="button" data-tb="1" class="'+(CV.tb?"on":"")+'" aria-pressed="'+CV.tb+'">Textbook cycle</button>'+(un||!lt?"":'<button type="button" data-pm="1" class="'+(CV.pm?"on":"")+'" aria-pressed="'+CV.pm+'">Past matches'+(npm?'<span class="ct">'+npm+"</span>":"")+"</button>")+'</div></div></div></div>'+
+  '<div class="cmp2"><div class="chart"><p class="yl">↑ Higher inflation</p><div id="cchart"><svg></svg></div><div class="xl"><span>← '+(un?"Lower unemployment":"Weaker growth")+'</span><span>'+(un?"Higher unemployment":"Stronger growth")+' →</span></div></div>'+
+  '<div class="side2"><div class="box storybox"><p class="lbl">'+esc(c.short)+" · "+(all?"since "+esc(pts[0][0]):top===last?"current cycle, since "+esc(pts[0][0]):esc(pts[0][0])+" to "+esc(pts[pts.length-1][0]))+'</p><p class="story">'+story(c,v,pts,un,cur)+'</p>'+(also.length?'<p class="defs">Also on the chart: '+also.join(", ")+".</p>":"")+'</div>'+
+  '<div class="box">'+key+(CV.tb?'<p class="defs">The dashed loop is how a cycle runs in theory: 1 recovery, 2 boom, 3 late cycle, 4 downturn. Real cycles rarely follow it neatly.</p>':"")+'</div>'+
+  '<details class="about"><summary>About this chart</summary><p>'+defs+'</p></details></div></div>'+anBox(c);
+ compassChart(c,v,un)}
+function setTab(t){CV.tab=t;var time=t==="time";$("v-now").hidden=time;$("v-time").hidden=!time;$("tab-now").className=time?"":"on";$("tab-time").className=time?"on":"";
+ $("tab-now").setAttribute("aria-selected",!time);$("tab-time").setAttribute("aria-selected",time);document.querySelector(".wrap").classList.toggle("wide",time);
+ $("sub").textContent=time?"Where each economy has been on inflation and growth (or unemployment), and the path it took to get here. Pick a country and a business cycle.":"Central banks raise interest rates when an economy runs hot and cut them when it runs cold. Here is where each major economy sits right now. Tap a country for the detail.";
+ if(D&&D.countries&&D.countries.length){if(time)renderTime();else{overview();detail()}}}
+$("tab-now").addEventListener("click",function(){setTab("now")});
+$("tab-time").addEventListener("click",function(){setTab("time")});
+$("v-time").addEventListener("click",function(e){var b=e.target.closest("button");
+ if(b&&b.hasAttribute("data-c")){sel=+b.getAttribute("data-c");CV.cs=null;renderTime()}
+ else if(b&&b.hasAttribute("data-m")){CV.mode=b.getAttribute("data-m");CV.cs=null;renderTime()}
+ else if(b&&b.hasAttribute("data-tb")){CV.tb=!CV.tb;renderTime()}
+ else if(b&&b.hasAttribute("data-pm")){CV.pm=!CV.pm;renderTime()}
+ else if(b&&b.hasAttribute("data-y")){var y=b.getAttribute("data-y"),v=D.countries[sel].compass[CV.mode==="unemp"?"unemp":"growth"],n=v.cycles.length;
+  if(y==="all")CV.cs=CV.cs.length===n?[n-1]:v.cycles.map(function(_,i){return i});
+  else{y=+y;var k=CV.cs.indexOf(y);if(k<0)CV.cs=CV.cs.concat([y]).sort(function(p,q){return p-q});else if(CV.cs.length>1)CV.cs=CV.cs.filter(function(i){return i!==y})}
+  renderTime()}
+ else tipShow(e)});
+$("v-time").addEventListener("mouseover",tipShow);
+$("v-time").addEventListener("focusin",tipShow);
+$("v-time").addEventListener("mouseleave",function(){var t=$("ctip");if(t)t.style.display="none"});
+var rz;window.addEventListener("resize",function(){clearTimeout(rz);rz=setTimeout(function(){if(CV.tab==="time"&&D&&D.countries&&D.countries[sel]&&D.countries[sel].compass)compassChart(D.countries[sel],D.countries[sel].compass[CV.mode==="unemp"?"unemp":"growth"],CV.mode==="unemp")},150)});
+if(window.__EMBED){D=window.__EMBED;render()}
+else{$("upd").textContent="Loading…";fetch("data.json?"+Date.now()).then(function(r){return r.json()}).then(function(j){D=j;render()}).catch(function(){$("ov").innerHTML='<p class="empty">Could not load the data.</p>';$("upd").textContent=""})}
+(function(){var b=document.getElementById("theme"),r=document.documentElement;function L(){return r.classList.contains("light")}function lab(){b.setAttribute("aria-label",L()?"Switch to dark mode":"Switch to light mode");var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",L()?"#F5F6F8":"#06060A")}b.addEventListener("click",function(){var l=!L();r.classList.toggle("light",l);try{localStorage.setItem("ict-theme",l?"light":"dark")}catch(e){}lab();pal();if(D&&D.countries&&D.countries.length)render();});lab()})();
+</script>
+</body>
+</html>

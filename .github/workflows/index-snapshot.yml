@@ -1,0 +1,31 @@
+name: "Index Contribution: save last session"
+on:
+  schedule:
+    # 16:40 New York time in both summer (20:40 UTC) and winter (21:40 UTC); the script skips the wrong one
+    - cron: "40 20 * * 1-5"
+    - cron: "40 21 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Save now, whatever the time"
+        type: boolean
+        default: false
+permissions:
+  contents: write
+  pages: write
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: index-contribution-site
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/snapshot.py
+        env:
+          FORCE: ${{ inputs.force && '1' || '0' }}
+      # Roll the Week/Month/YTD closes forward with the session just saved (skips if it's already there)
+      - run: python3 scripts/periods.py
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash ../.github/save.sh "Save last session" last-session.csv periods.csv
