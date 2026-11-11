@@ -21,7 +21,7 @@ var TOOLS=[
   ["Data Surprises",HUB+"surprises/","How releases landed against expectations"],
   ["Economy Thermometer",HUB+"economy-thermometer/","Is each G10 economy hot or cold?"],
   ["Central banks",HUB+"central-banks/","Rates, last move and next meeting"],
-  ["Fed planner","","Coming soon"]
+  ["Fed planner",HUB+"fed-scenario-planner/","How the next Fed decision could move markets"]
  ]],
  ["Glossary",HUB+"glossary/"]
 ];

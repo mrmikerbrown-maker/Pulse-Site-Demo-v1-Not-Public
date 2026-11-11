@@ -128,12 +128,14 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
    <div class="live" id="c-cb"><p class="wait">Loading…</p></div>
    <div class="go">Open the tracker →</div>
   </a>
+  <a class="card" href="fed-scenario-planner/">
+   <div class="lbl">Fed</div><h2>Fed Scenario Planner</h2>
+   <p class="d">What the market is pricing for the next Fed decision, and how FX, stocks, yields and gold could react.</p>
+   <div class="live" id="c-fed"><p class="wait">Loading…</p></div>
+   <div class="go">Open the planner →</div>
+  </a>
  </div>
 
- <h3>Coming soon</h3>
- <div class="soon">
-  <div class="sn"><b>Fed Scenario Planner</b><span>What the next Fed moves could look like.</span></div>
- </div>
 
  <div class="foot"><span>Built by Newsquawk. Each tool updates itself automatically.</span><span>For information only, not investment advice.</span></div>
 </main>
@@ -234,6 +236,17 @@ fetch("central-banks/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;r
   '<div class="small" style="margin-bottom:4px">'+esc(f.name+" at "+rate(f))+"</div>"+
   B.slice(0,3).map(function(b){return '<div class="sp"><span>'+esc(when(b)+" · "+b.short+" · "+rate(b))+"</span>"+lastTxt(b)+"</div>"}).join("");
 }).catch(function(){fail("c-cb")});
+
+/* Fed Scenario Planner: what fed funds futures price for the next FOMC. */
+fetch("fed-scenario-planner/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+ var p=d.pricing;if(!p||p.net_bp==null||!p.meeting)throw 0;
+ var dt=new Date(p.meeting+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short",timeZone:"Europe/London"});
+ var bp=Math.round(p.net_bp),cls=bp>0?"pk":bp<0?"ac":"";
+ var pc=function(v){return Math.round((v||0)*100)+"%"};
+ $("c-fed").innerHTML='<div class="big">'+esc(dt)+' FOMC: <span class="'+cls+'">'+(bp>0?"+":bp<0?"−":"")+Math.abs(bp)+'bp</span> <span class="small">priced</span></div>'+
+  '<div class="small">Hike '+pc(p.hike)+" · Hold "+pc(p.hold)+" · Cut "+pc(p.cut)+"</div>"+
+  (p.effr!=null?'<div class="small mu">Effective fed funds rate '+p.effr.toFixed(2)+"%</div>":"");
+}).catch(function(){fail("c-fed")});
 
 /* Market Clock: which cash markets are open now, on a 24-hour London-time strip. */
 (function(){

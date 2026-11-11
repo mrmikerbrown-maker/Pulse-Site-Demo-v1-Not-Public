@@ -1,0 +1,198 @@
+"""Builds data.json for the Fed scenario planner.
+Fetches ~3y of daily history, then computes: latest vols, stock-bond regime,
+betas per 10bp of 2yr move (all days / FOMC days), hit rates and an event bump."""
+import io, json, time, calendar, datetime as dt
+import numpy as np, pandas as pd, requests
+
+UA = {"User-Agent": "Mozilla/5.0"}
+YAHOO = {"eurusd": "EURUSD=X", "gbpusd": "GBPUSD=X", "usdjpy": "JPY=X", "spx": "^GSPC",
+         "gold": "GC=F", "vix": "^VIX", "gvz": "^GVZ", "move": "^MOVE"}
+FRED = {"y2": "DGS2", "y10": "DGS10"}
+# FOMC decision days (second day of each meeting), from federalreserve.gov/monetarypolicy/fomccalendars.htm.
+FOMC = ["2023-11-01", "2023-12-13", "2024-01-31", "2024-03-20", "2024-05-01", "2024-06-12",
+        "2024-07-31", "2024-09-18", "2024-11-07", "2024-12-18", "2025-01-29", "2025-03-19",
+        "2025-05-07", "2025-06-18", "2025-07-30", "2025-09-17", "2025-10-29", "2025-12-10",
+        "2026-01-28", "2026-03-18", "2026-04-29", "2026-06-17", "2026-07-29", "2026-09-16",
+        "2026-10-28", "2026-12-09",
+        # 2027 schedule (tentative), Fed press release 5 Sep 2025
+        "2027-01-27", "2027-03-17", "2027-04-28", "2027-06-09", "2027-07-28", "2027-09-15",
+        "2027-10-27", "2027-12-08"]
+ASSETS = ["eurusd", "gbpusd", "usdjpy", "spx", "gold", "y10"]
+
+
+def fetch(url, params=None, tries=3, timeout=60):
+    last = None
+    for i in range(tries):
+        try:
+            r = requests.get(url, params=params, headers=UA, timeout=timeout)
+            r.raise_for_status()
+            return r
+        except Exception as e:
+            last = e
+            time.sleep(3 * (i + 1))
+    raise last
+
+
+def get_yahoo(tk, rng="3y"):
+    r = fetch(f"https://query1.finance.yahoo.com/v8/finance/chart/{tk}", {"range": rng, "interval": "1d"})
+    j = r.json()["chart"]["result"][0]
+    s = pd.Series(j["indicators"]["quote"][0]["close"],
+                  index=pd.to_datetime(j["timestamp"], unit="s").normalize(), dtype=float).dropna()
+    return s[~s.index.duplicated(keep="last")]
+
+
+def get_fred(sid):
+    r = fetch("https://fred.stlouisfed.org/graph/fredgraph.csv", {"id": sid, "cosd": "2023-09-01"}, tries=2, timeout=25)
+    df = pd.read_csv(io.StringIO(r.text))
+    df.columns = ["d", "v"]
+    df["v"] = pd.to_numeric(df["v"], errors="coerce")
+    df = df.dropna()
+    return pd.Series(df["v"].values, index=pd.to_datetime(df["d"]))
+
+
+def get_treasury():
+    """Fallback: US Treasury's own daily par yield curve (same data FRED republishes)."""
+    frames = []
+    for yr in range(2023, dt.date.today().year + 1):
+        r = fetch(f"https://home.treasury.gov/resource-center/data-chart-center/interest-rates/daily-treasury-rates.csv/{yr}/all",
+                  {"type": "daily_treasury_yield_curve", "field_tdr_date_value": yr, "page": "", "_format": "csv"})
+        frames.append(pd.read_csv(io.StringIO(r.text))[["Date", "2 Yr", "10 Yr"]])
+    df = pd.concat(frames)
+    df["Date"] = pd.to_datetime(df["Date"], format="%m/%d/%Y")
+    df = df.dropna().sort_values("Date").set_index("Date")
+    return df["2 Yr"].astype(float), df["10 Yr"].astype(float)
+
+
+def get_yields():
+    try:
+        y2, y10 = get_treasury()
+        print("Yields: Treasury ok, last", y2.index[-1].date())
+        return y2, y10
+    except Exception as e:
+        print("Yields: Treasury failed, trying FRED:", repr(e)[:150])
+    fr = {k: get_fred(s) for k, s in FRED.items()}
+    print("Yields: FRED ok")
+    return fr["y2"], fr["y10"]
+
+
+MCODE = "FGHJKMNQUVXZ"
+
+
+def zq_price(year, month):
+    tk = f"ZQ{MCODE[month - 1]}{str(year)[2:]}.CBT"
+    s = get_yahoo(tk, "1mo")
+    return float(s.iloc[-1]), str(s.index[-1].date()), tk
+
+
+def get_effr():
+    r = fetch("https://markets.newyorkfed.org/api/rates/unsecured/effr/last/1.json")
+    return float(r.json()["refRates"][0]["percentRate"])
+
+
+def rate_pricing(today):
+    """Cut/hold/hike odds for the next FOMC decision from 30-day fed funds futures (100 - price = avg EFFR)."""
+    nxt = [d for d in FOMC if d >= today]
+    if not nxt:
+        return None
+    dec = dt.date.fromisoformat(nxt[0])
+    after = dt.date.fromisoformat(nxt[1]) if len(nxt) > 1 else None
+    r0 = get_effr()
+    n, d = calendar.monthrange(dec.year, dec.month)[1], dec.day   # new rate applies from day d+1
+    if n - d <= 7:                      # late-month meeting: the next month's contract is the cleaner read
+        ny, nm = (dec.year + 1, 1) if dec.month == 12 else (dec.year, dec.month + 1)
+        if after and (after.year, after.month) == (ny, nm):
+            return None
+        p, asof, tk = zq_price(ny, nm)
+        r1 = 100 - p
+    else:
+        p, asof, tk = zq_price(dec.year, dec.month)
+        r1 = (n * (100 - p) - d * r0) / (n - d)
+    delta = (r1 - r0) * 100
+    cut, hike = min(1, max(0, -delta / 25)), min(1, max(0, delta / 25))
+    return {"meeting": dec.isoformat(), "cut": round(cut, 3), "hike": round(hike, 3),
+            "hold": round(1 - cut - hike, 3), "net_bp": round(delta, 1), "effr": r0,
+            "contract": tk, "price": p, "asof": asof,
+            "source": "30-day fed funds futures via Yahoo (delayed); 25bp steps assumed"}
+
+
+def stats(y, x, mask, scale=10):
+    """Slope per 10bp of 2yr move, R2, hit rate on |move|>=3bp, sample size."""
+    yy, xx = y[mask], x[mask]
+    if len(xx) < 15:
+        return None
+    b = float(np.polyfit(xx, yy, 1)[0])
+    r2 = float(np.corrcoef(xx, yy)[0, 1] ** 2)
+    big = np.abs(xx) >= 3
+    hit = float(np.mean(np.sign(yy[big]) == np.sign(b) * np.sign(xx[big]))) if big.sum() >= 5 else None
+    return {"b": round(b * scale, 3), "r2": round(r2, 3), "hit": None if hit is None else round(hit, 3), "n": int(len(xx))}
+
+
+def compute(px, y2, y10):
+    d = pd.DataFrame({k: px[k] for k in ["eurusd", "gbpusd", "usdjpy", "spx", "gold"]})
+    d["y2"], d["y10"] = y2, y10
+    d = d.dropna()
+    r = pd.DataFrame(index=d.index)
+    for k in ["eurusd", "gbpusd", "usdjpy", "spx", "gold"]:
+        r[k] = np.log(d[k]).diff() * 100            # % move
+    r["y2"] = d["y2"].diff() * 100                  # bp
+    r["y10"] = d["y10"].diff() * 100                # bp
+    r = r.dropna()
+    print("Joined rows:", len(r), "from", r.index[0].date(), "to", r.index[-1].date())
+    fomc = r.index.isin(pd.to_datetime(FOMC))
+    corr = r["spx"].rolling(60).corr(r["y2"])
+    prior = corr.shift(1)                           # regime known before the day
+    allm = np.ones(len(r), dtype=bool)
+    x = r["y2"].values
+    betas = {}
+    for a in ASSETS:
+        y = r[a].values
+        betas[a] = {"all": stats(y, x, allm), "fomc": stats(y, x, fomc)}
+    y = r["spx"].values
+    betas["spx"]["rates"] = stats(y, x, (prior < 0).values)
+    betas["spx"]["growth"] = stats(y, x, (prior >= 0).values)
+    ratios = [r[c][fomc].std() / r[c][~fomc].std() for c in ["eurusd", "gbpusd", "usdjpy", "spx", "gold", "y2"]]
+    bump = float(np.clip(np.nanmean(ratios), 1.1, 2.0)) if fomc.sum() >= 10 else 1.3
+    real = {k: float(r[k].tail(20).std() * np.sqrt(252)) for k in ["eurusd", "gbpusd", "usdjpy"]}
+    cur = float(corr.iloc[-1])
+    return betas, bump, real, cur, str(r.index[-1].date())
+
+
+def main():
+    px = {}
+    for k, t in YAHOO.items():
+        try:
+            px[k] = get_yahoo(t)
+            print(f"Yahoo ok: {k} ({t}) last {px[k].index[-1].date()}")
+        except Exception as e:
+            raise SystemExit(f"Yahoo FAILED for {k} ({t}): {e!r}")
+    y2, y10 = get_yields()
+    betas, bump, real, cur, last = compute(px, y2, y10)
+    today = dt.date.today().isoformat()
+    try:
+        pricing = rate_pricing(today)
+        print("Pricing:", pricing)
+    except Exception as e:
+        pricing = None
+        print("Pricing FAILED (page falls back to manual sliders):", repr(e)[:200])
+    nxt = next((x for x in FOMC if x >= today), None)
+    out = {
+        "generated": dt.datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        "history_last_date": last,
+        "vols": {"vix": round(float(px["vix"].iloc[-1]), 2), "gvz": round(float(px["gvz"].iloc[-1]), 2),
+                 "move": round(float(px["move"].iloc[-1]), 1),
+                 "eurusd": round(real["eurusd"], 2), "gbpusd": round(real["gbpusd"], 2),
+                 "usdjpy": round(real["usdjpy"], 2)},
+        "vol_notes": {"fx": "20-day realised vol, annualised (not implied)"},
+        "regime": {"name": "rates" if cur < 0 else "growth", "corr60": round(cur, 3)},
+        "bump_fomc": round(bump, 2),
+        "betas_per_10bp": betas,
+        "pricing": pricing,
+        "next_event": {"date": nxt, "type": "FOMC decision"} if nxt else None,
+    }
+    with open("data.json", "w") as f:
+        json.dump(out, f, indent=1)
+    print(json.dumps(out, indent=1))
+
+
+if __name__ == "__main__":
+    main()

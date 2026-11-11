@@ -16,6 +16,7 @@ The site is public to anyone with the link, despite the repo name.
 | `economy-thermometer/` | Economy Thermometer |
 | `clock/` | Market Clock |
 | `central-banks/` | Central banks |
+| `fed-scenario-planner/` | Fed Scenario Planner |
 | `glossary/` | Glossary page |
 
 Shared by every page:
@@ -34,8 +35,9 @@ All the jobs are free GitHub Actions and need no passwords or keys. Each one can
 | Central banks: update rates | about 06:30 and 20:30 in winter (an hour later in summer) | `central-banks/data.json` |
 | Economy Thermometer: update data | about 06:17 in winter (07:17 in summer) | `economy-thermometer/data.json` |
 | Index Contribution: save SPY weights | 13:15 on weekdays in winter (14:15 in summer) | `index-contribution-site/spy-weights*.csv` |
+| Fed Scenario Planner: update data | weekdays 22:30 (often runs a few hours late) | `fed-scenario-planner/data.json` |
 | Index Contribution: save last session | 16:40 New York time on weekdays | `index-contribution-site/last-session.csv`, `periods.csv` |
 
 Every job saves through `.github/save.sh`, which retries if another job saved at the same moment and then asks GitHub Pages to rebuild.
 
-The tools used to live in their own repos (calendar, central-banks, economy-thermometer, index-contribution-site). They were moved here on 11 Nov 2026 with their history kept.
+The tools used to live in their own repos (calendar, central-banks, economy-thermometer, index-contribution-site, and the private fed-scenario-planner). They were moved here on 11 Nov 2026 with their history kept.
