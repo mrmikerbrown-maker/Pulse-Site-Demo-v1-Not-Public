@@ -17,8 +17,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pandas numpy requests openpyxl
+      - run: pip install pandas numpy requests
+      - run: python build_data.py
+      # Fed-day history: adds each new meeting's surprise and refits the market reactions.
+      # If it fails, the last good fomc.json stays and the pricing above is still saved.
       - run: python fomc_history.py
+        continue-on-error: true
       - env:
           GH_TOKEN: ${{ github.token }}
-        run: bash ../.github/save.sh "Fed-day history (test)" fomc.json sf_raw.csv daily_moves.csv
+        run: bash ../.github/save.sh "Update Fed planner data" data.json fomc.json fomc_surprises.csv

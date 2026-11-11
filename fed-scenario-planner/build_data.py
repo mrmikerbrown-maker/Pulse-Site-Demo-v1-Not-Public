@@ -84,14 +84,15 @@ def zq_price(year, month):
     return float(s.iloc[-1]), str(s.index[-1].date()), tk
 
 
-def get_effr():
+def get_effr(with_date=False):
     r = fetch("https://markets.newyorkfed.org/api/rates/unsecured/effr/last/1.json")
-    return float(r.json()["refRates"][0]["percentRate"])
+    x = r.json()["refRates"][0]
+    return (float(x["percentRate"]), x["effectiveDate"]) if with_date else float(x["percentRate"])
 
 
-def rate_pricing(today):
+def rate_pricing(today, fomc=FOMC):
     """Cut/hold/hike odds for the next FOMC decision from 30-day fed funds futures (100 - price = avg EFFR)."""
-    nxt = [d for d in FOMC if d >= today]
+    nxt = [d for d in fomc if d >= today]
     if not nxt:
         return None
     dec = dt.date.fromisoformat(nxt[0])
@@ -282,14 +283,19 @@ def main():
     y2, y10 = get_yields()
     betas, bump, real, cur, last = compute(px, y2, y10)
     today = dt.date.today().isoformat()
+    fomc = get_fomc_dates()
     try:
-        pricing = rate_pricing(today)
+        pricing = rate_pricing(today, fomc)
         print("Pricing:", pricing)
     except Exception as e:
         pricing = None
         print("Pricing FAILED (page falls back to manual sliders):", repr(e)[:200])
     try:
-        path = rate_path(today, get_effr(), get_fomc_dates())
+        r0, r0_date = get_effr(with_date=True)
+        # start the path from the effective rate's own date, so a meeting that has just happened stays in
+        # the path until the effective rate reflects it (pages pick the next meeting themselves)
+        path = rate_path(min(today, r0_date), r0, fomc)
+        path["effr_date"] = r0_date
         print("Path:", path)
     except Exception as e:
         path = None
@@ -299,7 +305,7 @@ def main():
                 path = json.load(f).get("path")
         except Exception:
             pass
-    nxt = next((x for x in FOMC if x >= today), None)
+    nxt = next((x for x in fomc if x >= today), None)
     out = {
         "generated": dt.datetime.utcnow().isoformat(timespec="seconds") + "Z",
         "history_last_date": last,
