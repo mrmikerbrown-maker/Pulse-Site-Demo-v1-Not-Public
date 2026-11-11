@@ -1,32 +1,36 @@
-/* Shared top bar for every page on mrmikerbrown-maker.github.io.
-   A page loads it with one line in <head>:  <script src="/nav.js" defer></script>
+/* Shared top bar for every page of the Pulse site (hub repo Pulse-Site-Demo-v1-Not-Public).
+   A page loads it with one line in <head>:  <script src="/Pulse-Site-Demo-v1-Not-Public/nav.js" defer></script>
+   Links to the hub's own pages (Home, Market Clock, Data Surprises, Glossary) are worked out from where this file
+   is loaded from (HUB below), so renaming the hub repo again only needs the <script> line on each page changing.
    It puts the same full-width bar at the top of the page: logo + site name (links home), a link to every tool,
    and the page's own sun/moon button (moved into the bar). On narrow screens the links fold into a menu button.
    The page's own logo row is hidden so there is only one header.
    To add a tool to every page, add one line to TOOLS below. To rename the site, change NAME. */
 (function(){
+var ME=document.currentScript&&document.currentScript.src;
+var HUB=ME?new URL(".",ME).pathname:"/Pulse-Site-Demo-v1-Not-Public/";
 var NAME="Pulse";
 var TOOLS=[
- ["Home","/"],
+ ["Home",HUB],
  ["This week","/calendar/"],
  ["Markets",[
   ["Index Contribution","/index-contribution-site/","Which stocks moved the S&amp;P 500, Nasdaq 100 and Dow"],
-  ["Market Clock","/clock/","When markets open, close and move most"]
+  ["Market Clock",HUB+"clock/","When markets open, close and move most"]
  ]],
  ["Economy",[
-  ["Data Surprises","/surprises/","How releases landed against expectations"],
+  ["Data Surprises",HUB+"surprises/","How releases landed against expectations"],
   ["Economy Thermometer","/economy-thermometer/","Is each G10 economy hot or cold?"],
   ["Central banks","/central-banks/","Rates, last move and next meeting"],
   ["Fed planner","","Coming soon"]
  ]],
- ["Glossary","/glossary/"]
+ ["Glossary",HUB+"glossary/"]
 ];
 /* A top-level item is ["Label","/path/"]; a dropdown is ["Label",[["Name","/path/","one-line description"],...]].
    A child with an empty path shows greyed out as "coming soon". */
 var LOGO="data:image/png;base64,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";
 window.NQ_TOOLS=TOOLS;
 var here=location.pathname.replace(/index\.html$/,"");
-function isHere(h){return h==="/"?here==="/":here.indexOf(h)===0}
+function isHere(h){return h===HUB?here===HUB:here.indexOf(h)===0}
 var F="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif";
 var css=
 ".nq-hd{display:block;border-bottom:1px solid var(--line);background:var(--bg);position:relative;z-index:40;margin-bottom:18px}"+
@@ -73,7 +77,7 @@ var css=
 function build(){
  if(document.querySelector(".nq-hd"))return;
  // Glossary words get a dotted underline with a pop-up definition on every page (see glossary.js).
- if(!window.NQG&&!document.querySelector('script[src="/glossary.js"]')){var gs=document.createElement("script");gs.src="/glossary.js";gs.defer=true;document.head.appendChild(gs)}
+ if(!window.NQG&&!document.querySelector('script[src$="glossary.js"]')){var gs=document.createElement("script");gs.src=HUB+"glossary.js";gs.defer=true;document.head.appendChild(gs)}
  var st=document.createElement("style");st.textContent=css;document.head.appendChild(st);
  function cur(h){return h&&isHere(h)?' aria-current="page"':""}
  var CHEV='<svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -86,7 +90,7 @@ function build(){
   if(typeof t[1]==="string")return '<a href="'+t[1]+'"'+cur(t[1])+">"+t[0]+"</a>";
   return '<div class="nq-ph">'+t[0]+"</div>"+t[1].map(function(c){return c[1]?'<a class="nq-pc" href="'+c[1]+'"'+cur(c[1])+">"+c[0]+"</a>":'<span class="nq-pc nq-soon">'+c[0]+" · coming soon</span>"}).join("")}).join("");
  var hd=document.createElement("header");hd.className="nq-hd";
- hd.innerHTML='<div class="nq-in"><a class="nq-br" href="/" aria-label="'+NAME+' home"><img alt="Newsquawk" width="120" src="'+LOGO+'"><span>'+NAME+'</span></a>'+
+ hd.innerHTML='<div class="nq-in"><a class="nq-br" href="'+HUB+'" aria-label="'+NAME+' home"><img alt="Newsquawk" width="120" src="'+LOGO+'"><span>'+NAME+'</span></a>'+
   '<nav class="nq-ln" aria-label="Tools">'+links+'</nav>'+
   '<button class="nq-b" type="button" aria-expanded="false" aria-label="Menu"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h11"/></svg></button>'+
   '<span class="nq-th"></span></div><nav class="nq-p" aria-label="Tools">'+plinks+"</nav>";
