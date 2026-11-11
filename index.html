@@ -7,7 +7,7 @@
 <meta name="description" content="Free tools for reading the macro picture and the market's moves: economy thermometer, index contribution, data surprises and market clock.">
 <link rel="icon" href="data:,">
 <script>try{var t=localStorage.getItem("ict-theme");if(t?t==="light":matchMedia("(prefers-color-scheme: light)").matches)document.documentElement.classList.add("light")}catch(e){}</script>
-<script src="/nav.js" defer></script>
+<script src="nav.js" defer></script>
 <style>
 :root{--bg:#06060A;--card:#0D0E15;--line:#22242E;--text:#FFFFFF;--text2:#CBD5E1;--muted:#8A8FA3;--dim:#5E6273;--accent:#00E0FF;--pink:#FF3B6B;--up:#3DDC97;--down:#FF5C7A;color-scheme:dark}
 :root.light{--bg:#F5F6F8;--card:#FFFFFF;--line:#E1E4EA;--text:#0B0D14;--text2:#3A4150;--muted:#6B7280;--dim:#9AA0AC;--accent:#00B4D8;--pink:#E62E5C;--up:#0E9F6E;--down:#E23D52;color-scheme:light}
@@ -104,7 +104,7 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
    <div class="live" id="c-index"><p class="wait">Loading…</p></div>
    <div class="go">Open the tracker →</div>
   </a>
-  <a class="card" href="/surprises/">
+  <a class="card" href="surprises/">
    <div class="lbl">Data</div><h2>Data Surprises</h2>
    <p class="d">How the big US releases landed against what economists expected, and how markets reacted.</p>
    <div class="live" id="c-surp"><p class="wait">Loading…</p></div>
@@ -116,7 +116,7 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
    <div class="live" id="c-therm"><p class="wait">Loading…</p></div>
    <div class="go">Open the thermometer →</div>
   </a>
-  <a class="card" href="/clock/">
+  <a class="card" href="clock/">
    <div class="lbl">Timing</div><h2>Market Clock</h2>
    <p class="d">When the big markets open and close, and when the busiest hours are, in London time.</p>
    <div class="live" id="c-clock"></div>
@@ -188,7 +188,7 @@ fetch("/economy-thermometer/data.json?"+Date.now()).then(function(r){if(!r.ok)th
 })();
 
 /* Data Surprises: the three most recent releases on the surprises page, read straight from that page. */
-fetch("/surprises/?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){
+fetch("surprises/?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){
  var i=t.indexOf("var REL=");if(i<0)throw 0;
  var s=t.slice(i+8),depth=0,end=0,q=false;
  for(var k=0;k<s.length;k++){var c=s[k];if(q){if(c==="\\")k++;else if(c==='"')q=false;continue}

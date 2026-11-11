@@ -108,7 +108,7 @@ select.rs{width:100%;font:inherit;font-size:14px;padding:8px;border-radius:8px;b
 :root.light #tip{box-shadow:0 8px 28px rgba(11,13,20,.14)}
 :root.light input[type=range]{accent-color:#0092B0}
 </style>
-<script src="/nav.js" defer></script>
+<script src="../nav.js" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -403,7 +403,7 @@ function renderReal(k,i){
 /* Glossary words and pop-ups now come from the shared /glossary.js (loaded by nav.js). */
 function lk(){if(window.NQG&&NQG.scan)setTimeout(NQG.scan,0)}
 function closeTip(){if(window.NQG&&NQG.close)NQG.close()}
-$("bx").onclick=function(){showMode("x")};$("bq").onclick=function(){showMode("q")};$("br").onclick=function(){showMode("r")};$("bg").onclick=function(){location.href="/glossary/"};
+$("bx").onclick=function(){showMode("x")};$("bq").onclick=function(){showMode("q")};$("br").onclick=function(){showMode("r")};$("bg").onclick=function(){location.href="../glossary/"};
 setInd(0);
 lk([document.querySelector(".sub"),document.querySelector("p.note")]);
 (function(){var b=document.getElementById("theme"),r=document.documentElement;function L(){return r.classList.contains("light")}function lab(){b.setAttribute("aria-label",L()?"Switch to dark mode":"Switch to light mode");var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",L()?"#F5F6F8":"#06060A")}b.addEventListener("click",function(){var l=!L();r.classList.toggle("light",l);try{localStorage.setItem("ict-theme",l?"light":"dark")}catch(e){}lab();});lab()})();

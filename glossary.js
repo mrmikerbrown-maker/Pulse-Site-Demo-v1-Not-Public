@@ -1,4 +1,4 @@
-/* Shared glossary for every page on mrmikerbrown-maker.github.io.
+/* Shared glossary for every page of the Pulse site (hub repo Pulse-Site-Demo-v1-Not-Public).
    nav.js loads this file on every page, so pages need no changes.
    What it does: finds glossary words in the page text and gives the first visible one of each a dotted underline.
    Hover (mouse) or tap (phone) shows the definition, with a link to the full Glossary page (/glossary/).
@@ -8,6 +8,8 @@
    A page can keep an area free of underlines with the attribute data-nogloss. */
 (function(){
 if(window.NQG)return;
+var ME=document.currentScript&&document.currentScript.src;
+var HUB=ME?new URL(".",ME).pathname:"/Pulse-Site-Demo-v1-Not-Public/";
 var GG=[
 ["The big picture",[
 ["Surprise","The actual number minus the expected number. Markets react to the surprise, not to the number itself.",["surprise","surprises"]],
@@ -132,7 +134,7 @@ var GG=[
 var GL=[];GG.forEach(function(g){g[1].forEach(function(it){GL.push({g:g[0],t:it[0],d:it[1],a:it[2],x:it[3]})})});
 function slug(t){return t.toLowerCase().replace(/&amp;|&/g," and ").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")}
 GL.forEach(function(it){it.id=slug(it.t)});
-var GURL="/glossary/";
+var GURL=HUB+"glossary/";
 window.NQG={groups:GG,terms:GL,slug:slug,url:GURL};
 if(window.NQG_NOLINK)return;
 
