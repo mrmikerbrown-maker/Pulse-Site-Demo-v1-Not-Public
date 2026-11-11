@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-11T00:46:28Z",
+ "generated": "2026-11-11T10:18:59Z",
  "demo": false,
  "history_start": "2019-01-01",
  "banks": [
@@ -262,7 +262,7 @@
    "name": "Bank of England",
    "rate_name": "Bank Rate",
    "rate": 4.0,
-   "asof": "2026-11-09",
+   "asof": "2026-11-10",
    "last": {
     "date": "2026-11-05",
     "bp": 25,
@@ -379,7 +379,7 @@
      4.0
     ],
     [
-     "2026-11-09",
+     "2026-11-10",
      4.0
     ]
    ],
@@ -952,7 +952,7 @@
    "name": "Norges Bank",
    "rate_name": "Policy rate",
    "rate": 4.5,
-   "asof": "2026-11-09",
+   "asof": "2026-11-10",
    "last": {
     "date": "2026-11-05",
     "bp": 0,
@@ -1073,7 +1073,7 @@
      4.5
     ],
     [
-     "2026-11-09",
+     "2026-11-10",
      4.5
     ]
    ],
@@ -1085,12 +1085,13 @@
    "short": "Riksbank",
    "name": "Sveriges Riksbank",
    "rate_name": "Policy rate",
-   "rate": 1.75,
-   "asof": "2026-11-10",
+   "rate": 2.0,
+   "asof": "2026-11-11",
    "last": {
-    "date": "2026-11-04",
-    "bp": 0,
-    "kind": "hold"
+    "date": "2026-11-11",
+    "bp": 25,
+    "kind": "hike",
+    "unscheduled": true
    },
    "prev": null,
    "next": {
@@ -1182,8 +1183,12 @@
      1.75
     ],
     [
-     "2026-11-10",
-     1.75
+     "2026-11-11",
+     2.0
+    ],
+    [
+     "2026-11-11",
+     2.0
     ]
    ],
    "last_meeting_on_file": "2027-06-22",
@@ -1194,8 +1199,8 @@
   "OK   BIS policy rates (AU, CA, CH, GB, JP, NO, NZ, SE)",
   "OK   USD  Fed       4.0% as of 2026-11-10 (FRED DFEDTARU), last: {'date': '2026-10-28', 'bp': 0, 'kind': 'hold'}",
   "OK   EUR  ECB       2.5% as of 2026-11-10 (FRED ECBDFR), last: {'date': '2026-10-29', 'bp': 0, 'kind': 'hold'}",
-  "OK   GBP  own feed: 4.0% as of 2026-11-09",
-  "OK   GBP  BoE       4.0% as of 2026-11-09 (own feed), last: {'date': '2026-11-05', 'bp': 25, 'kind': 'hike'}",
+  "OK   GBP  own feed: 4.0% as of 2026-11-10",
+  "OK   GBP  BoE       4.0% as of 2026-11-10 (own feed), last: {'date': '2026-11-05', 'bp': 25, 'kind': 'hike'}",
   "OK   JPY  BoJ       1.25% as of 2026-11-03 (BIS JP), last: {'date': '2026-10-30', 'bp': None, 'kind': 'pending'}",
   "OK   CHF  own feed: 0.0% as of 2026-11-06",
   "OK   CHF  SNB       0.0% as of 2026-11-06 (own feed), last: {'date': '2026-09-24', 'bp': 0, 'kind': 'hold'}",
@@ -1205,9 +1210,9 @@
   "OK   AUD  own feed: 4.85% as of 2026-11-10",
   "OK   AUD  RBA       4.85% as of 2026-11-10 (own feed), last: {'date': '2026-11-03', 'bp': 25, 'kind': 'hike'}",
   "OK   NZD  RBNZ      2.75% as of 2026-10-30 (BIS NZ), last: {'date': '2026-10-28', 'bp': 0, 'kind': 'hold'}",
-  "OK   NOK  own feed: 4.5% as of 2026-11-09",
-  "OK   NOK  Norges    4.5% as of 2026-11-09 (own feed), last: {'date': '2026-11-05', 'bp': 0, 'kind': 'hold'}",
-  "OK   SEK  own feed: 1.75% as of 2026-11-10",
-  "OK   SEK  Riksbank  1.75% as of 2026-11-10 (own feed), last: {'date': '2026-11-04', 'bp': 0, 'kind': 'hold'}"
+  "OK   NOK  own feed: 4.5% as of 2026-11-10",
+  "OK   NOK  Norges    4.5% as of 2026-11-10 (own feed), last: {'date': '2026-11-05', 'bp': 0, 'kind': 'hold'}",
+  "OK   SEK  own feed: 2.0% as of 2026-11-11",
+  "OK   SEK  Riksbank  2.0% as of 2026-11-11 (own feed), last: {'date': '2026-11-11', 'bp': 25, 'kind': 'hike', 'unscheduled': True}"
  ]
 }
