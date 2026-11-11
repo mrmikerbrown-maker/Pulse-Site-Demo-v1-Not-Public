@@ -57,6 +57,32 @@ tr.u td{background:var(--hl);font-weight:700}tr.u td:first-child{box-shadow:inse
 .foot{margin-top:26px;font-size:12px;color:var(--dim);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
 .foot a{color:var(--accent)}
 @media (max-width:760px){.card{padding:16px}.tw{margin:0 -16px;padding:0 16px}table{font-size:12px}th,td{padding:8px 7px}td:first-child{white-space:normal;min-width:84px;max-width:96px}.w{width:46px!important}}
+/* rate path ("hike ladder"): one row of 25bp blocks per meeting */
+:root{--slot:#161824;--cmp:#FFFFFF}:root.light{--slot:#EEF0F4;--cmp:#0B0D14}
+.rp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:0 0 16px;padding:0 0 14px;border-bottom:1px solid var(--line)}
+.rp-stats span{display:block;color:var(--muted);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.rp-stats b{color:var(--text);font-size:20px;font-variant-numeric:tabular-nums}
+.rp-ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-bottom:10px}
+.rp-seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.rp-seg button{border:0;border-radius:0;font-size:12px;padding:6px 11px;color:var(--muted)}
+.rp-seg button+button{border-left:1px solid var(--line)}
+.rp-seg button.on{color:#06060A}
+.rp-row{display:grid;grid-template-columns:120px minmax(0,1fr) 76px 64px 84px 84px;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.rp-row.hd{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;padding-top:0}
+.rp-row.hd>div:nth-child(n+3){text-align:right}
+.rp-row>.v{text-align:right;color:var(--text);font-size:14px}.rp-row>.v.big{font-weight:800;font-size:15px}
+.rp-dt b{display:block;color:var(--text);font-size:14px}.rp-dt small{color:var(--muted);font-size:11px}
+.rp-up{color:var(--down)!important}.rp-dn{color:var(--up)!important}.rp-mu{color:var(--muted)!important}
+.rp-blocks{position:relative;display:flex;gap:4px;height:22px}
+.rp-blk{flex:1;background:var(--slot);border-radius:4px;position:relative;overflow:hidden}
+.rp-blk i{position:absolute;top:0;bottom:0;left:0;background:var(--down);border-radius:4px}
+.rp-blk.c i{left:auto;right:0;background:var(--up)}
+.rp-blk.z{flex:0 0 2px;background:var(--muted);border-radius:1px}
+.rp-mk{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--cmp);border-radius:1px;box-shadow:0 0 0 2px var(--card)}
+.rp-scale{display:flex;gap:4px;font-size:10px;color:var(--dim);margin-top:4px}.rp-scale span{flex:1;text-align:right}.rp-scale .z{flex:0 0 2px}
+.rp-key{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:12px}
+.rp-key i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:6px}
+@media (max-width:760px){.rp-row{grid-template-columns:1fr auto auto;row-gap:8px;column-gap:12px}.rp-row .rp-blocks,.rp-row .rp-scale{grid-column:1/-1;order:9}.rp-row .c-chg,.rp-row .c-cmp,.rp-row.hd{display:none}}
 </style>
 <script src="../nav.js" defer></script>
 </head>
@@ -66,6 +92,15 @@ tr.u td{background:var(--hl);font-weight:700}tr.u td:first-child{box-shadow:inse
 <h1>Fed Scenario Planner</h1>
 <p class="sub">How could the next Fed decision move FX, stocks, yields and gold? The planner starts from what fed funds futures are pricing, sizes each scenario to current volatility, and uses sensitivities measured on the last three years of daily data.</p>
 <p class="stamp" id="stamp"></p>
+<div class="card" id="rp" hidden>
+ <h2>Rate path priced by fed funds futures</h2>
+ <div class="rp-stats" id="rpstats"></div>
+ <div class="rp-ctl">Compare
+  <div class="rp-seg" id="rpseg"><button data-k="">Off</button><button data-k="1w ago" class="on">1w ago</button><button data-k="3w ago">3w ago</button></div>
+ </div>
+ <div id="rplad"></div>
+ <div class="rp-key"><span><i style="background:var(--down)"></i>Hikes</span><span><i style="background:var(--up)"></i>Cuts</span><span id="rpkc"><i style="background:var(--cmp);width:3px"></i><span id="rpkw"></span></span><span>One block = 25bp · cumulative pricing from fed funds futures</span></div>
+</div>
 <div class="warn"><b>Treat the numbers as rough.</b> The FOMC-day estimates rest on only about two dozen meetings, the scenario sizes are assumptions, and FX vols are realised, not implied. This is a planning aid, not a forecast.</div>
 
 <div class="card">
@@ -187,7 +222,35 @@ function stamp(){
  el.textContent=("Prices to the "+ldn(h,{weekday:"short",day:"numeric",month:"short"})+" close · updated "+ldn(D.generated,{weekday:"short",day:"numeric",month:"short"})+", "+ldn(D.generated,{hour:"2-digit",minute:"2-digit"})+" London").replace(/,(?= \d+ \w{3})/g,"");
  if(age>4){el.textContent+=" · data is "+Math.floor(age)+" days old";el.className="stamp old"}
 }
+var RPC="1w ago";
+function rpath(){
+ var P=D.path;if(!P||!P.rates||!P.rates.length){$("rp").hidden=true;return}$("rp").hidden=false;
+ var e=P.effr,R=P.rates,C=RPC&&P.compare&&P.compare[RPC]?P.compare[RPC].rates:null,today=new Date(P.asof+"T12:00:00Z");
+ function fd(s,o){return new Date(s+"T12:00:00Z").toLocaleDateString("en-GB",Object.assign({timeZone:"UTC"},o)).replace("Sept","Sep")}
+ function sg(x,d){if(Math.abs(x)<Math.pow(10,-d)/2)x=0;return(x>0?"+":x<0?"−":"")+Math.abs(x).toFixed(d)}
+ function pct(p){return p<0?"("+Math.abs(p).toFixed(0)+"%)":p.toFixed(0)+"%"}
+ function cl(x){return x>.5?"rp-up":x<-.5?"rp-dn":"rp-mu"}
+ var cums=R.map(function(r){return(r-e)*400}),all=cums.concat(C?C.map(function(r){return(r-e)*400}):[]).concat([0]);
+ var nh=Math.max(1,Math.ceil(Math.max.apply(0,all)/100-1e-9)),nc=Math.max(0,Math.ceil(-Math.min.apply(0,all)/100-1e-9));
+ var pk=0;R.forEach(function(r,i){if(Math.abs(r-e)>Math.abs(R[pk]-e))pk=i});var M=P.meetings,lm=M.length-1;
+ $("rpstats").innerHTML='<div><span>Effective fed funds rate</span><b>'+e.toFixed(2)+'%</b></div><div><span>Priced for '+fd(M[0],{day:"numeric",month:"short"})+' meeting</span><b>'+sg(cums[0]/4,1)+'bp</b></div><div><span>'+(R[pk]>=e?"Peak":"Low")+'</span><b>'+R[pk].toFixed(2)+'%</b></div><div><span>'+fd(M[lm],{month:"short"})+" "+M[lm].slice(2,4)+'</span><b>'+R[lm].toFixed(2)+'%</b></div>';
+ var h='<div class="rp-row hd"><div>Meeting</div><div>Priced</div><div>Cumulative</div><div>Rate</div><div class="c-chg">This meeting</div><div class="c-cmp">'+(C?"vs "+RPC:"")+'</div></div>',prev=e;
+ R.forEach(function(r,i){
+  var cum=cums[i],me=(r-prev)*100;prev=r;var days=Math.round((new Date(M[i]+"T19:00:00Z")-today)/864e5),bl='<div class="rp-blocks">',k,f;
+  for(k=nc;k>=1;k--){f=Math.max(0,Math.min(1,(-cum-(k-1)*100)/100));bl+='<div class="rp-blk c"><i style="width:'+(f*100).toFixed(1)+'%"></i></div>'}
+  if(nc)bl+='<div class="rp-blk z"></div>';
+  for(k=1;k<=nh;k++){f=Math.max(0,Math.min(1,(cum-(k-1)*100)/100));bl+='<div class="rp-blk"><i style="width:'+(f*100).toFixed(1)+'%"></i></div>'}
+  if(C&&C[i]!=null){var cc=(C[i]-e)*400,pos=(cc+nc*100)/((nh+nc)*100);bl+='<span class="rp-mk" style="left:calc('+(pos*100).toFixed(2)+'% - 1px)" title="'+RPC+': '+pct(cc)+'"></span>'}
+  bl+='</div>';var dv=C&&C[i]!=null?(r-C[i])*100:null;
+  h+='<div class="rp-row"><div class="rp-dt"><b>'+fd(M[i],{day:"numeric",month:"short",year:"numeric"})+'</b><small>'+(days<60?days+" days":Math.round(days/30.4)+" months")+'</small></div>'+bl+'<div class="v big">'+pct(cum)+'</div><div class="v">'+r.toFixed(2)+'%</div><div class="v c-chg '+cl(me)+'">'+sg(me,1)+' bp</div><div class="v c-cmp '+(dv==null?"":cl(dv))+'">'+(dv==null?"":sg(dv,1)+" bp")+'</div></div>';
+ });
+ var sc='';for(k=nc;k>=1;k--)sc+="<span>"+(k*-25)+"bp</span>";if(nc)sc+='<span class="z"></span>';for(k=1;k<=nh;k++)sc+="<span>+"+k*25+"bp</span>";
+ h+='<div class="rp-row" style="border:0;padding-top:4px"><div></div><div class="rp-scale">'+sc+'</div></div>';
+ $("rplad").innerHTML=h;$("rpkc").hidden=!C;if(C)$("rpkw").textContent=fd(P.compare[RPC].asof,{day:"numeric",month:"short"});
+}
+document.querySelectorAll("#rpseg button").forEach(function(b){b.onclick=function(){RPC=b.getAttribute("data-k");document.querySelectorAll("#rpseg button").forEach(function(x){x.className=x===b?"on":""});rpath()}});
 function setup(){
+ rpath();
  var v=D.vols;$("vix").value=v.vix;$("move").value=v.move;$("gvz").value=v.gvz;$("eu").value=v.eurusd;$("gb").value=v.gbpusd;$("jp").value=v.usdjpy;
  var pr=D.pricing,prs="manual entry";
  if(pr){var c5=Math.round(pr.cut*20)*5,h5=Math.round(pr.hike*20)*5;$("pc").value=c5;$("ph").value=Math.min(h5,100-c5);prs=pr.contract.replace(".CBT","")+" futures"}

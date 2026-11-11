@@ -115,6 +115,120 @@ def rate_pricing(today):
             "source": "30-day fed funds futures via Yahoo (delayed); 25bp steps assumed"}
 
 
+MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september",
+          "october", "november", "december"]
+
+
+def get_fomc_dates():
+    """Decision days from the Fed's own calendar page, merged with the list above. Falls back to the list
+    if the page can't be read. Each year must give 6-10 meetings to be trusted."""
+    import re
+    found = set()
+    try:
+        html = fetch("https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm", tries=2, timeout=30).text
+        parts = re.split(r"(\d{4})\s+FOMC Meetings", html)
+        for i in range(1, len(parts) - 1, 2):
+            yr, chunk = int(parts[i]), parts[i + 1]
+            got = []
+            for mo, days in re.findall(r"fomc-meeting__month[^>]*>(?:\s|<[^>]+>)*([A-Za-z]+(?:/[A-Za-z]+)?)"
+                                       r"(?:\s|<[^>]+>)*</div>(?:\s|<[^>]+>)*?<div[^>]*fomc-meeting__date[^>]*>"
+                                       r"(?:\s|<[^>]+>)*(\d{1,2}(?:\s*[-\u2013]\s*\d{1,2})?)", chunk):
+                ms = [next((i + 1 for i, n in enumerate(MONTHS) if n[:3] == x[:3].lower()), None)
+                      for x in mo.split("/")]
+                if None in ms:
+                    continue
+                dd = [int(x) for x in re.split(r"[-\u2013]", days)]
+                mon = ms[0]
+                if len(dd) == 2 and dd[1] < dd[0]:          # runs into the next month, e.g. Apr/May 30-1
+                    mon = ms[1] if len(ms) > 1 else ms[0] % 12 + 1
+                try:
+                    got.append(dt.date(yr, mon, dd[-1]).isoformat())
+                except ValueError:
+                    pass
+            if 6 <= len(got) <= 10:
+                found.update(got)
+        print("FOMC calendar page:", len(found), "dates, last", max(found) if found else None)
+    except Exception as e:
+        print("FOMC calendar page FAILED, using built-in dates:", repr(e)[:150])
+    allc = sorted(set(FOMC) | found)
+    # if the page and the list disagree for a year the page covers, trust the page
+    yrs = {d[:4] for d in found}
+    return sorted([d for d in allc if d[:4] not in yrs or d in found])
+
+
+def month_add(y, m, k=1):
+    m += k
+    return y + (m - 1) // 12, (m - 1) % 12 + 1
+
+
+def path_on(R, meets, r0):
+    """Average effective rate after each meeting, chained month by month from 30-day fed funds futures.
+    R: {(year, month): 100 - futures price}. Uses the next month's contract when that month has no meeting
+    (cleanest read); otherwise backs the post-meeting rate out of the meeting month's average."""
+    mm = {(d.year, d.month) for d in meets}
+    out, post = [], r0
+    for d in meets:
+        ym = (d.year, d.month)
+        pm, nm = month_add(d.year, d.month, -1), month_add(d.year, d.month, 1)
+        pre = R[pm] if pm not in mm and pm in R else post
+        n = calendar.monthrange(d.year, d.month)[1]
+        if nm not in mm and nm in R:
+            post = R[nm]
+        elif ym in R:
+            post = (n * R[ym] - d.day * pre) / (n - d.day)
+        else:
+            break                       # no prices this far out yet
+        out.append(round(post, 4))
+    return out
+
+
+def rate_path(today, r0, fomc):
+    """Meeting-by-meeting priced path, as far out as there are both futures prices and known meeting dates,
+    plus the same path 1 and 3 weeks ago."""
+    td = dt.date.fromisoformat(today)
+    meets = [dt.date.fromisoformat(d) for d in fomc if d >= today]
+    if not meets:
+        return None
+    S, ym, miss = {}, month_add(td.year, td.month, -1), 0
+    for _ in range(60):                 # up to 5 years out; stops after 3 missing months in a row
+        y, m = ym
+        tk = f"ZQ{MCODE[m - 1]}{str(y)[2:]}.CBT"
+        try:
+            S[ym] = get_yahoo(tk, "3mo")
+            miss = 0
+        except Exception:
+            miss += 1
+            if miss >= 3 and ym > (td.year, td.month):
+                break
+        ym = month_add(y, m, 1)
+    print("Path: contracts", min(S), "to", max(S), f"({len(S)})")
+    df = pd.DataFrame(S).sort_index().ffill()
+    need = [k for k in S if k >= (td.year, td.month)]
+    df = df.dropna(subset=need[:3])         # far months trade thinly; forward-fill covers gaps
+    df = df.dropna(how="all")
+    if df.empty:
+        raise ValueError("no complete row of futures prices")
+
+    def at(day):
+        row = df[df.index <= pd.Timestamp(day)].iloc[-1]
+        R = {k: 100 - float(v) for k, v in row.items() if pd.notna(v)}
+        return {"asof": str(row.name.date()), "rates": path_on(R, meets, r0)}
+
+    cur = at(df.index[-1])
+    meets = meets[:len(cur["rates"])]
+    end = df.index[-1].date()
+    comp = {}
+    for lab, k in [("1w ago", 7), ("3w ago", 21)]:
+        try:
+            c = at(end - dt.timedelta(days=k))
+            c["rates"] = c["rates"][:len(meets)]
+            comp[lab] = c
+        except Exception as e:
+            print("Path: no", lab, repr(e)[:120])
+    return {"meetings": [d.isoformat() for d in meets], "effr": r0, "asof": cur["asof"], "rates": cur["rates"],
+            "compare": comp, "source": "CBOT 30-day fed funds futures via Yahoo (delayed)"}
+
+
 def stats(y, x, mask, scale=10):
     """Slope per 10bp of 2yr move, R2, hit rate on |move|>=3bp, sample size."""
     yy, xx = y[mask], x[mask]
@@ -174,6 +288,17 @@ def main():
     except Exception as e:
         pricing = None
         print("Pricing FAILED (page falls back to manual sliders):", repr(e)[:200])
+    try:
+        path = rate_path(today, get_effr(), get_fomc_dates())
+        print("Path:", path)
+    except Exception as e:
+        path = None
+        print("Path FAILED, keeping the last good one:", repr(e)[:200])
+        try:
+            with open("data.json") as f:
+                path = json.load(f).get("path")
+        except Exception:
+            pass
     nxt = next((x for x in FOMC if x >= today), None)
     out = {
         "generated": dt.datetime.utcnow().isoformat(timespec="seconds") + "Z",
@@ -187,6 +312,7 @@ def main():
         "bump_fomc": round(bump, 2),
         "betas_per_10bp": betas,
         "pricing": pricing,
+        "path": path,
         "next_event": {"date": nxt, "type": "FOMC decision"} if nxt else None,
     }
     with open("data.json", "w") as f:
