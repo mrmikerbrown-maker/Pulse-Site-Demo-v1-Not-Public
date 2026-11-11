@@ -65,6 +65,11 @@ def surprises():
               "Unscheduled values", df["Unscheduled"].value_counts(dropna=False).to_dict() if "Unscheduled" in df else "-")
         if "fomc" not in k.lower():
             continue
+        if k.lower().startswith("fomc") and "update" in k.lower():
+            raw = df.assign(Date=dd)
+            raw.to_csv("sf_raw.csv", index=False)
+            pre = raw[raw["Date"] < "2010-01-01"]
+            print("   non-null before 2010:", pre.notna().sum().to_dict())
         df = df.assign(date=dd.dt.normalize())
         if "Unscheduled" in df:
             df = df[df["Unscheduled"].fillna(0) == 0]
@@ -127,6 +132,7 @@ def main():
     big = t.reindex(t["target_bp"].abs().sort_values(ascending=False).index).head(12)
     print("Biggest decision surprises:\n", big[["date", "target_bp", "msg_bp", "y2", "eurusd", "spx"]].to_string())
     t["msg_bp"] = t["msg_bp"].round(2)
+    chg.round(4).to_csv("daily_moves.csv")
     out = {"generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "n": int(len(t)),
            "from": t["date"].iloc[0], "to": t["date"].iloc[-1], "msg_sd": round(msg_sd, 2), "fit": fit,
            "events": t.astype(object).where(t.notna(), None).to_dict("records"),

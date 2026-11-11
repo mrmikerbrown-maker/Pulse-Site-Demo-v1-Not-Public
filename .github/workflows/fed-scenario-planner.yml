@@ -21,4 +21,4 @@ jobs:
       - run: python fomc_history.py
       - env:
           GH_TOKEN: ${{ github.token }}
-        run: bash ../.github/save.sh "Fed-day history (test)" fomc.json
+        run: bash ../.github/save.sh "Fed-day history (test)" fomc.json sf_raw.csv daily_moves.csv
