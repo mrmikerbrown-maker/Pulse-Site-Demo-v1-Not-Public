@@ -128,9 +128,9 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
    <div class="live" id="c-cb"><p class="wait">Loading…</p></div>
    <div class="go">Open the tracker →</div>
   </a>
-  <a class="card" href="fed-pricing/">
-   <div class="lbl">Fed</div><h2>Fed Pricing</h2>
-   <p class="d">How many hikes or cuts the market prices for each Fed meeting, from fed funds futures.</p>
+  <a class="card" href="cb-pricing/#fed">
+   <div class="lbl">Fed · ECB</div><h2>Central Bank Pricing</h2>
+   <p class="d">How many hikes or cuts the market prices for each Fed and ECB meeting, from futures.</p>
    <div class="live" id="c-fedp"><p class="wait">Loading…</p></div>
    <div class="go">Open the pricing →</div>
   </a>
@@ -243,17 +243,23 @@ fetch("central-banks/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;r
   B.slice(0,3).map(function(b){return '<div class="sp"><span>'+esc(when(b)+" · "+b.short+" · "+rate(b))+"</span>"+lastTxt(b)+"</div>"}).join("");
 }).catch(function(){fail("c-cb")});
 
-/* Fed Pricing: bp priced for the next meeting and where the path peaks (or troughs). */
-fetch("fed-scenario-planner/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
- var P=d.path;if(!P||!P.rates||!P.rates.length)throw 0;
+/* Central Bank Pricing: bp priced for each bank's next meeting (Fed and ECB). */
+(function(){
  var md=function(s,o){return new Date(s+"T12:00:00Z").toLocaleDateString("en-GB",Object.assign({timeZone:"UTC"},o)).replace("Sept","Sep")};
- var e=P.effr,R=P.rates,nx=0;while(nx<R.length-1&&new Date(P.meetings[nx]+"T20:00:00Z")<Date.now())nx++;
- var nb=(R[nx]-(nx?R[nx-1]:e))*100,pk=0;R.forEach(function(r,i){if(Math.abs(r-e)>Math.abs(R[pk]-e))pk=i});
- var tb=(R[pk]-e)*100,sg=function(x){return(x>0?"+":x<0?"−":"")+Math.abs(x).toFixed(0)},cl=function(x){return x>0?"pk":x<0?"ac":""};
- $("c-fedp").innerHTML='<div class="big">'+esc(md(P.meetings[nx],{day:"numeric",month:"short"}))+': <span class="'+cl(nb)+'">'+Math.abs(Math.round(nb))+'bp</span> <span class="small">of '+(nb<0?"easing":"tightening")+' priced</span></div>'+
-  '<div class="small">'+(R[pk]>=e?"Peak ":"Low ")+R[pk].toFixed(2)+"% by "+esc(md(P.meetings[pk],{month:"short",year:"numeric"}))+" ("+Math.abs(Math.round(tb))+"bp of "+(tb<0?"easing":"tightening")+")</div>"+
-  '<div class="small mu">Effective fed funds rate '+e.toFixed(2)+"%</div>";
-}).catch(function(){fail("c-fedp")});
+ var cl=function(x){return x>0?"pk":x<0?"ac":""};
+ function line(name,t){return fetch(t[0]+"?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+  var P=d.path;if(!P||!P.rates||!P.rates.length)throw 0;
+  var e=P.effr,R=P.rates,nx=0;while(nx<R.length-1&&new Date(P.meetings[nx]+t[1])<Date.now())nx++;
+  var nb=(R[nx]-(nx?R[nx-1]:e))*100;
+  return '<div class="big">'+name+' '+esc(md(P.meetings[nx],{day:"numeric",month:"short"}))+': <span class="'+cl(nb)+'">'+Math.abs(Math.round(nb))+'bp</span> <span class="small">of '+(nb<0?"easing":"tightening")+' priced</span></div>';
+ }).catch(function(){return ""})}
+ /* Same banks as cb-pricing/index.html: [name, data file, decision time UTC]. Add a line here when a bank is added there. */
+ var BK=[["Fed","fed-scenario-planner/data.json","T19:00:00Z"],["ECB","ecb-pricing/data.json","T13:15:00Z"]];
+ Promise.all(BK.map(function(b){return line(b[0],[b[1],b[2]])})).then(function(x){
+  if(!x.join("")){fail("c-fedp");return}
+  $("c-fedp").innerHTML=x.join("")+'<div class="small mu">Next meeting for each central bank</div>';
+ });
+})();
 
 /* Fed Scenario Planner: what a hold, or the step beyond what is priced, would mean as a surprise. */
 fetch("fed-scenario-planner/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
