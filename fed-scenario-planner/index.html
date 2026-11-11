@@ -110,7 +110,7 @@ h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 </div>
 <div class="card err" id="err" hidden><b>The planner could not load its data.</b> Try again in a minute.</div>
 
-<div class="foot"><span>Data: CBOT 30-day fed funds futures via Yahoo (delayed); Fed-day surprises from the San Francisco Fed (Bauer–Swanson) to 2023, then fed funds futures; market moves from Yahoo Finance and the US Treasury. Updated each weekday night.</span><span>Take a 1-week trial → <a href="https://newsquawk.com">newsquawk.com</a></span></div>
+<div class="foot"><span>Data: CBOT 30-day fed funds futures via Yahoo (delayed); Fed-day surprises from the San Francisco Fed (Bauer–Swanson) to 2023, then fed funds futures; market moves from the US Treasury, the ECB and Yahoo Finance. Updated each weekday night.</span><span>Take a 1-week trial → <a href="https://newsquawk.com">newsquawk.com</a></span></div>
 </div>
 <script>
 var D,H,$=function(i){return document.getElementById(i)};
@@ -139,8 +139,8 @@ function seg(id,list,cur,set){
  $(id).innerHTML=list.map(function(o,i){var sub=id==="dec"?"<small>"+(o[1]===0?"no change":sg(o[1],0)+"bp")+"</small>":"";return'<button type="button" aria-pressed="'+(i===cur)+'" data-i="'+i+'">'+o[0]+sub+"</button>"}).join("");
  $(id).querySelectorAll("button").forEach(function(b){b.onclick=function(){set(+b.getAttribute("data-i"));draw()}});
 }
-function say(a,o){var e=o.est;if(Math.abs(e)<o.res/3)return a.k==="gold"?"No reliable pattern on Fed days":"No clear direction: other news usually matters more";
- return{y2:e>0?"Yields up: the market prices more hikes":"Yields down: fewer hikes priced",y10:e>0?"Longer yields follow, but less":"Longer yields fall, but less",eurusd:e<0?"Dollar stronger":"Dollar weaker",gbpusd:e<0?"Dollar stronger":"Dollar weaker",usdjpy:e>0?"Dollar stronger":"Dollar weaker",spx:e<0?"Stocks lower":"Stocks higher",gold:e<0?"Gold lower":"Gold higher"}[a.k]}
+function say(a,o){var e=o.est;if(Math.abs(e)<o.res/3)return"No clear direction: other news usually matters more";
+ return{y2:e>0?"Yields up: the market prices more hikes":"Yields down: fewer hikes priced",y10:e>0?"Longer yields follow, but less":"Longer yields fall, but less",eurusd:e<0?"Dollar stronger":"Dollar weaker",gbpusd:e<0?"Dollar stronger":"Dollar weaker",usdjpy:e>0?"Dollar stronger":"Dollar weaker",spx:e<0?"Stocks lower":"Stocks higher",gold:e<0?"Gold lower as yields rise":"Gold higher as yields fall"}[a.k]}
 
 function draw(){
  var pr=M.priced,d=DEC[dec][1],t=TONE[tone][1],sur=d-pr,F=H.fit;
@@ -184,7 +184,7 @@ function start(){
  el.textContent=("Futures prices "+ldn(M.asof+"T12:00:00Z",{weekday:"short",day:"numeric",month:"short"})+" · updated "+ldn(D.generated,{weekday:"short",day:"numeric",month:"short"})+", "+ldn(D.generated,{hour:"2-digit",minute:"2-digit"})+" London").replace(/,(?= \d+ \w{3})/g,"");
  if(age>4){el.textContent+=" · data is "+Math.floor(age)+" days old";el.className="stamp old"}
  $("how").innerHTML="Sizes come from "+H.n+" real Fed decision days since "+H.from+": how far each market moved on the day for each bp of surprise in the decision, and for the message (the 2-year yield move the decision itself doesn't explain). "+
-  "Mid-2007 to 2009 is left out because the crisis swamped everything. Moves are close to close, and the Fed decides at about 7pm London, so each day also includes some trading from before the decision. The shaded range covers about two Fed days in three.";
+  "Mid-2007 to 2009 is left out because the crisis swamped everything. The Fed decides at about 7pm London: yields and the S&amp;P are close to close on the day, so they include some trading from before the decision; FX (ECB reference rates) and gold (COMEX settlement) run from the fix before the decision to the next day's. The shaded range covers about two Fed days in three.";
  $("app").hidden=false;draw();
 }
 $("theme").onclick=function(){var l=document.documentElement.classList.toggle("light");try{localStorage.setItem("ict-theme",l?"light":"dark")}catch(e){}};
