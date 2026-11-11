@@ -120,6 +120,7 @@ function sg(x,d){if(Math.abs(x)<Math.pow(10,-d)/2)x=0;return(x>0?"+":x<0?"−":"
 function fmt(a,x){return sg(x,a.bp?0:2)+(a.bp?"bp":"%")}
 function fd(s,o){return new Date(s+"T12:00:00Z").toLocaleDateString("en-GB",Object.assign({timeZone:"UTC"},o)).replace("Sept","Sep")}
 function ldn(iso,o){return new Date(iso).toLocaleString("en-GB",Object.assign({timeZone:"Europe/London"},o))}
+function te(x,d){return Math.abs(x).toFixed(d)+"bp of "+(x<0?"easing":"tightening")}
 function dname(v){return v===0?"Hold":(v>0?"Hike ":"Cut ")+Math.abs(v)}
 
 /* Next meeting and what is priced for it, from the futures path (falls back to the older single-meeting read). */
@@ -149,12 +150,12 @@ function draw(){
  /* verdict: size of the whole surprise in 2-year yield terms */
  var msg=t*H.msg_sd,tot=F.y2.bt*sur+msg,ab=Math.abs(tot);
  $("verdict").innerHTML=ab<2?'<span class="nt">Roughly as expected</span>':(ab<6?"A slight ":ab<15?"A clear ":"A big ")+'<span class="'+(tot>0?"hk":"dv")+'">'+(tot>0?"hawkish":"dovish")+" surprise</span>";
- $("why").innerHTML="Markets price <b>"+sg(pr,1)+"bp</b> for this meeting. "+(d===0?"A hold":"A "+Math.abs(d)+"bp "+(d>0?"hike":"cut"))+" is "+sg(sur,1)+"bp against that"+(t?", and a "+TONE[tone][0].toLowerCase()+" message pushes it further "+(t>0?"hawkish":"dovish"):"")+".";
+ $("why").innerHTML="Markets price <b>"+te(pr,1)+"</b> for this meeting. "+(d===0?"A hold":"A "+Math.abs(d)+"bp "+(d>0?"hike":"cut"))+" is "+sg(sur,1)+"bp against that"+(t?", and a "+TONE[tone][0].toLowerCase()+" message pushes it further "+(t>0?"hawkish":"dovish"):"")+".";
  /* scale: priced vs decision */
  var lo=Math.min(DEC[0][1],pr)-12,hi=Math.max(DEC[3][1],pr)+12,X=function(v){return((v-lo)/(hi-lo)*100).toFixed(2)+"%"},col=sur>0?"var(--down)":"var(--up)",h='<div class="ax"></div>';
  for(var v=Math.ceil(lo/25)*25;v<=hi;v+=25)h+='<div class="tk" style="left:'+X(v)+'">'+sg(v,0)+'</div>';
  var a=Math.min(pr,d),b=Math.max(pr,d);h+='<div class="gap" style="left:'+X(a)+';width:calc('+X(b)+' - '+X(a)+');background:'+col+'"></div>';
- h+='<div class="mk" style="left:'+X(pr)+';background:var(--muted)"></div><div class="lb" style="left:'+X(pr)+';top:0;color:var(--muted)">Priced '+sg(pr,1)+'</div>';
+ h+='<div class="mk" style="left:'+X(pr)+';background:var(--muted)"></div><div class="lb" style="left:'+X(pr)+';top:0;color:var(--muted)">Priced: '+te(pr,0)+'</div>';
  h+='<div class="mk" style="left:'+X(d)+';background:var(--text)"></div><div class="lb" style="left:'+X(d)+';top:46px;color:var(--text);font-weight:700;background:var(--card);padding:0 3px">'+DEC[dec][0]+'</div>';
  $("scale").innerHTML=h;
  /* markets */

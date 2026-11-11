@@ -123,7 +123,7 @@ function rpath(){
  var cums=R.map(function(r){return(r-e)*400}),all=cums.concat(C?C.map(function(r){return(r-e)*400}):[]).concat([0]);
  var nh=Math.max(1,Math.ceil(Math.max.apply(0,all)/100-1e-9)),nc=Math.max(0,Math.ceil(-Math.min.apply(0,all)/100-1e-9));
  var pk=0;R.forEach(function(r,i){if(Math.abs(r-e)>Math.abs(R[pk]-e))pk=i});var M=P.meetings,lm=M.length-1;var nx=0;while(nx<lm&&new Date(M[nx]+"T20:00:00Z")<Date.now())nx++;
- $("rpstats").innerHTML='<div><span>Effective fed funds rate</span><b>'+e.toFixed(2)+'%</b></div><div><span>Priced for '+fd(M[nx],{day:"numeric",month:"short"})+' meeting</span><b>'+sg((R[nx]-(nx?R[nx-1]:e))*100,1)+'bp</b></div><div><span>'+(R[pk]>=e?"Peak":"Low")+'</span><b>'+R[pk].toFixed(2)+'%</b></div><div><span>'+fd(M[lm],{month:"short"})+" "+M[lm].slice(2,4)+'</span><b>'+R[lm].toFixed(2)+'%</b></div>';
+ $("rpstats").innerHTML='<div><span>Effective fed funds rate</span><b>'+e.toFixed(2)+'%</b></div><div><span>Priced for '+fd(M[nx],{day:"numeric",month:"short"})+' meeting</span><b>'+Math.abs((R[nx]-(nx?R[nx-1]:e))*100).toFixed(1)+'bp <small style="font-size:13px;font-weight:600;color:var(--muted)">of '+(R[nx]<(nx?R[nx-1]:e)?"easing":"tightening")+'</small></b></div><div><span>'+(R[pk]>=e?"Peak":"Low")+'</span><b>'+R[pk].toFixed(2)+'%</b></div><div><span>'+fd(M[lm],{month:"short"})+" "+M[lm].slice(2,4)+'</span><b>'+R[lm].toFixed(2)+'%</b></div>';
  var h='<div class="rp-row hd"><div>Meeting</div><div>Priced</div><div>Cumulative</div><div>Rate</div><div class="c-chg">This meeting</div><div class="c-cmp">'+(C?"vs "+RPC:"")+'</div></div>',prev=e;
  R.forEach(function(r,i){
   var cum=cums[i],me=(r-prev)*100;prev=r;var days=Math.round((new Date(M[i]+"T19:00:00Z")-today)/864e5),bl='<div class="rp-blocks">',k,f;
