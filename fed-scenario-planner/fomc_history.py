@@ -119,7 +119,7 @@ def main():
     t["msg_bp"] = t["msg_bp"].round(2)
     out = {"generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "n": int(len(t)),
            "from": t["date"].iloc[0], "to": t["date"].iloc[-1], "msg_sd": round(msg_sd, 2), "fit": fit,
-           "events": t.to_dict("records"),
+           "events": t.astype(object).where(t.notna(), None).to_dict("records"),
            "sources": "Decision surprises: SF Fed monetary policy surprises (Bauer-Swanson), then 30-day fed funds futures. "
                       "Market moves: Yahoo Finance and US Treasury, close to close on the decision day."}
     with open("fomc.json", "w") as f:
