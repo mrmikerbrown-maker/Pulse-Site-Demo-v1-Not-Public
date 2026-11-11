@@ -141,7 +141,7 @@ function seg(id,list,cur,set){
  $(id).querySelectorAll("button").forEach(function(b){b.onclick=function(){set(+b.getAttribute("data-i"));draw()}});
 }
 function say(a,o){var e=o.est;if(Math.abs(e)<o.res/3)return"No clear direction: other news usually matters more";
- return{y2:e>0?"Yields up: the market prices more hikes":"Yields down: fewer hikes priced",y10:e>0?"Longer yields follow, but less":"Longer yields fall, but less",eurusd:e<0?"Dollar stronger":"Dollar weaker",gbpusd:e<0?"Dollar stronger":"Dollar weaker",usdjpy:e>0?"Dollar stronger":"Dollar weaker",spx:e<0?"Stocks lower":"Stocks higher",gold:e<0?"Gold lower as yields rise":"Gold higher as yields fall"}[a.k]}
+ return{y2:e>0?"Yields up: more tightening priced":"Yields down: less tightening priced",y10:e>0?"Longer yields follow, but less":"Longer yields fall, but less",eurusd:e<0?"Dollar stronger":"Dollar weaker",gbpusd:e<0?"Dollar stronger":"Dollar weaker",usdjpy:e>0?"Dollar stronger":"Dollar weaker",spx:e<0?"Stocks lower":"Stocks higher",gold:e<0?"Gold lower as yields rise":"Gold higher as yields fall"}[a.k]}
 
 function draw(){
  var pr=M.priced,d=DEC[dec][1],t=TONE[tone][1],sur=d-pr,F=H.fit;
