@@ -66,6 +66,7 @@ h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 .warn{font-size:13px;color:var(--pink);margin:10px 0 0}
 .n{color:var(--muted);font-size:12px;margin:10px 0 0;max-width:80ch}
 .n a,.lk a{color:var(--accent)}
+.dwarn{border:1px solid var(--line);border-left:3px solid var(--pink);border-radius:10px;padding:10px 14px;font-size:13px;margin:0 0 14px;background:var(--card);color:var(--text2)}.dwarn b{color:var(--text)}
 .err{border-left:3px solid var(--pink)}
 .foot{margin-top:26px;font-size:12px;color:var(--dim);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
 .foot a{color:var(--accent)}
@@ -83,6 +84,7 @@ h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 <h1>Fed Scenario Planner</h1>
 <p class="sub">Pick what the Fed does at its next meeting, and the message it sends. See how markets have reacted to a surprise that size on past Fed days, given what is already priced.</p>
 <p class="stamp" id="stamp"></p>
+<div class="dwarn" id="dwarn" hidden></div>
 
 <div id="app" hidden>
 <div class="card">
@@ -177,6 +179,13 @@ function draw(){
  if(w)$("warn").textContent="This would be one of the biggest Fed surprises on record. The largest since "+H.from+" was about "+Math.round(Math.abs(big.target_bp))+"bp ("+fd(big.date,{month:"short",year:"numeric"})+"), so treat the sizes as a rough guide.";
 }
 
+/* Warn when the latest data could not be fetched (the page keeps showing the last good data). */
+function dataWarn(D,H){var w=[],now=Date.now(),day=864e5,f=function(iso){return ldn(iso,{weekday:"short",day:"numeric",month:"short"})};
+ if(D.problems&&D.problems.indexOf("path")>=0&&D.path)w.push("Last night's fed funds futures prices could not be fetched, so pricing is from "+f(D.path.asof+"T12:00:00Z")+".");
+ else if(D.path&&now-new Date(D.path.asof+"T12:00:00Z")>4*day)w.push("Fed funds futures prices are from "+f(D.path.asof+"T12:00:00Z")+" and haven't updated since.");
+ if(now-new Date(D.generated)>4*day)w.push("The data hasn't refreshed since "+f(D.generated)+".");
+ if(H&&now-new Date(H.generated)>8*day)w.push("The Fed-day history last refreshed on "+f(H.generated)+", so it may be missing the latest meeting.");
+ var el=document.getElementById("dwarn");if(!el)return;el.hidden=!w.length;if(w.length)el.innerHTML="<b>Data warning.</b> "+w.join(" ");}
 function start(){
  M=nextMeeting();if(!M||!H||!H.fit)throw 0;
  DEC=choices(M.priced).map(function(v){return[dname(v),v]});
@@ -186,7 +195,7 @@ function start(){
  if(age>4){el.textContent+=" · data is "+Math.floor(age)+" days old";el.className="stamp old"}
  $("how").innerHTML="Sizes come from "+H.n+" real Fed decision days since "+H.from+": how far each market moved on the day for each bp of surprise in the decision, and for the message (the 2-year yield move the decision itself doesn't explain). "+
   "Mid-2007 to 2009 is left out because the crisis swamped everything. The Fed decides at about 7pm London: yields and the S&amp;P are close to close on the day, so they include some trading from before the decision; FX (ECB reference rates) and gold (COMEX settlement) run from the fix before the decision to the next day's. The shaded range covers about two Fed days in three.";
- $("app").hidden=false;draw();
+ $("app").hidden=false;draw();dataWarn(D,H);
 }
 $("theme").onclick=function(){var l=document.documentElement.classList.toggle("light");try{localStorage.setItem("ict-theme",l?"light":"dark")}catch(e){}};
 function get(u){return fetch(u+"?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()})}

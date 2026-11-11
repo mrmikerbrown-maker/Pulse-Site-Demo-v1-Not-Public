@@ -16,7 +16,7 @@ Then, per market: move = a + b_target * target_bp + b_msg * msg_bp, fitted over 
 (mid-2007 to 2009 left out: the crisis swamped everything). The leftover spread gives the likely range.
 If anything fails, the last good fomc.json is kept."""
 import io, json, time, calendar, datetime as dt
-import numpy as np, pandas as pd, requests
+import numpy as np, pandas as pd
 from build_data import fetch, get_fomc_dates, MCODE
 
 START = "1994-02-01"

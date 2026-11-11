@@ -30,6 +30,7 @@ h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 .n{color:var(--muted);font-size:12px;margin-top:8px}
 .warn{border:1px solid var(--line);border-left:3px solid var(--pink);border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:14px;background:var(--card)}
 .warn b{color:var(--text)}
+.dwarn{border:1px solid var(--line);border-left:3px solid var(--pink);border-radius:10px;padding:10px 14px;font-size:13px;margin:0 0 14px;background:var(--card);color:var(--text2)}.dwarn b{color:var(--text)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
 .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px}
 label{display:block;font-size:13px;color:var(--text2);font-weight:600}label small{display:block;font-size:11px;color:var(--muted);font-weight:400;margin-top:2px}
@@ -92,6 +93,7 @@ tr.u td{background:var(--hl);font-weight:700}tr.u td:first-child{box-shadow:inse
 <h1>Fed Pricing</h1>
 <p class="sub">Fed hikes and cuts priced by fed funds futures for each FOMC meeting, as far out as contracts trade.</p>
 <p class="stamp" id="stamp"></p>
+<div class="dwarn" id="dwarn" hidden></div>
 <div class="card" id="rp" hidden>
  <div class="rp-stats" id="rpstats"></div>
  <div class="rp-ctl">Compare
@@ -112,6 +114,13 @@ function stamp(){
  el.textContent=("Futures prices "+ldn(P.asof+"T12:00:00Z",{weekday:"short",day:"numeric",month:"short"})+" · updated "+ldn(D.generated,{weekday:"short",day:"numeric",month:"short"})+", "+ldn(D.generated,{hour:"2-digit",minute:"2-digit"})+" London").replace(/,(?= \d+ \w{3})/g,"");
  if(age>4){el.textContent+=" · data is "+Math.floor(age)+" days old";el.className="stamp old"}
 }
+/* Warn when the latest data could not be fetched (the page keeps showing the last good data). */
+function dataWarn(D,H){var w=[],now=Date.now(),day=864e5,f=function(iso){return ldn(iso,{weekday:"short",day:"numeric",month:"short"})};
+ if(D.problems&&D.problems.indexOf("path")>=0&&D.path)w.push("Last night's fed funds futures prices could not be fetched, so pricing is from "+f(D.path.asof+"T12:00:00Z")+".");
+ else if(D.path&&now-new Date(D.path.asof+"T12:00:00Z")>4*day)w.push("Fed funds futures prices are from "+f(D.path.asof+"T12:00:00Z")+" and haven't updated since.");
+ if(now-new Date(D.generated)>4*day)w.push("The data hasn't refreshed since "+f(D.generated)+".");
+ if(H&&now-new Date(H.generated)>8*day)w.push("The Fed-day history last refreshed on "+f(H.generated)+", so it may be missing the latest meeting.");
+ var el=document.getElementById("dwarn");if(!el)return;el.hidden=!w.length;if(w.length)el.innerHTML="<b>Data warning.</b> "+w.join(" ");}
 var RPC="1w ago";
 function rpath(){
  var P=D.path;if(!P||!P.rates||!P.rates.length){$("rp").hidden=true;return}$("rp").hidden=false;
@@ -140,7 +149,7 @@ function rpath(){
 }
 document.querySelectorAll("#rpseg button").forEach(function(b){b.onclick=function(){RPC=b.getAttribute("data-k");document.querySelectorAll("#rpseg button").forEach(function(x){x.className=x===b?"on":""});rpath()}});
 $("theme").onclick=function(){var l=document.documentElement.classList.toggle("light");try{localStorage.setItem("ict-theme",l?"light":"dark")}catch(e){}};
-fetch("../fed-scenario-planner/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){D=j;if(!D.path)throw 0;rpath();stamp()}).catch(function(){$("rperr").hidden=false});
+fetch("../fed-scenario-planner/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){D=j;if(!D.path)throw 0;rpath();stamp();dataWarn(D,null)}).catch(function(){$("rperr").hidden=false});
 </script>
 </body>
 </html>
