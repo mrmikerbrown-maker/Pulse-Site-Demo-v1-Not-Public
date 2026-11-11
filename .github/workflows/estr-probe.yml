@@ -1,0 +1,11 @@
+name: Test - ECB futures data (one-off)
+on:
+  push:
+    branches: [claude/project-thread-usygiz]
+    paths: [probe/**, .github/workflows/estr-probe.yml]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 probe/estr_probe.py || true
