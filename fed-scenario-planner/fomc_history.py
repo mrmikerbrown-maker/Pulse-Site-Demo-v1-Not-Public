@@ -12,7 +12,7 @@ import io, json, time, datetime as dt
 import numpy as np, pandas as pd, requests
 
 UA = {"User-Agent": "Mozilla/5.0"}
-START = "2004-01-01"
+START = "1994-02-01"   # the Fed has announced decisions on the day since Feb 1994
 YAHOO = {"eurusd": "EURUSD=X", "gbpusd": "GBPUSD=X", "usdjpy": "JPY=X", "spx": "^GSPC", "gold": "GC=F"}
 
 
@@ -76,6 +76,8 @@ def main():
     d = pd.DataFrame(px)
     d["y2"], d["y10"] = y2, y10
     d = d.sort_index()
+    for c in d.columns:
+        print("data", c, d[c].first_valid_index().date(), "to", d[c].last_valid_index().date(), int(d[c].notna().sum()), "days")
     chg = pd.DataFrame(index=d.index)
     for k in YAHOO:
         chg[k] = np.log(d[k]).diff() * 100           # % move, close to close
@@ -88,7 +90,7 @@ def main():
         m = chg.loc[e["date"]]
         rows.append({"date": e["date"].date().isoformat(), "target_bp": round(float(e["target_bp"]), 2),
                      **{k: (None if pd.isna(m[k]) else round(float(m[k]), 3)) for k in chg.columns}})
-    t = pd.DataFrame(rows).dropna()
+    t = pd.DataFrame(rows).dropna(subset=["y2"])
     # message = 2-year move not explained by the decision surprise
     X1 = np.c_[np.ones(len(t)), t["target_bp"]]
     c2 = np.linalg.lstsq(X1, t["y2"], rcond=None)[0]
@@ -98,16 +100,19 @@ def main():
     fit = {}
     X = np.c_[np.ones(len(t)), t["target_bp"], t["msg_bp"]]
     for k in ["y2", "y10", "eurusd", "gbpusd", "usdjpy", "spx", "gold"]:
-        y = t[k].values
-        b, *_ = np.linalg.lstsq(X, y, rcond=None)
-        res = y - X @ b
+        ok = t[k].notna().values
+        y = t[k].values[ok].astype(float)
+        Xk = X[ok]
+        b, *_ = np.linalg.lstsq(Xk, y, rcond=None)
+        res = y - Xk @ b
         dof = len(y) - 3
         s2 = res @ res / dof
-        cov = s2 * np.linalg.inv(X.T @ X)
+        cov = s2 * np.linalg.inv(Xk.T @ Xk)
         r2 = 1 - (res @ res) / ((y - y.mean()) @ (y - y.mean()))
         fit[k] = {"b_target": round(float(b[1]), 4), "se_target": round(float(np.sqrt(cov[1, 1])), 4),
                   "b_msg": round(float(b[2]), 4), "se_msg": round(float(np.sqrt(cov[2, 2])), 4),
-                  "resid_sd": round(float(np.sqrt(s2)), 4), "r2": round(float(r2), 3)}
+                  "resid_sd": round(float(np.sqrt(s2)), 4), "r2": round(float(r2), 3),
+                  "n": int(ok.sum()), "from": t["date"].values[ok][0]}
         print(k, fit[k])
     big = t.reindex(t["target_bp"].abs().sort_values(ascending=False).index).head(12)
     print("Biggest decision surprises:\n", big[["date", "target_bp", "msg_bp", "y2", "eurusd", "spx"]].to_string())
