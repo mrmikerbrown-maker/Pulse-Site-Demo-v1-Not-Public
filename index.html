@@ -250,8 +250,8 @@ fetch("fed-scenario-planner/data.json?"+Date.now()).then(function(r){if(!r.ok)th
  var e=P.effr,R=P.rates,nx=0;while(nx<R.length-1&&new Date(P.meetings[nx]+"T20:00:00Z")<Date.now())nx++;
  var nb=(R[nx]-(nx?R[nx-1]:e))*100,pk=0;R.forEach(function(r,i){if(Math.abs(r-e)>Math.abs(R[pk]-e))pk=i});
  var tb=(R[pk]-e)*100,sg=function(x){return(x>0?"+":x<0?"−":"")+Math.abs(x).toFixed(0)},cl=function(x){return x>0?"pk":x<0?"ac":""};
- $("c-fedp").innerHTML='<div class="big">'+esc(md(P.meetings[nx],{day:"numeric",month:"short"}))+': <span class="'+cl(nb)+'">'+sg(nb)+'bp</span> <span class="small">priced</span></div>'+
-  '<div class="small">'+(R[pk]>=e?"Peak ":"Low ")+R[pk].toFixed(2)+"% by "+esc(md(P.meetings[pk],{month:"short",year:"numeric"}))+" ("+sg(tb)+"bp, "+(tb/25*100).toFixed(0)+"%)</div>"+
+ $("c-fedp").innerHTML='<div class="big">'+esc(md(P.meetings[nx],{day:"numeric",month:"short"}))+': <span class="'+cl(nb)+'">'+Math.abs(Math.round(nb))+'bp</span> <span class="small">of '+(nb<0?"easing":"tightening")+' priced</span></div>'+
+  '<div class="small">'+(R[pk]>=e?"Peak ":"Low ")+R[pk].toFixed(2)+"% by "+esc(md(P.meetings[pk],{month:"short",year:"numeric"}))+" ("+Math.abs(Math.round(tb))+"bp of "+(tb<0?"easing":"tightening")+")</div>"+
   '<div class="small mu">Effective fed funds rate '+e.toFixed(2)+"%</div>";
 }).catch(function(){fail("c-fedp")});
 
@@ -266,7 +266,7 @@ fetch("fed-scenario-planner/data.json?"+Date.now()).then(function(r){if(!r.ok)th
  var nm=function(v){return v===0?"A hold":v>0?"A "+v+"bp hike":"A "+Math.abs(v)+"bp cut"};
  var line=function(v){var s=v-pr,a=Math.round(Math.abs(s));return '<div class="small">'+nm(v)+" would be "+(a<3?"roughly as expected":"a "+a+'bp <span class="'+cls(s)+'">'+(s>0?"hawkish":"dovish")+"</span> surprise")+"</div>"};
  var near=Math.round(pr/25)*25,other=near===0?(pr>=0?25:-25):0;
- $("c-fed").innerHTML='<div class="big">'+esc(dt)+' FOMC: <span class="'+cls(Math.round(pr))+'">'+sg(pr)+'bp</span> <span class="small">priced</span></div>'+line(0)+(near!==0?line(near):line(other));
+ $("c-fed").innerHTML='<div class="big">'+esc(dt)+' FOMC: <span class="'+cls(Math.round(pr))+'">'+Math.abs(Math.round(pr))+'bp</span> <span class="small">of '+(pr<0?"easing":"tightening")+' priced</span></div>'+line(0)+(near!==0?line(near):line(other));
 }).catch(function(){fail("c-fed")});
 
 /* Market Clock: which cash markets are open now, on a 24-hour London-time strip. */
