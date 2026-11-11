@@ -3,9 +3,6 @@ on:
   schedule:
     - cron: "15 21 * * 1-5"   # weekdays 21:15 UTC, after Eurex publishes settlements (GitHub often runs it a little late)
   workflow_dispatch:           # lets you run it by hand from the Actions tab
-  push:                        # test runs while the page is being built; removed before merging
-    branches: [claude/project-thread-usygiz]
-    paths: [ecb-pricing/build.py, .github/workflows/ecb-pricing.yml]
 permissions:
   contents: write
   pages: write
