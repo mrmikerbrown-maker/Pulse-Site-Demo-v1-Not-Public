@@ -1,24 +1,27 @@
 """One-off check of which data sources work from GitHub Actions (not part of the site)."""
-import requests, re
+import requests, re, io, datetime as dt
 UA = {"User-Agent": "Mozilla/5.0"}
-def y(tk, rng="max"):
-    try:
-        r = requests.get(f"https://query1.finance.yahoo.com/v8/finance/chart/{tk}", params={"range": rng, "interval": "1d"}, headers=UA, timeout=30)
-        j = r.json()["chart"]
-        if j.get("error"): return f"ERR {j['error'].get('code')}"
-        res = j["result"][0]; ts = res.get("timestamp") or []
-        import datetime as dt
-        return f"{len(ts)} bars {dt.datetime.utcfromtimestamp(ts[0]).date() if ts else '-'} to {dt.datetime.utcfromtimestamp(ts[-1]).date() if ts else '-'}"
-    except Exception as e:
-        return "FAIL " + repr(e)[:100]
-for tk in ["ZQZ19.CBT", "ZQF24.CBT", "ZQZ25.CBT", "ZQZ26.CBT", "ZQF27.CBT", "ZQ=F", "SR3=F", "^IRX", "EURUSD=X", "^GSPC", "GC=F", "^TNX", "2YY=F", "ZT=F"]:
-    print("Yahoo", tk, y(tk))
-for name, url in [("SF Fed page", "https://www.frbsf.org/research-and-insights/data-and-indicators/monetary-policy-surprises/"),
-                  ("FRED DGS2", "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS2&cosd=2015-01-01"),
-                  ("FRED DFEDTARU", "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFEDTARU&cosd=2015-01-01")]:
-    try:
-        r = requests.get(url, headers=UA, timeout=30)
-        links = re.findall(r'href="([^"]+\.(?:xlsx|csv|xls))"', r.text)[:10]
-        print(name, r.status_code, len(r.text), links)
-    except Exception as e:
-        print(name, "FAIL", repr(e)[:100])
+r = requests.get("https://www.frbsf.org/research-and-insights/data-and-indicators/monetary-policy-surprises/", headers=UA, timeout=30)
+links = sorted(set(re.findall(r'(?:href|src)="([^"]+)"', r.text)))
+print("SF links with xls/upload/csv:")
+for l in links:
+    if re.search(r"xls|csv|upload|download", l, re.I): print("  ", l)
+for m in re.finditer(r"(updated|through|sample|last)[^<]{0,120}", r.text, re.I):
+    print(" text:", m.group(0)[:140])
+for l in links:
+    if re.search(r"\.xlsx?($|\?)", l, re.I):
+        try:
+            import pandas as pd
+            u = l if l.startswith("http") else "https://www.frbsf.org" + l
+            b = requests.get(u, headers=UA, timeout=60).content
+            x = pd.read_excel(io.BytesIO(b), sheet_name=None)
+            for k, df in x.items():
+                print("SHEET", k, df.shape); print(df.head(3).to_string()[:800]); print(df.tail(3).to_string()[:800])
+        except Exception as e:
+            print("xlsx fail", repr(e)[:200])
+def y(tk, rng):
+    j = requests.get(f"https://query1.finance.yahoo.com/v8/finance/chart/{tk}", params={"range": rng, "interval": "1d"}, headers=UA, timeout=30).json()["chart"]["result"][0]
+    ts = j["timestamp"]; return f"{len(ts)} bars {dt.datetime.utcfromtimestamp(ts[0]).date()} to {dt.datetime.utcfromtimestamp(ts[-1]).date()}"
+for tk in ["ZQ=F", "^IRX", "ZT=F", "EURUSD=X", "^GSPC"]:
+    try: print("Yahoo 10y daily", tk, y(tk, "10y"))
+    except Exception as e: print(tk, "FAIL", repr(e)[:100])
