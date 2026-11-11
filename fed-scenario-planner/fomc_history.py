@@ -51,7 +51,8 @@ def treasury():
 def surprises():
     page = fetch("https://www.frbsf.org/research-and-insights/data-and-indicators/monetary-policy-surprises/").text
     import re
-    url = next(l for l in re.findall(r'href="([^"]+\.xlsx?)"', page))
+    links = re.findall(r'(?:href|src)="([^"]+)"', page)
+    url = next(l for l in links if re.search(r"\.xlsx?($|\?)", l, re.I)).replace("&amp;", "&")
     url = url if url.startswith("http") else "https://www.frbsf.org" + url
     x = pd.read_excel(io.BytesIO(fetch(url).content), sheet_name=None)
     sh = next(k for k in x if k.lower().startswith("fomc") and "update" in k.lower())
