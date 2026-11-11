@@ -1,0 +1,65 @@
+id,time_utc,country,release,period,actual,consensus,previous,unit,scale,importance
+tv1001659152601,2026-11-02T07:00:00Z,DE,Retail Sales MoM Real,Sep,-2,0.4,1.2,%,,medium
+tv1001695704701,2026-11-02T08:30:00Z,CH,procure.ch Manufacturing PMI,Oct,56.7,55.3,55.3,,,medium
+tv1001650049501,2026-11-02T15:00:00Z,US,ISM Manufacturing Employment,Oct,52.4,52,52.7,,,medium
+tv1001650049504,2026-11-02T15:00:00Z,US,ISM Manufacturing PMI,Oct,55.5,54.5,54.5,,,key
+tv1001651160601,2026-11-03T03:30:00Z,AU,RBA rate decision,Nov,4.85,4.85,4.6,%,,key
+tv1001662075903,2026-11-03T07:30:00Z,CH,Inflation Rate YoY,Oct,1.5,1.3,1,%,,medium
+tv1001661049404,2026-11-03T15:00:00Z,US,Factory Orders MoM,Sep,1.8,1.2,0.3,%,,medium
+tv1001668384901,2026-11-03T15:00:00Z,US,JOLTs Job Openings,Sep,7.523,7.1,7.19,,M,key
+tv1001660034202,2026-11-03T21:30:00Z,US,API Crude Oil Stock Change,w/o Oct 26,-5.267,1.75,-2.031,,M,medium
+tv1001686073802,2026-11-03T21:45:00Z,NZ,Employment Change QoQ,Q3,-0.1,0.4,0.3,%,,medium
+tv1001686073801,2026-11-03T21:45:00Z,NZ,Unemployment Rate,Q3,5.7,5.5,5.6,%,,medium
+tv1001661337801,2026-11-04T08:30:00Z,SE,Riksbank rate decision,,2,2,1.75,%,,key
+tv1001658355302,2026-11-04T10:00:00Z,EU,Core Inflation Rate YoY Flash,Oct,2.5,2.5,2.5,%,,medium
+tv1001658355304,2026-11-04T10:00:00Z,EU,Inflation Rate YoY Flash,Oct,4,4,3.8,%,,key
+tv1001659136201,2026-11-04T13:15:00Z,US,ADP Employment Change,Oct,86,69,86,,K,medium
+tv1001661925603,2026-11-04T13:30:00Z,CA,Balance of Trade,Sep,5.35,4.1,4.95,C$,B,medium
+tv1001661641402,2026-11-04T13:30:00Z,US,Balance of Trade,Sep,-105,-108,-105.7,$,B,medium
+tv1001659458203,2026-11-04T15:00:00Z,US,ISM Services PMI,Oct,54.5,54.8,54.9,,,key
+tv1001692990206,2026-11-04T15:30:00Z,US,EIA Crude Oil Stocks Change,w/o Oct 26,-0.865,1.75,-1.892,,M,medium
+tv1001692990208,2026-11-04T15:30:00Z,US,EIA Gasoline Stocks Change,w/o Oct 26,-0.222,-0.75,3.87,,M,medium
+tv1001680887601,2026-11-05T00:30:00Z,AU,Balance of Trade,Sep,2.826,0.81,0.184,A$,B,key
+tv1001661516402,2026-11-05T07:00:00Z,SE,CPI with fixed interest rate MoM Flash,Oct,0,0.3,0.9,%,,medium
+tv1001661516601,2026-11-05T07:00:00Z,SE,CPIF ex Energy YoY Prel,Oct,0.1,0.5,0.5,%,,medium
+tv1001661516404,2026-11-05T07:00:00Z,SE,Core Inflation Rate MoM Flash,Oct,-0.2,0.2,0.1,%,,medium
+tv1001696354701,2026-11-05T08:00:00Z,CH,Unemployment Rate s.a,Oct,3.1,3.1,3.1,%,,medium
+tv1001651403801,2026-11-05T09:00:00Z,NO,Norges Bank rate decision,,4.5,4.5,4.5,%,,key
+tv1001641500101,2026-11-05T12:00:00Z,GB,BoE MPC Vote Cut,Nov,0,0,0,,,medium
+tv1001641500102,2026-11-05T12:00:00Z,GB,BoE MPC Vote Hike,Nov,9,7,3,,,medium
+tv1001641500103,2026-11-05T12:00:00Z,GB,BoE MPC Vote Unchanged,Nov,0,2,6,,,medium
+tv1001641499801,2026-11-05T12:00:00Z,GB,BoE rate decision,Nov,4,4,3.75,%,,key
+tv1001690327602,2026-11-05T13:30:00Z,US,Initial Jobless Claims,w/o Oct 26,189,196,195,,K,medium
+tv1001636278302,2026-11-05T13:30:00Z,US,Nonfarm Productivity QoQ Prel,Q3,3.6,2.8,1.4,%,,medium
+tv1001636278301,2026-11-05T13:30:00Z,US,Unit Labour Costs QoQ Prel,Q3,-0.7,0.6,1.3,%,,medium
+tv1001658908601,2026-11-06T07:00:00Z,DE,Industrial Production MoM,Sep,0.7,0,1,%,,medium
+tv1001677156601,2026-11-06T07:00:00Z,GB,House Price Index MoM,Oct,-0.6,0.1,-0.1,%,,medium
+tv1001677156602,2026-11-06T07:00:00Z,GB,Lloyds House Price Index YoY,Oct,-1.2,-0.3,-0.1,%,,medium
+tv1001659120801,2026-11-06T10:00:00Z,EU,Retail Sales MoM,Sep,-0.7,-0.1,0.4,%,,medium
+tv1001662534201,2026-11-06T13:30:00Z,CA,Employment Change,Oct,-4.7,13.6,-68.3,,K,medium
+tv1001662534205,2026-11-06T13:30:00Z,CA,Unemployment Rate,Oct,6.7,6.5,6.5,%,,key
+tv1001626876701,2026-11-06T13:30:00Z,US,Average Hourly Earnings MoM,Oct,0.4,0.3,0.3,%,,medium
+tv1001626876702,2026-11-06T13:30:00Z,US,Average Hourly Earnings YoY,Oct,3.1,2.9,3.2,%,,medium
+tv1001626876706,2026-11-06T13:30:00Z,US,Non Farm Payrolls,Oct,165,65,60,,K,key
+tv1001626876709,2026-11-06T13:30:00Z,US,Unemployment Rate,Oct,4.1,4.2,4.2,%,,key
+tv1001659628601,2026-11-06T15:00:00Z,CA,Ivey PMI,Oct,56.4,,61.9,,,key
+tv1001659628602,2026-11-06T15:00:00Z,CA,Ivey PMI s.a,Oct,58.3,,58.2,,,key
+tv1001652126805,2026-11-06T15:00:00Z,US,Michigan Consumer Sentiment Prel,Nov,51,48,46.3,,,key
+tv1001661128602,2026-11-09T01:30:00Z,CN,Inflation Rate MoM,Oct,0,0,0.2,%,,medium
+tv1001661128601,2026-11-09T01:30:00Z,CN,Inflation Rate YoY,Oct,0.7,0.8,0.9,%,,key
+tv1001661128603,2026-11-09T01:30:00Z,CN,PPI YoY,Oct,5.7,5.3,5,%,,medium
+tv1001658896903,2026-11-09T07:00:00Z,DE,Balance of Trade,Sep,15.6,19.6,17.8,€,B,key
+tv1001658896901,2026-11-09T07:00:00Z,DE,Exports MoM,Sep,2,0.5,-0.4,%,,medium
+tv1001691949101,2026-11-09T09:30:00Z,EU,Sentix Investor Confidence,Nov,2.4,2.1,2.7,,,medium
+tv1001672563401,2026-11-09T23:30:00Z,JP,Household Spending MoM,Sep,-2.8,0.3,0.1,%,,medium
+tv1001672563402,2026-11-09T23:30:00Z,JP,Household Spending YoY,Sep,-6.8,-3.1,-3.1,%,,medium
+tv1001622539303,2026-11-09T23:50:00Z,JP,Current Account,Sep,2372.3,3354.4,3993.1,¥,B,medium
+tv1001669568402,2026-11-10T00:30:00Z,AU,NAB Business Confidence,Oct,-15,,-14,,,key
+tv1001661148203,2026-11-10T03:00:00Z,CN,Balance of Trade,Oct,105.28,125.8,133.53,$,B,key
+tv1001661148201,2026-11-10T03:00:00Z,CN,Exports YoY,Oct,35.2,33.5,36.3,%,,key
+tv1001661148202,2026-11-10T03:00:00Z,CN,Imports YoY,Oct,41.6,32,31,%,,key
+tv1001676391905,2026-11-10T07:00:00Z,NO,Core Inflation Rate MoM,Oct,0.3,0.4,0.2,%,,medium
+tv1001660738406,2026-11-10T13:30:00Z,US,CPI,Oct,337.511,337.042,336.94,,,medium
+tv1001660738401,2026-11-10T13:30:00Z,US,Core Inflation Rate MoM,Oct,0.3,0.2,0.3,%,,key
+tv1001660738403,2026-11-10T13:30:00Z,US,Inflation Rate MoM,Oct,0.4,0.3,0.6,%,,key
+tv1001660034302,2026-11-10T21:30:00Z,US,API Crude Oil Stock Change,w/o Nov 2,8.968,-1.483,-5.267,,M,medium
