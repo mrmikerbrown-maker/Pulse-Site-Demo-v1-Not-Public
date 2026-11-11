@@ -23,11 +23,11 @@ ECB = ["2025-12-18", "2026-02-05", "2026-03-19", "2026-04-30", "2026-06-11", "20
        "2027-09-09", "2027-10-28", "2027-12-16"]
 
 
-def fetch(url, params=None, tries=3):
+def fetch(url, params=None, tries=3, headers=UA):
     last = None
     for i in range(tries):
         try:
-            r = requests.get(url, params=params, headers=UA, timeout=60)
+            r = requests.get(url, params=params, headers=headers, timeout=60)
             r.raise_for_status()
             return r
         except Exception as e:
@@ -50,8 +50,12 @@ def eurex(busdate):
 
 def ecb_latest(series):
     """Latest value of an ECB Data Portal series, e.g. EST/B.EU000A2X2A25.WT (€STR)."""
-    r = fetch(f"https://data-api.ecb.europa.eu/service/data/{series}", {"lastNObservations": 1, "format": "csvdata"})
-    row = list(csv.DictReader(r.text.splitlines()))[-1]
+    r = fetch(f"https://data-api.ecb.europa.eu/service/data/{series}", {"lastNObservations": 1, "format": "csvdata"},
+              headers={"User-Agent": UA["User-Agent"], "Accept": "text/csv"})
+    rows = list(csv.DictReader(r.text.splitlines()))
+    if not rows:
+        raise RuntimeError("empty reply: " + r.text[:200])
+    row = rows[-1]
     return float(row["OBS_VALUE"]), row["TIME_PERIOD"]
 
 
@@ -85,10 +89,10 @@ def main():
     if os.path.exists(OUT):
         with open(OUT) as f:
             old = json.load(f)
-    problems, data = [], {"generated": dt.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")}
+    problems, data = [], {"generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
 
     try:
-        today = dt.datetime.utcnow().date()
+        today = dt.datetime.now(dt.timezone.utc).date()
         rates, days = eurex(today)
         days = sorted(set(days), reverse=True)
         asof = None
