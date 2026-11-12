@@ -1,0 +1,12 @@
+name: Test - BoE pricing data (one-off)
+on:
+  push:
+    branches: [claude/project-thread-usygiz]
+    paths: [probe/**, .github/workflows/boe-probe.yml]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install openpyxl requests
+      - run: python3 probe/boe_probe.py || true
