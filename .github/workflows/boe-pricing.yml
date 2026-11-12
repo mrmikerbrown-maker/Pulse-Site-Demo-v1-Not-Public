@@ -1,0 +1,25 @@
+name: "BoE Pricing: update data"
+on:
+  schedule:
+    - cron: "30 13 * * 1-5"   # weekdays 13:30 UTC: the Bank publishes the previous day's OIS curve around midday
+    - cron: "30 21 * * 1-5"   # and again in the evening in case it was late
+  workflow_dispatch:           # lets you run it by hand from the Actions tab
+permissions:
+  contents: write
+  pages: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: boe-pricing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests openpyxl
+      - run: python build.py
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash ../.github/save.sh "Update BoE pricing data" data.json
