@@ -134,7 +134,7 @@ tr.det td{border-top:0;padding:2px 16px 16px;text-align:left;white-space:normal;
  <div class="dayt" id="dayt" data-nogloss></div>
  <div id="days" data-nogloss><p class="empty">Loading this week's calendar…</p></div>
  <p class="about"><b>How to read it.</b> <b>Consensus</b> is the average forecast from economists polled before the release. <b>Previous</b> is last period's figure. <b>Result</b> shows how far the actual number landed from the consensus. A small circle before a name marks a medium-importance release; the rest are key releases. Click or tap any release to see what it measures and why markets care. Pick as many countries as you like, and the page remembers your choice. A big gap is a surprise, and surprises are what move prices. See <a class="ac" href="#">Data Surprises</a> for how markets have reacted to past surprises.</p>
- <div class="foot"><span>Built by Newsquawk</span><span id="src">Checked every 15 minutes on weekdays. Not investment advice.</span></div>
+ <div class="foot"><span>Built by Newsquawk</span><span id="src">Checked every 5 minutes on weekdays. Not investment advice.</span></div>
 </main>
 <script src="notes.js"></script>
 <script>
@@ -213,7 +213,7 @@ document.getElementById("seg").onclick=function(e){var b=e.target.closest("butto
 function fetchData(){
  fetch("data/calendar.json?"+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
   DATA=d;EV=d.events.map(prep);chips();draw();
-  document.getElementById("src").textContent="Source: "+(d.source==="TradingView"?"TradingView economic calendar":d.source+" weekly calendar (backup source, no actuals)")+". Last change "+sf.format(new Date(d.checked))+" London. Checked every 15 minutes on weekdays. Not investment advice."
+  document.getElementById("src").textContent="Source: "+(d.source==="TradingView"?"TradingView economic calendar":d.source+" weekly calendar (backup source, no actuals)")+". Last change "+sf.format(new Date(d.checked))+" London. Checked every 5 minutes on weekdays. Not investment advice."
  }).catch(function(){if(!DATA)document.getElementById("days").innerHTML='<p class="empty">Could not load the calendar. Try again in a minute.</p>'})}
 chips();fetchData();setInterval(fetchData,5*60e3);setInterval(function(){if(DATA)draw()},30e3);
 </script>

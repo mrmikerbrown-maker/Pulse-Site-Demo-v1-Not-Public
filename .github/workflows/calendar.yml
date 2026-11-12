@@ -1,28 +1,33 @@
 name: "Calendar: update this week"
+# GitHub only fires scheduled jobs a few times a day in practice (often hours late or skipped),
+# so each run keeps going for up to 5h50m and checks the calendar every 5 minutes itself.
+# A new run starts every hour and takes over from the previous one, so a skipped start doesn't matter.
 on:
   schedule:
-    # Every 15 minutes on weekdays, 05:00-21:45 UTC (06:00-22:45 London in winter).
-    # GitHub sometimes runs scheduled jobs late.
-    - cron: "*/15 5-21 * * 1-5"
-    # Overnight Asia releases (NZ, Australia, Japan, China)
-    - cron: "*/30 22-23 * * 0-4"
-    - cron: "*/30 0-4 * * 1-5"
-    # Saturday and Sunday: load next week
-    - cron: "0 9 * * 6"
-    - cron: "0 18 * * 0"
+    - cron: "7 * * * *"
   workflow_dispatch:
 permissions:
   contents: write
   pages: write
 concurrency:
   group: calendar
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   update:
     runs-on: ubuntu-latest
+    timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
-      - run: python3 calendar/scripts/fetch.py
       - env:
           GH_TOKEN: ${{ github.token }}
-        run: bash .github/save.sh "Update calendar" calendar/data/
+        run: |
+          end=$(( $(date +%s) + 350*60 ))
+          while :; do
+            git pull -q --rebase --autostash origin "${GITHUB_REF_NAME}" || true
+            python3 calendar/scripts/fetch.py || echo "fetch failed, will try again"
+            bash .github/save.sh "Update calendar" calendar/data/ || true
+            # Weekdays every 5 minutes; weekends (when only next week's schedule changes) every 30.
+            if [ "$(date -u +%u)" -ge 6 ]; then wait=1800; else wait=300; fi
+            [ $(( $(date +%s) + wait )) -lt "$end" ] || break
+            sleep "$wait"
+          done
