@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-11T10:19:23Z",
+ "generated": "2026-11-12T15:11:43Z",
  "demo": false,
  "schema": 3,
  "history_years": 10,
@@ -12483,8 +12483,8 @@
    },
    "rate": {
     "value": 4.6,
-    "asof": "2026-09",
-    "asof_label": "Sep 2026",
+    "asof": "2026-10",
+    "asof_label": "Oct 2026",
     "last_change": {
      "asof": "2026-09",
      "asof_label": "Sep 2026",
