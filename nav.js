@@ -20,9 +20,9 @@ var TOOLS=[
  ["Economy",[
   ["Data Surprises",HUB+"surprises/","How releases landed against expectations"],
   ["Economy Thermometer",HUB+"economy-thermometer/","Is each G10 economy hot or cold?"],
-  ["Central banks",HUB+"central-banks/","Rates, last move and next meeting"],
-  ["Central bank pricing",HUB+"cb-pricing/","Hikes and cuts priced for each Fed, ECB and BoE meeting"],
-  ["Fed planner",HUB+"fed-scenario-planner/","How the next Fed decision could move markets"]
+  ["Central banks overview",HUB+"central-banks/","Every G10 policy rate, last move and next meeting"],
+  ["Central bank pricing",HUB+"cb-pricing/","Tightening or easing priced for each Fed, ECB and BoE meeting"],
+  ["Fed scenario planner",HUB+"fed-scenario-planner/","Pick the next Fed outcome and see how markets reacted before"]
  ]],
  ["Glossary",HUB+"glossary/"]
 ];
