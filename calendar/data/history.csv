@@ -64,3 +64,15 @@ tv1001660738401,2026-11-10T13:30:00Z,US,Core Inflation Rate MoM,Oct,0.3,0.2,0.3,
 tv1001660738403,2026-11-10T13:30:00Z,US,Inflation Rate MoM,Oct,0.4,0.3,0.6,%,,key
 tv1001660034302,2026-11-10T21:30:00Z,US,API Crude Oil Stock Change,w/o Nov 2,8.968,-1.483,-5.267,,M,medium
 tv1001681438801,2026-11-12T00:01:00Z,GB,RICS House Price Balance,Oct,-36,-34,-34,,,medium
+tv1001660246403,2026-11-12T07:00:00Z,GB,GDP 3-Month Avg,Sep,0.7,0.7,0.6,%,,medium
+tv1001657477201,2026-11-12T07:00:00Z,GB,GDP Growth Rate QoQ Prel,Q3,0.7,0.7,0.4,%,,key
+tv1001657477202,2026-11-12T07:00:00Z,GB,GDP Growth Rate YoY Prel,Q3,1.9,1.9,1.2,%,,key
+tv1001660246404,2026-11-12T07:00:00Z,GB,GDP MoM,Sep,0.2,0,0,%,,key
+tv1001660246413,2026-11-12T07:00:00Z,GB,Goods Trade Balance,Sep,-22.291,-19.45,-19.61,£,B,medium
+tv1001660246406,2026-11-12T07:00:00Z,GB,Industrial Production MoM,Sep,0.3,-0.3,0.7,%,,medium
+tv1001660246408,2026-11-12T07:00:00Z,GB,Manufacturing Production MoM,Sep,0.7,-0.5,0.7,%,,medium
+tv1001660246411,2026-11-12T07:00:00Z,GB,Services Output MoM,Sep,0.2,0,-0.1,%,,medium
+tv1001660246412,2026-11-12T07:00:00Z,GB,Services Output YoY,Sep,2.2,2.2,2.4,%,,medium
+tv1001661515003,2026-11-12T07:00:00Z,SE,CPI with fixed interest rate MoM,Oct,0,0,0.9,%,,medium
+tv1001661515001,2026-11-12T07:00:00Z,SE,Core Inflation Rate MoM,Oct,-0.1,-0.2,0.1,%,,medium
+tv1001661515002,2026-11-12T07:00:00Z,SE,Core Inflation Rate YoY,Oct,0.1,0.1,0.5,%,,medium
