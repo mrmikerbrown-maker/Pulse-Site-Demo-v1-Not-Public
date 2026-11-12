@@ -129,8 +129,8 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
    <div class="go">Open the tracker →</div>
   </a>
   <a class="card" href="cb-pricing/#fed">
-   <div class="lbl">Fed · ECB</div><h2>Central Bank Pricing</h2>
-   <p class="d">How many hikes or cuts the market prices for each Fed and ECB meeting, from futures.</p>
+   <div class="lbl">Fed · ECB · BoE</div><h2>Central Bank Pricing</h2>
+   <p class="d">How many hikes or cuts the market prices for each Fed, ECB and BoE meeting.</p>
    <div class="live" id="c-fedp"><p class="wait">Loading…</p></div>
    <div class="go">Open the pricing →</div>
   </a>
@@ -254,7 +254,7 @@ fetch("central-banks/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;r
   return '<div class="big">'+name+' '+esc(md(P.meetings[nx],{day:"numeric",month:"short"}))+': <span class="'+cl(nb)+'">'+Math.abs(Math.round(nb))+'bp</span> <span class="small">of '+(nb<0?"easing":"tightening")+' priced</span></div>';
  }).catch(function(){return ""})}
  /* Same banks as cb-pricing/index.html: [name, data file, decision time UTC]. Add a line here when a bank is added there. */
- var BK=[["Fed","fed-scenario-planner/data.json","T19:00:00Z"],["ECB","ecb-pricing/data.json","T13:15:00Z"]];
+ var BK=[["Fed","fed-scenario-planner/data.json","T19:00:00Z"],["ECB","ecb-pricing/data.json","T13:15:00Z"],["BoE","boe-pricing/data.json","T12:00:00Z"]];
  Promise.all(BK.map(function(b){return line(b[0],[b[1],b[2]])})).then(function(x){
   if(!x.join("")){fail("c-fedp");return}
   $("c-fedp").innerHTML=x.join("")+'<div class="small mu">Next meeting for each central bank</div>';

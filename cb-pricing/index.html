@@ -112,21 +112,27 @@ tr.u td{background:var(--hl);font-weight:700}tr.u td:first-child{box-shadow:inse
 var D=null,$=function(i){return document.getElementById(i)},BANK="fed",CACHE={};
 /* One entry per central bank; the switch above the chart is built from this list, in this order.
    To add a bank: give it a data job that writes a data.json with the same "path" shape as ecb-pricing/data.json
-   (meetings, rates, effr = today's rate, asof, compare), then add an entry here. time = decision time in UTC. */
+   (meetings, rates, effr = today's rate, asof, compare), then add an entry here. time = decision time in UTC.
+   policy = [key in data.json holding {value}, label] for the official policy rate shown first, if the data has it.
+   stamp = what the date in the grey line refers to. */
 var BANKS={
  fed:{label:"Fed",url:"../fed-scenario-planner/data.json",fut:"fed funds futures",futs:"fed funds futures",time:"T19:00:00Z",
   base:"Effective fed funds rate",
   note:'Rates are the average effective fed funds rate each futures contract prices after that meeting. Want to see how markets could react to the next decision? <a href="../fed-scenario-planner/" style="color:var(--accent)">Open the Fed Scenario Planner →</a>',
   src:"Data: CBOT 30-day fed funds futures via Yahoo (delayed), effective fed funds rate from the New York Fed, meeting dates from the Federal Reserve. Updated each weekday night."},
- ecb:{label:"ECB",url:"../ecb-pricing/data.json",fut:"ECB dated €STR futures",futs:"€STR futures",time:"T13:15:00Z",
+ ecb:{label:"ECB",url:"../ecb-pricing/data.json",fut:"ECB dated €STR futures",futs:"€STR futures",time:"T13:15:00Z",policy:["dfr","ECB deposit rate"],
   base:"€STR this period",
   note:"Rates are the €STR each futures contract prices for the period after that meeting. €STR usually sits a few basis points under the ECB deposit rate.",
-  src:"Data: Eurex ECB Dated €STR Futures daily settlements, €STR and deposit rate from the ECB, meeting dates from the ECB. Updated each weekday night."}
+  src:"Data: Eurex ECB Dated €STR Futures daily settlements, €STR and deposit rate from the ECB, meeting dates from the ECB. Updated each weekday night."},
+ boe:{label:"BoE",url:"../boe-pricing/data.json",fut:"the Bank of England's OIS curve",futs:"OIS curve",time:"T12:00:00Z",policy:["bank_rate","Bank Rate"],stamp:"OIS curve",
+  base:"SONIA to next meeting",
+  note:"Rates are the average SONIA the market prices between each meeting and the next, read off the Bank of England's daily OIS curve. The curve is smoothed, so the split between neighbouring meetings is approximate; the overall path is within a few basis points of MPC-dated SONIA futures. SONIA usually sits a few basis points under Bank Rate.",
+  src:"Data: Bank of England daily OIS curve (published the next working day), SONIA and Bank Rate from the Bank of England, meeting dates from the Bank of England. Updated each weekday."}
 };
 function ldn(iso,o){return new Date(iso).toLocaleString("en-GB",Object.assign({timeZone:"Europe/London"},o))}
 function stamp(){
  var P=D.path,el=$("stamp"),age=(Date.now()-new Date(D.generated))/864e5;
- el.textContent=("Futures prices "+ldn(P.asof+"T12:00:00Z",{weekday:"short",day:"numeric",month:"short"})+" · updated "+ldn(D.generated,{weekday:"short",day:"numeric",month:"short"})+", "+ldn(D.generated,{hour:"2-digit",minute:"2-digit"})+" London").replace(/,(?= \d+ \w{3})/g,"");
+ el.textContent=((BANKS[BANK].stamp||"Futures prices")+" "+ldn(P.asof+"T12:00:00Z",{weekday:"short",day:"numeric",month:"short"})+" · updated "+ldn(D.generated,{weekday:"short",day:"numeric",month:"short"})+", "+ldn(D.generated,{hour:"2-digit",minute:"2-digit"})+" London").replace(/,(?= \d+ \w{3})/g,"");
  if(age>4){el.textContent+=" · data is "+Math.floor(age)+" days old";el.className="stamp old"}
 }
 /* Warn when the latest data could not be fetched (the page keeps showing the last good data). */
@@ -146,7 +152,7 @@ function rpath(){
  var cums=R.map(function(r){return(r-e)*400}),all=cums.concat(C?C.map(function(r){return(r-e)*400}):[]).concat([0]);
  var nh=Math.max(1,Math.ceil(Math.max.apply(0,all)/100-1e-9)),nc=Math.max(0,Math.ceil(-Math.min.apply(0,all)/100-1e-9));
  var pk=0;R.forEach(function(r,i){if(Math.abs(r-e)>Math.abs(R[pk]-e))pk=i});var M=P.meetings,lm=M.length-1;var nx=0;while(nx<lm&&new Date(M[nx]+BANKS[BANK].time)<Date.now())nx++;
- $("rpstats").innerHTML=(D.dfr?'<div><span>ECB deposit rate</span><b>'+D.dfr.value.toFixed(2)+'%</b></div>':'')+'<div><span>'+BANKS[BANK].base+'</span><b>'+e.toFixed(2)+'%</b></div><div><span>Priced for '+fd(M[nx],{day:"numeric",month:"short"})+' meeting</span><b>'+Math.abs((R[nx]-(nx?R[nx-1]:e))*100).toFixed(1)+'bp <small style="font-size:13px;font-weight:600;color:var(--muted)">of '+(R[nx]<(nx?R[nx-1]:e)?"easing":"tightening")+'</small></b></div><div><span>'+(R[pk]>=e?"Peak":"Low")+'</span><b>'+R[pk].toFixed(2)+'%</b></div><div><span>'+fd(M[lm],{month:"short"})+" "+M[lm].slice(2,4)+'</span><b>'+R[lm].toFixed(2)+'%</b></div>';
+ $("rpstats").innerHTML=(BANKS[BANK].policy&&D[BANKS[BANK].policy[0]]?'<div><span>'+BANKS[BANK].policy[1]+'</span><b>'+D[BANKS[BANK].policy[0]].value.toFixed(2)+'%</b></div>':'')+'<div><span>'+BANKS[BANK].base+'</span><b>'+e.toFixed(2)+'%</b></div><div><span>Priced for '+fd(M[nx],{day:"numeric",month:"short"})+' meeting</span><b>'+Math.abs((R[nx]-(nx?R[nx-1]:e))*100).toFixed(1)+'bp <small style="font-size:13px;font-weight:600;color:var(--muted)">of '+(R[nx]<(nx?R[nx-1]:e)?"easing":"tightening")+'</small></b></div><div><span>'+(R[pk]>=e?"Peak":"Low")+'</span><b>'+R[pk].toFixed(2)+'%</b></div><div><span>'+fd(M[lm],{month:"short"})+" "+M[lm].slice(2,4)+'</span><b>'+R[lm].toFixed(2)+'%</b></div>';
  var h='<div class="rp-row hd"><div>Meeting</div><div>Priced</div><div>Cumulative</div><div>Rate</div><div class="c-chg">This meeting</div><div class="c-cmp">'+(C?"vs "+RPC:"")+'</div></div>',prev=e;
  R.forEach(function(r,i){
   var cum=cums[i],me=(r-prev)*100;prev=r;var days=Math.round((new Date(M[i]+BANKS[BANK].time)-today)/864e5),bl='<div class="rp-blocks">',k,f;
