@@ -1,0 +1,38 @@
+/* Alpha Pulse brand layer, loaded last in <head> on every page so it wins over each page's own colours.
+   Colours and fonts come from the Alpha Pulse Brand Bible (v03, Nov 2026). Change a colour here and every page follows.
+
+   Dark (the default) maps straight onto the brand: Near-black background, Paper text, Up Lime / Down Red figures.
+   Light uses Paper as the background. Up Lime and Down Red are unreadable as text on Paper (the guide says never),
+   so light mode uses darker versions of the same two colours for figures.
+
+   --accent   = selected buttons, focus rings, links. Paper on dark, Near-black on light (no brand red on data).
+   --onaccent = text sitting on an --accent fill.
+   --pink     = Pulse Red, the brand red: badges, warnings, "hot". --pinkt is the same idea readable as small text.
+   --accrgb   = --accent as r,g,b for see-through fills: rgba(var(--accrgb),.12).
+
+   Font: "AP Display" is Creato Display (SIL Open Font License, see fonts/OFL.txt) with tabular figures added so
+   numbers line up in tables, as the guide asks. The licence makes a changed copy take a new name, hence "AP Display". */
+@font-face{font-family:"AP Display";src:url(fonts/APDisplay-Light.woff2) format("woff2");font-weight:100 300;font-style:normal;font-display:swap}
+@font-face{font-family:"AP Display";src:url(fonts/APDisplay-Regular.woff2) format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"AP Display";src:url(fonts/APDisplay-Medium.woff2) format("woff2");font-weight:500 600;font-style:normal;font-display:swap}
+@font-face{font-family:"AP Display";src:url(fonts/APDisplay-Bold.woff2) format("woff2");font-weight:700 900;font-style:normal;font-display:swap}
+
+:root{
+ --bg:#050505;--card:#100F0E;--line:#26231F;--text:#F5F1E8;--text2:#CFC9BC;--muted:#8F897E;--dim:#625D55;
+ --accent:#F5F1E8;--onaccent:#050505;--accrgb:245,241,232;
+ --pink:#C42424;--pinkt:#FF5A4D;--onpink:#F5F1E8;
+ --up:#B8F23C;--down:#FF5A4D;--upa:184,242,60;--downa:255,90,77;
+ --ap-red:#C42424;--ap-deep:#550202;--ap-paper:#F5F1E8;--ap-black:#050505;--ap-lime:#B8F23C;--ap-downred:#FF5A4D;
+ --ap-gradient:linear-gradient(145deg,#C42424,#550202);
+ color-scheme:dark}
+:root.light{
+ --bg:#F5F1E8;--card:#FBF9F3;--line:#E0D9CA;--text:#050505;--text2:#38342E;--muted:#6B655A;--dim:#A29B8E;
+ --accent:#050505;--onaccent:#F5F1E8;--accrgb:5,5,5;
+ --pink:#C42424;--pinkt:#C42424;--onpink:#F5F1E8;
+ --up:#467300;--down:#B8322A;--upa:70,115,0;--downa:184,50,42;
+ color-scheme:light}
+
+body,button,input,select,textarea{font-family:"AP Display",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+/* Headlines: Medium, per the guide (sizes and positions stay as the site layout rule). */
+h1{font-weight:500}
+::selection{background:#C42424;color:#F5F1E8}

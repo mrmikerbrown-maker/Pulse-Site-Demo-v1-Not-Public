@@ -1,6 +1,6 @@
 # Who moved the index?
 
-A live, Newsquawk-branded page showing which stocks and sectors moved the S&P 500, Nasdaq 100 and Dow today, in index points.
+A live, Alpha Pulse-branded page showing which stocks and sectors moved the S&P 500, Nasdaq 100 and Dow today, in index points.
 
 ## How it works
 

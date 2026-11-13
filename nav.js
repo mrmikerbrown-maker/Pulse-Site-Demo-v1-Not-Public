@@ -1,15 +1,15 @@
-/* Shared top bar for every page of the Pulse site (hub repo Pulse-Site-Demo-v1-Not-Public).
+/* Shared top bar for every page of the Alpha Pulse site (hub repo Pulse-Site-Demo-v1-Not-Public).
    A page loads it with one line in <head>:  <script src="/Pulse-Site-Demo-v1-Not-Public/nav.js" defer></script>
    Links to the hub's own pages (Home, Market Clock, Data Surprises, Glossary) are worked out from where this file
    is loaded from (HUB below), so renaming the hub repo again only needs the <script> line on each page changing.
-   It puts the same full-width bar at the top of the page: logo + site name (links home), a link to every tool,
+   It puts the same full-width bar at the top of the page: Alpha Pulse logo (links home), a link to every tool,
    and the page's own sun/moon button (moved into the bar). On narrow screens the links fold into a menu button.
    The page's own logo row is hidden so there is only one header.
-   To add a tool to every page, add one line to TOOLS below. To rename the site, change NAME. */
+   To add a tool to every page, add one line to TOOLS below. NAME is the site name used for screen readers; the visible name is the logo itself. */
 (function(){
 var ME=document.currentScript&&document.currentScript.src;
 var HUB=ME?new URL(".",ME).pathname:"/Pulse-Site-Demo-v1-Not-Public/";
-var NAME="Pulse";
+var NAME="Alpha Pulse";
 var TOOLS=[
  ["Home",HUB],
  ["This week",HUB+"calendar/"],
@@ -28,18 +28,17 @@ var TOOLS=[
 ];
 /* A top-level item is ["Label",HUB+"path/"]; a dropdown is ["Label",[["Name",HUB+"path/","one-line description"],...]].
    A child with an empty path shows greyed out as "coming soon". */
-var LOGO="data:image/png;base64,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";
+var LOGO=HUB+"brand/logo/bar-paper.svg",LOGO_L=HUB+"brand/logo/bar-near-black.svg"; /* PLACEHOLDER logo files: swap the SVGs in brand/logo/, keep the names */
 window.NQ_TOOLS=TOOLS;
 var here=location.pathname.replace(/index\.html$/,"");
 function isHere(h){return h===HUB?here===HUB:here.indexOf(h)===0}
-var F="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif";
+var F="'AP Display',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif";
 var css=
 ".nq-hd{display:block;border-bottom:1px solid var(--line);background:var(--bg);position:relative;z-index:40;margin-bottom:18px}"+
 ".nq-in{max-width:1240px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:14px 16px 12px}"+
 ".nq-br{display:flex;align-items:center;gap:12px;flex:none;text-decoration:none;margin-right:auto}"+
-".nq-br img{display:block;width:120px;height:auto;margin:0}"+
-":root.light .nq-br img{filter:invert(1) hue-rotate(180deg)}"+
-".nq-br span{font:800 15px/1 "+F+";letter-spacing:.16em;text-transform:uppercase;color:var(--accent);border-left:1px solid var(--line);padding:4px 0 4px 12px}"+
+".nq-br img{display:block;height:26px;width:auto;margin:0}"+
+".nq-br .nq-lt,:root.light .nq-br .nq-dk{display:none}:root.light .nq-br .nq-lt{display:block}"+
 ".nq-ln{display:flex;gap:2px;flex:none}"+
 ".nq-ln a,.nq-p a{font:500 14px/1.2 "+F+";color:var(--text2);text-decoration:none;padding:8px 9px;border-radius:8px;white-space:nowrap}"+
 ".nq-ln a:hover,.nq-p a:hover{background:var(--card);color:var(--text)}"+
@@ -73,7 +72,7 @@ var css=
 ".nq-hd.nq-n .nq-ln{display:none}"+
 ".nq-hd.nq-n .nq-b{display:inline-flex}"+
 ".nq-hd.nq-n.nq-o .nq-p{display:flex;border-top:1px solid var(--line)}"+
-"@media (max-width:520px){.nq-br img{width:96px}.nq-br span{font-size:13px;padding-left:10px}.nq-br{gap:10px}.nq-in{gap:10px}}"+
+"@media (max-width:520px){.nq-br img{height:23px}.nq-in{gap:10px}}"+
 ".nq-gone{display:none!important}";
 function build(){
  if(document.querySelector(".nq-hd"))return;
@@ -91,7 +90,7 @@ function build(){
   if(typeof t[1]==="string")return '<a href="'+t[1]+'"'+cur(t[1])+">"+t[0]+"</a>";
   return '<div class="nq-ph">'+t[0]+"</div>"+t[1].map(function(c){return c[1]?'<a class="nq-pc" href="'+c[1]+'"'+cur(c[1])+">"+c[0]+"</a>":'<span class="nq-pc nq-soon">'+c[0]+" · coming soon</span>"}).join("")}).join("");
  var hd=document.createElement("header");hd.className="nq-hd";
- hd.innerHTML='<div class="nq-in"><a class="nq-br" href="'+HUB+'" aria-label="'+NAME+' home"><img alt="Newsquawk" width="120" src="'+LOGO+'"><span>'+NAME+'</span></a>'+
+ hd.innerHTML='<div class="nq-in"><a class="nq-br" href="'+HUB+'" aria-label="'+NAME+' home"><img class="nq-dk" alt="'+NAME+'" src="'+LOGO+'"><img class="nq-lt" alt="" src="'+LOGO_L+'"></a>'+
   '<nav class="nq-ln" aria-label="Tools">'+links+'</nav>'+
   '<button class="nq-b" type="button" aria-expanded="false" aria-label="Menu"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h11"/></svg></button>'+
   '<span class="nq-th"></span></div><nav class="nq-p" aria-label="Tools">'+plinks+"</nav>";

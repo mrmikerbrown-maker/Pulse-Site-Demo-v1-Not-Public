@@ -3,17 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Pulse · Newsquawk market tools</title>
+<title>Alpha Pulse · market tools</title>
 <meta name="description" content="Free tools for reading the macro picture and the market's moves: economy thermometer, index contribution, data surprises and market clock.">
-<link rel="icon" href="data:,">
 <script>try{var t=localStorage.getItem("ict-theme");if(t?t==="light":matchMedia("(prefers-color-scheme: light)").matches)document.documentElement.classList.add("light")}catch(e){}</script>
 <script src="nav.js" defer></script>
 <style>
-:root{--bg:#06060A;--card:#0D0E15;--line:#22242E;--text:#FFFFFF;--text2:#CBD5E1;--muted:#8A8FA3;--dim:#5E6273;--accent:#00E0FF;--pink:#FF3B6B;--up:#3DDC97;--down:#FF5C7A;color-scheme:dark}
-:root.light{--bg:#F5F6F8;--card:#FFFFFF;--line:#E1E4EA;--text:#0B0D14;--text2:#3A4150;--muted:#6B7280;--dim:#9AA0AC;--accent:#00B4D8;--pink:#E62E5C;--up:#0E9F6E;--down:#E23D52;color-scheme:light}
+:root{--bg:#050505;--card:#100F0E;--line:#26231F;--text:#F5F1E8;--text2:#CFC9BC;--muted:#8F897E;--dim:#625D55;--accent:#F5F1E8;--pink:#C42424;--up:#B8F23C;--down:#FF5A4D;color-scheme:dark}
+:root.light{--bg:#F5F1E8;--card:#FBF9F3;--line:#E0D9CA;--text:#050505;--text2:#38342E;--muted:#6B655A;--dim:#A29B8E;--accent:#050505;--pink:#C42424;--up:#467300;--down:#B8322A;color-scheme:light}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text2);font-family:ui-sans-serif,system-ui,-apple-system,"SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;line-height:1.4}
-body:before{content:"";position:fixed;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#00e0ff,rgba(0,224,255,0) 40%,rgba(0,224,255,0) 60%,#ff3b6b);z-index:20}
+body{margin:0;background:var(--bg);color:var(--text2);font-family:"AP Display",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+body:before{content:"";position:fixed;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#C42424,#550202);z-index:20}
 a{color:inherit;text-decoration:none}
 .hd{border-bottom:1px solid var(--line)}
 .top{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:18px;padding:14px max(16px,env(safe-area-inset-left,0px)) 12px}
@@ -47,14 +46,14 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
 .asof{font-size:12px;color:var(--dim);margin-top:6px}
 .wait{font-size:13px;color:var(--dim)}
 .go{margin-top:12px;font-size:14px;font-weight:700;color:var(--accent)}
-.up{color:var(--up)}.dn{color:var(--down)}.pk{color:var(--pink)}.ac{color:var(--accent)}.mu{color:var(--muted)}
+.up{color:var(--up)}.dn{color:var(--down)}.pk{color:var(--pinkt)}.ac{color:var(--accent)}.mu{color:var(--muted)}
 .pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
 .pl{font-size:11px;font-weight:800;letter-spacing:.04em;padding:3px 7px;border-radius:6px;border:1px solid var(--dim);color:var(--text2)}
-.pl.warm{background:rgba(255,59,107,.14);border-color:var(--pink);color:var(--pink)}
-.pl.hot{background:var(--pink);border-color:var(--pink);color:#06060A}
-.pl.cool{background:rgba(0,224,255,.12);border-color:var(--accent);color:var(--accent)}
-.pl.cold{background:var(--accent);border-color:var(--accent);color:#06060A}
-:root.light .pl.hot,:root.light .pl.cold{color:#fff}
+.pl.warm{background:rgba(196,36,36,.14);border-color:var(--pinkt);color:var(--pinkt)}
+.pl.hot{background:var(--pink);border-color:var(--pink);color:var(--onpink)}
+.pl.cool{background:rgba(var(--accrgb),.12);border-color:var(--accent);color:var(--accent)}
+.pl.cold{background:var(--accent);border-color:var(--accent);color:var(--onaccent)}
+:root.light .pl.hot,:root.light .pl.cold{color:#F5F1E8}
 .mb{display:grid;grid-template-columns:48px 1fr 70px;gap:6px;align-items:center;font-size:12px;margin-top:5px;font-variant-numeric:tabular-nums}
 .mb b{color:var(--text);font-weight:700}
 .mb span.t{height:8px;border-radius:3px;background:var(--up);min-width:2px}
@@ -63,8 +62,8 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
 .sp{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--line)}
 .sp:last-of-type{border-bottom:0}
 .tag{flex:none;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:99px;color:var(--muted)}
-.tag.hi{background:rgba(255,59,107,.14);color:var(--pink)}
-.tag.lo{background:rgba(0,224,255,.12);color:var(--accent)}
+.tag.hi{background:rgba(196,36,36,.14);color:var(--pinkt)}
+.tag.lo{background:rgba(var(--accrgb),.12);color:var(--accent)}
 .sess{display:grid;grid-template-columns:70px 1fr;gap:6px 8px;align-items:center;font-size:12px;margin-top:8px}
 .track{position:relative;height:10px;border-radius:99px;background:var(--line)}
 .track i{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--dim)}
@@ -83,6 +82,9 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
  .soon{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 </style>
+<link rel="icon" type="image/png" sizes="32x32" href="brand/logo/icon-32.png">
+<link rel="apple-touch-icon" href="brand/logo/icon-192.png">
+<link rel="stylesheet" href="brand/brand.css">
 </head>
 <body>
 
@@ -143,7 +145,7 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
  </div>
 
 
- <div class="foot"><span>Built by Newsquawk. Each tool updates itself automatically.</span><span>For information only, not investment advice.</span></div>
+ <div class="foot"><span>Alpha Pulse. Each tool updates itself automatically.</span><span>For information only, not investment advice.</span></div>
 </main>
 <script>
 var $=function(i){return document.getElementById(i)};

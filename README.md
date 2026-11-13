@@ -1,6 +1,6 @@
-# Pulse site (Pulse-Site-Demo-v1-Not-Public)
+# Alpha Pulse site (Pulse-Site-Demo-v1-Not-Public)
 
-Everything on the Pulse site lives in this one repo and is served by GitHub Pages at
+Everything on the Alpha Pulse site lives in this one repo and is served by GitHub Pages at
 https://mrmikerbrown-maker.github.io/Pulse-Site-Demo-v1-Not-Public/
 
 The site is public to anyone with the link, despite the repo name.
@@ -41,3 +41,11 @@ All the jobs are free GitHub Actions and need no passwords or keys. Each one can
 Every job saves through `.github/save.sh`, which retries if another job saved at the same moment and then asks GitHub Pages to rebuild.
 
 The tools used to live in their own repos (calendar, central-banks, economy-thermometer, index-contribution-site, and the private fed-scenario-planner). They were moved here on 11 Nov 2026 with their history kept.
+
+## Brand (Alpha Pulse)
+
+Colours, fonts and logos live in `brand/`:
+
+- `brand/brand.css` holds every shared colour and the font. Each page loads it last, so a colour changed there changes everywhere.
+- `brand/logo/` holds the logo files. They are PLACEHOLDERS traced from the brand guide. When the official files arrive, upload them with the same names (`bar-paper.svg`, `bar-near-black.svg`, `icon-32.png`, `icon-192.png`, `icon-512.png`, `icon.svg`) and every page picks them up.
+- `brand/fonts/` holds "AP Display": Creato Display (SIL Open Font License, `OFL.txt`) with tabular figures added so numbers line up. The licence asks for a new name on a changed copy, hence "AP Display".
