@@ -156,17 +156,17 @@ function finds(t){var out=[];
   while((m=r[0].exec(t))){var w=m[2],i=r[1][r[2]?w.toLowerCase():w];out.push({i:i,st:m.index+m[1].length,len:w.length});r[0].lastIndex=m.index+m[1].length+w.length}});
  return out.sort(function(a,b){return a.st-b.st||b.len-a.len})}
 
-var F="ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif";
+var F="'AP Display',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif";
 var css=
 /* !important so a page's own styles for spans (sizes, colours, block layout) never change the word itself */
-".nqg-t{display:inline!important;position:static!important;float:none!important;width:auto!important;height:auto!important;margin:0!important;padding:0!important;font:inherit!important;color:inherit!important;letter-spacing:inherit!important;text-transform:inherit!important;opacity:1!important;background:none!important;border:0!important;border-bottom:1.5px dotted var(--accent,#00E0FF)!important;cursor:help!important;border-radius:0!important}"+
-".nqg-t:hover,.nqg-t:focus,.nqg-t.nqg-on{background:rgba(0,224,255,.14)!important;outline:none;border-radius:2px!important}"+
-"#nqg-tip{position:fixed;z-index:70;display:none;background:var(--card,#0D0E15);color:var(--text,#fff);border:1px solid var(--line,#22242E);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);padding:12px 14px;font:400 13px/1.45 "+F+";text-align:left;text-transform:none;letter-spacing:normal;white-space:normal}"+
-"#nqg-tip b{display:block;font-size:14px;font-weight:700;margin:0 0 4px;padding-right:22px;color:var(--text,#fff)}"+
-"#nqg-tip p{margin:0 0 8px;color:var(--text2,#CBD5E1)}"+
-"#nqg-tip a{color:var(--accent,#00E0FF);font-size:12px;font-weight:600;text-decoration:none}#nqg-tip a:hover{text-decoration:underline}"+
+".nqg-t{display:inline!important;position:static!important;float:none!important;width:auto!important;height:auto!important;margin:0!important;padding:0!important;font:inherit!important;color:inherit!important;letter-spacing:inherit!important;text-transform:inherit!important;opacity:1!important;background:none!important;border:0!important;border-bottom:1.5px dotted var(--accent,#F5F1E8)!important;cursor:help!important;border-radius:0!important}"+
+".nqg-t:hover,.nqg-t:focus,.nqg-t.nqg-on{background:rgba(var(--accrgb,245,241,232),.12)!important;outline:none;border-radius:2px!important}"+
+"#nqg-tip{position:fixed;z-index:70;display:none;background:var(--card,#100F0E);color:var(--text,#F5F1E8);border:1px solid var(--line,#26231F);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);padding:12px 14px;font:400 13px/1.45 "+F+";text-align:left;text-transform:none;letter-spacing:normal;white-space:normal}"+
+"#nqg-tip b{display:block;font-size:14px;font-weight:700;margin:0 0 4px;padding-right:22px;color:var(--text,#F5F1E8)}"+
+"#nqg-tip p{margin:0 0 8px;color:var(--text2,#CFC9BC)}"+
+"#nqg-tip a{color:var(--accent,#F5F1E8);font-size:12px;font-weight:600;text-decoration:none}#nqg-tip a:hover{text-decoration:underline}"+
 ":root.light #nqg-tip{box-shadow:0 8px 28px rgba(11,13,20,.14)}"+
-"#nqg-tip .nqg-x{position:absolute;top:4px;right:6px;border:0;background:transparent;font:400 20px/1 "+F+";padding:2px 6px;color:var(--muted,#8A8FA3);cursor:pointer}";
+"#nqg-tip .nqg-x{position:absolute;top:4px;right:6px;border:0;background:transparent;font:400 20px/1 "+F+";padding:2px 6px;color:var(--muted,#8F897E);cursor:pointer}";
 
 /* Where not to underline: menus, buttons, links, form fields, headings, charts, and anything clickable. */
 var SKIPTAG=/^(A|BUTTON|SELECT|OPTION|INPUT|TEXTAREA|LABEL|SCRIPT|STYLE|NOSCRIPT|TEMPLATE|H1|H2|H3|SVG|CODE|PRE|SUMMARY|TITLE|CANVAS)$/;

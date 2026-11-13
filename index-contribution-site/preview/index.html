@@ -3,31 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Who Moved the Index? | Newsquawk</title>
+<title>Who Moved the Index? | Alpha Pulse</title>
 <meta name="robots" content="noindex">
 <meta name="description" content="Which stocks and sectors moved the S&amp;P 500, Nasdaq 100 and Dow, in index points: today, this week, this month and this year.">
 <!-- Link previews (Slack, X, WhatsApp, LinkedIn) -->
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="Newsquawk">
+<meta property="og:site_name" content="Alpha Pulse">
 <meta property="og:title" content="Who moved the index?">
 <meta property="og:description" content="Which stocks and sectors moved the S&amp;P 500, Nasdaq 100 and Dow, in index points: today, this week, this month and this year.">
 <meta property="og:url" content="https://mrmikerbrown-maker.github.io/Pulse-Site-Demo-v1-Not-Public/index-contribution-site/">
 <meta property="og:image" content="https://mrmikerbrown-maker.github.io/Pulse-Site-Demo-v1-Not-Public/index-contribution-site/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Newsquawk: Who moved the index?">
+<meta property="og:image:alt" content="Alpha Pulse: Who moved the index?">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Who moved the index?">
 <meta name="twitter:description" content="Which stocks and sectors moved the S&amp;P 500, Nasdaq 100 and Dow, in index points: today, this week, this month and this year.">
 <meta name="twitter:image" content="https://mrmikerbrown-maker.github.io/Pulse-Site-Demo-v1-Not-Public/index-contribution-site/og.png">
 <script>try{const t=localStorage.getItem("ict-theme");if(t?t==="light":matchMedia("(prefers-color-scheme: light)").matches)document.documentElement.classList.add("light")}catch(e){}</script>
 <style>
-/* Layout: Newsquawk house look (dark only). Logo, title, index toggle, stat strip, then three stacked chart cards, CTA. */
-:root{--bg:#06060A;--card:#0D0E15;--line:#22242E;--text:#FFFFFF;--text2:#CBD5E1;--muted:#8A8FA3;--dim:#5E6273;--accent:#00E0FF;--pink:#FF3B6B;
-  --up:#28E0A0;--down:#FF5D6E;--neutral:#1C1F2B;--ink:#FFFFFF;--rule:#22242E;color-scheme:dark}
+/* Layout: Alpha Pulse house look (dark only). Logo, title, index toggle, stat strip, then three stacked chart cards, CTA. */
+:root{--bg:#050505;--card:#100F0E;--line:#26231F;--text:#F5F1E8;--text2:#CFC9BC;--muted:#8F897E;--dim:#625D55;--accent:#F5F1E8;--pink:#C42424;
+  --up:#B8F23C;--down:#FF5A4D;--neutral:#1E1C19;--ink:#F5F1E8;--rule:#26231F;color-scheme:dark}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text2);font-family:ui-sans-serif,system-ui,-apple-system,"SF Pro Display","Inter","Segoe UI",Roboto,sans-serif;line-height:1.4;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:0 28px}
-body:before{content:"";position:fixed;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#00e0ff,rgba(0,224,255,0) 40%,rgba(0,224,255,0) 60%,#ff3b6b);z-index:5}
+body{margin:0;background:var(--bg);color:var(--text2);font-family:"AP Display",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4;padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:0 28px}
+body:before{content:"";position:fixed;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#C42424,#550202);z-index:5}
 .wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
 .logo{display:block;width:150px;height:auto;margin:22px 0 2px}
 header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px}
@@ -36,7 +36,7 @@ h1{font-size:clamp(22px,4.4vw,30px);line-height:1.15;margin:0 0 8px;color:var(--
 .tabs{display:flex;gap:6px}
 .chip{appearance:none;font:inherit;font-size:13px;padding:6px 11px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text);cursor:pointer}
 .chip:hover{border-color:var(--accent)}
-.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#06060A;font-weight:700}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--onaccent);font-weight:700}
 .chip:focus-visible{outline:2px solid var(--text);outline-offset:1px}
 .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 .strip>div{min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--card)}
@@ -51,22 +51,22 @@ svg text{fill:var(--text2);font-family:inherit}
 .up{fill:var(--up)} .down{fill:var(--down)}
 .legend{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
 .legend i{display:block;height:8px;width:160px;border-radius:4px;background:linear-gradient(90deg,var(--down),var(--neutral),var(--up))}
-#tip{position:fixed;pointer-events:none;background:#FFFFFF;color:#06060A;font-size:12px;padding:6px 8px;border-radius:6px;line-height:1.35;font-variant-numeric:tabular-nums;z-index:20}
+#tip{position:fixed;pointer-events:none;background:#F5F1E8;color:#050505;font-size:12px;padding:6px 8px;border-radius:6px;line-height:1.35;font-variant-numeric:tabular-nums;z-index:20}
 [hidden]{display:none!important}
 .hint{font-size:12px!important;color:var(--accent)!important;margin:0!important}
 .scrollx{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .ctl{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin-bottom:6px}
-.status{font-size:12px;color:var(--muted);margin:6px 0 0}.status.err{color:var(--pink)}
+.status{font-size:12px;color:var(--muted);margin:6px 0 0}.status.err{color:var(--pinkt)}
 .note{font-size:12px;color:var(--muted);margin:0;max-width:72ch}
 .badge{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:0 0 10px}
 .badge i{width:8px;height:8px;border-radius:50%;background:var(--dim)}
-.badge.live{color:var(--up);border-color:rgba(40,224,160,.45)}.badge.live i{background:var(--up);animation:pulse 1.6s ease-in-out infinite}
+.badge.live{color:var(--up);border-color:rgba(184,242,60,.45)}.badge.live i{background:var(--up);animation:pulse 1.6s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.25}}
 @media (prefers-reduced-motion:reduce){.badge.live i{animation:none}}
 .prow{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}.prow[hidden]{display:none}.since{font-size:12px;color:var(--muted)}.seg button:disabled{opacity:.4;cursor:default}
 .seg{display:inline-flex;gap:2px;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:2px}
 .seg button{appearance:none;font:inherit;font-size:13px;padding:5px 12px;border:0;border-radius:7px;background:none;color:var(--text2);cursor:pointer}
-.seg button:hover{color:var(--text)}.seg button[aria-pressed="true"]{background:var(--accent);color:#06060A;font-weight:700}
+.seg button:hover{color:var(--text)}.seg button[aria-pressed="true"]{background:var(--accent);color:var(--onaccent);font-weight:700}
 .seg button:focus-visible,.sel:focus-visible,.dl:focus-visible{outline:2px solid var(--text);outline-offset:1px}
 .sel{appearance:none;-webkit-appearance:none;font:inherit;font-size:13px;color:var(--text);background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%238A8FA3' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center;border:1px solid var(--line);border-radius:9px;padding:6px 30px 6px 11px;cursor:pointer}
 .sel:hover{border-color:var(--accent)}
@@ -77,7 +77,7 @@ svg text{fill:var(--text2);font-family:inherit}
 .views{display:flex;gap:3px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px}
 .views a{color:var(--text2);text-decoration:none;font-size:13px;font-weight:600;padding:6px 12px;border-radius:7px;white-space:nowrap}
 .views a:hover{color:var(--text)}
-.views a[aria-current="page"]{background:var(--accent);color:#06060A}
+.views a[aria-current="page"]{background:var(--accent);color:var(--onaccent)}
 .views a:focus-visible{outline:2px solid var(--text);outline-offset:1px}
 .top .badge{margin:0 0 0 auto}
 .bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 20px}
@@ -113,7 +113,7 @@ footer{display:flex;flex-direction:column;gap:8px;margin-top:4px}footer .status{
 #wt th:hover{color:var(--text)}
 #wt th[aria-sort="descending"]:after{content:" ↓";color:var(--accent)}#wt th[aria-sort="ascending"]:after{content:" ↑";color:var(--accent)}
 #wt td{padding:7px 8px;border-bottom:1px solid var(--line);color:var(--text2);white-space:nowrap}
-#wt tbody tr{cursor:pointer}#wt tbody tr:hover td,#wt tbody tr.sel td{background:#141622}
+#wt tbody tr{cursor:pointer}#wt tbody tr:hover td,#wt tbody tr.sel td{background:#161412}
 #wt .n{text-align:right}#wt .sy{font-weight:700;color:var(--text)}#wt .nm{color:var(--muted);margin-left:8px;white-space:normal}
 #wt td.st{white-space:normal}
 #wt .wb{display:flex;align-items:center;justify-content:flex-end;gap:8px}#wt .wb i{display:block;height:6px;border-radius:3px;background:var(--accent);opacity:.75}
@@ -124,11 +124,11 @@ footer{display:flex;flex-direction:column;gap:8px;margin-top:4px}footer .status{
 @media (max-width:560px){.strip{grid-template-columns:1fr 1fr}.strip .v{font-size:20px}.strip>div:last-child:nth-child(odd){grid-column:1/-1}section{padding:12px}}
 
 /* Light theme: the same tokens, swapped. The switch is the sun/moon button in the header. */
-:root.light{--bg:#F5F6F8;--card:#FFFFFF;--line:#E1E4EA;--text:#0B0D14;--text2:#3A4150;--muted:#6B7280;--dim:#A0A6B2;--accent:#00B4D8;--pink:#E62E5C;
-  --up:#0E9F6E;--down:#E23D52;--neutral:#E8EBF0;--ink:#0B0D14;--rule:#EDEFF3;color-scheme:light}
+:root.light{--bg:#F5F1E8;--card:#FBF9F3;--line:#E0D9CA;--text:#050505;--text2:#38342E;--muted:#6B655A;--dim:#A29B8E;--accent:#050505;--pink:#C42424;
+  --up:#467300;--down:#B8322A;--neutral:#E9E3D5;--ink:#050505;--rule:#EDE7DA;color-scheme:light}
 :root.light .logo{filter:invert(1) hue-rotate(180deg)}
-:root.light #tip{background:#0B0D14;color:#FFFFFF}
-:root.light #wt tbody tr:hover td,:root.light #wt tbody tr.sel td{background:#EEF6FA}
+:root.light #tip{background:#050505;color:#F5F1E8}
+:root.light #wt tbody tr:hover td,:root.light #wt tbody tr.sel td{background:#F1ECE1}
 .theme{appearance:none;display:inline-flex;align-items:center;justify-content:center;flex:none;width:30px;height:30px;padding:0;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text2);cursor:pointer}
 .theme:hover{color:var(--text)}.theme:focus-visible{outline:2px solid var(--text);outline-offset:1px}
 .theme svg{width:15px;height:15px}.theme .i-moon{display:none}:root.light .theme .i-sun{display:none}:root.light .theme .i-moon{display:block}
@@ -136,9 +136,12 @@ footer{display:flex;flex-direction:column;gap:8px;margin-top:4px}footer .status{
 .tr{display:flex;align-items:center;gap:8px;margin-left:auto;min-width:0}.tr .badge{margin:0;min-width:0}.tr .badge span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:560px){.tr{display:contents}.theme{order:1;margin-left:auto}.top .badge{order:2}.tr .badge span{white-space:normal}}
 </style>
+<link rel="icon" type="image/png" sizes="32x32" href="../../brand/logo/icon-32.png">
+<link rel="apple-touch-icon" href="../../brand/logo/icon-192.png">
+<link rel="stylesheet" href="../../brand/brand.css">
 <div class="wrap">
 <div class="top">
-  <a href="#move" class="home" aria-label="Who moved the index? home"><img class="logo" src="data:image/png;base64,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" alt="Newsquawk" width="150"></a>
+  <a href="#move" class="home" aria-label="Who moved the index? home"><img class="logo" src="../../brand/logo/bar-paper.svg" alt="Alpha Pulse" width="150"></a>
   <nav class="views" aria-label="Pages"><a href="#move" data-v="move">Index move</a><a href="#weights" data-v="weights">Weights &amp; stock lookup</a></nav>
   <div class="tr"><p class="badge" id="badge" hidden><i></i><span></span></p><button class="theme" id="theme" type="button" aria-label="Switch to light mode"><svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg><svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1z"/></svg></button></div>
 </div>
@@ -179,7 +182,6 @@ footer{display:flex;flex-direction:column;gap:8px;margin-top:4px}footer .status{
 <p class="status" id="status" aria-live="polite">Loading the latest data…</p>
 <p class="note">Which stocks and sectors pushed the index up or dragged it down, in index points. Prices are delayed by about 15 to 20 minutes, regular US session only.</p>
 <p class="note" id="note"></p>
-<a class="cta" href="https://newsquawk.com">Take a 1-week trial → newsquawk.com</a>
 </footer>
 </div>
 <div id="tip" hidden></div>
@@ -276,7 +278,7 @@ function map(ix){const svg=document.getElementById("map");svg.innerHTML="";const
       hover(rc,`<b>${shortName(r)}</b> ${r[0]}<br>${SHORT[b.n]||b.n} · weight ${r[2].toFixed(2)}% · move ${fmtPct(r[3])}<br>${fmtP(r[4])} pts${share(ix,r[4])}`);
       rc.style.cursor="pointer";rc.addEventListener("click",()=>openStock(r[0]));
       if(o.w>30&&o.h>18){const fs=Math.max(9,Math.min(22,Math.min(o.w/(r[0].length*0.68),Math.sqrt(o.w*o.h)/6.5)));if(fs*r[0].length*0.62>o.w-4)return;
-        const col=LIGHT()||t>0.45?"#06060A":"#FFFFFF",two=o.h>fs*2.5;
+        const col=LIGHT()||t>0.45?"#050505":"#FFFFFF",two=o.h>fs*2.5;
         const a=el("text",{x:o.x+o.w/2,y:o.y+o.h/2+(two?-fs*0.15:fs*0.35),"text-anchor":"middle","font-size":fs,"font-weight":700,"pointer-events":"none",style:`fill:${col}`},svg);a.textContent=r[0];
         if(two){const c=el("text",{x:o.x+o.w/2,y:o.y+o.h/2+fs*0.95,"text-anchor":"middle","font-size":fs*0.7,"pointer-events":"none",style:`fill:${col}`},svg);c.textContent=fmtPct(r[3],1)}}})})}
 
@@ -332,7 +334,7 @@ function fall(ix,target,boxW,extra=0){const svg=target||document.getElementById(
   const labs=[],hits=[];
   steps.forEach((g,i)=>{const sub=g.k==="sub"||g.k==="subg",faded=g.k==="rest"||g.k==="subg";
     const bw=cw*(sub?0.5:g.k==="rest"?0.4:0.66),x=L+i*cw+(cw-bw)/2,cx=L+i*cw+cw/2;
-    const tc=g.v>=0?css("--up"):css("--down"),fill=g.k==="total"?(TOTSTYLE==="A"?"#E6E8EF":TOTSTYLE==="now"?css("--accent"):tc):g.k==="rest"?`url(#${target?"hatch2":"hatch"}${g.v>=0?"U":"D"})`:(g.v>=0?css("--up"):css("--down"));
+    const tc=g.v>=0?css("--up"):css("--down"),fill=g.k==="total"?(TOTSTYLE==="A"?"#E6DFD0":TOTSTYLE==="now"?css("--accent"):tc):g.k==="rest"?`url(#${target?"hatch2":"hatch"}${g.v>=0?"U":"D"})`:(g.v>=0?css("--up"):css("--down"));
     const rc=el("rect",{x,y:y(Math.max(g.a,g.b)),width:bw,height:Math.max(1.5,Math.abs(y(g.a)-y(g.b))),rx:g.k==="total"?0:2,fill,stroke:g.k==="rest"?tc:"none","stroke-width":g.k==="total"&&TOTSTYLE==="B"?2:1,"fill-opacity":g.k==="total"&&TOTSTYLE==="B"?0.15:g.k==="rest"?1:faded?0.5:sub?0.8:(g.k==="sector"&&open.has(ix+g.n))?0.35:1},svg);
     const name=g.k==="sector"?(SHORT[g.n]||g.n)+(open.has(ix+g.n)?" −":" +"):g.r?shortName(g.r):g.n;
     const lab=el("text",{x:cx+4,y:base,"text-anchor":"end",transform:`rotate(-45 ${cx+4} ${base})`,"font-size":sub?(narrow?10:11):(narrow?11:12),"font-weight":(g.k==="stock"||g.k==="sector"||g.k==="total"||g.k==="sub")?700:400,style:faded?`fill:${css("--muted")}`:sub?`fill:${css("--text2")}`:""},svg);lab.textContent=name;labs.push([lab,cx+4]);
@@ -505,7 +507,7 @@ async function downloadImage(){if(!DATA)return;const btn=document.getElementById
     const logo=await loadImg(document.querySelector(".logo").src);
     const pad=40,head=170,foot=56,CW=W+pad*2,CH=head+H+foot,k=2,cv=document.createElement("canvas");cv.width=CW*k;cv.height=CH*k;
     const g=cv.getContext("2d");g.scale(k,k);g.fillStyle=css("--bg");g.fillRect(0,0,CW,CH);
-    const gr=g.createLinearGradient(0,0,CW,0);gr.addColorStop(0,"#00e0ff");gr.addColorStop(.4,"rgba(0,224,255,0)");gr.addColorStop(.6,"rgba(0,224,255,0)");gr.addColorStop(1,"#ff3b6b");g.fillStyle=gr;g.fillRect(0,0,CW,4);
+    const gr=g.createLinearGradient(0,0,CW,0);gr.addColorStop(0,"#C42424");gr.addColorStop(.4,"rgba(245,241,232,0)");gr.addColorStop(.6,"rgba(245,241,232,0)");gr.addColorStop(1,"#550202");g.fillStyle=gr;g.fillRect(0,0,CW,4);
     const lw=150,lh=lw*logo.naturalHeight/logo.naturalWidth;let lsrc=logo;
     // The logo is white; in light mode draw it dark (pixel invert, which works in every browser)
     if(LIGHT()){const lc=document.createElement("canvas");lc.width=logo.naturalWidth;lc.height=logo.naturalHeight;const x=lc.getContext("2d");x.drawImage(logo,0,0);
@@ -517,7 +519,7 @@ async function downloadImage(){if(!DATA)return;const btn=document.getElementById
     g.textAlign="right";g.fillStyle=d.pts>=0?css("--up"):css("--down");g.font=`700 30px ${FONT}`;g.fillText(`${fmtP(d.pts)} pts`,CW-pad,72);
     g.fillStyle=css("--text2");g.font=`400 15px ${FONT}`;g.fillText(`${d.close.toLocaleString("en-GB",{minimumFractionDigits:2})} (${fmtPct(d.pct)})`,CW-pad,98);g.textAlign="left";
     g.drawImage(chart,pad,head,W,H);
-    g.fillStyle=css("--muted");g.font=`400 13px ${FONT}`;g.fillText("Source: Newsquawk calculations from delayed Google Finance prices. newsquawk.com",pad,CH-24);
+    g.fillStyle=css("--muted");g.font=`400 13px ${FONT}`;g.fillText("Source: Alpha Pulse calculations from delayed Google Finance prices.",pad,CH-24);
     const a=document.createElement("a");a.download=`who-moved-${cur.toLowerCase()}-${PER==="d"?"":{w:"week",m:"month",y:"ytd"}[PER]+"-"}${new Date().toISOString().slice(0,10)}.png`;
     a.href=URL.createObjectURL(await new Promise(r=>cv.toBlob(r,"image/png")));document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}
   catch(e){alert("Sorry, the image couldn't be made in this browser.")}
