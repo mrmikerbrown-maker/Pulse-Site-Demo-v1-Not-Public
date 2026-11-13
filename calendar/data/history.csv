@@ -82,3 +82,5 @@ tv1001694045902,2026-11-12T13:30:00Z,US,Initial Jobless Claims,w/o Nov 2,200,195
 tv1001658835901,2026-11-12T15:00:00Z,US,Existing Home Sales,Oct,3.75,3.85,3.97,,M,key
 tv1001692990306,2026-11-12T17:00:00Z,US,EIA Crude Oil Stocks Change,w/o Nov 2,4.657,-1.483,-0.865,,M,medium
 tv1001692990308,2026-11-12T17:00:00Z,US,EIA Gasoline Stocks Change,w/o Nov 2,1.799,-0.35,-0.222,,M,medium
+tv1001658348902,2026-11-13T10:00:00Z,EU,Employment Change QoQ Prel,Q3,0,0.1,0.1,%,,medium
+tv1001658348903,2026-11-13T10:00:00Z,EU,Employment Change YoY Prel,Q3,0.4,0.4,0.5,%,,medium
