@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-14T00:57:50Z",
+ "generated": "2026-11-14T13:43:12Z",
  "demo": false,
  "history_start": "2019-01-01",
  "banks": [
@@ -9,7 +9,7 @@
    "name": "Federal Reserve",
    "rate_name": "Fed funds target range",
    "rate": 4.0,
-   "asof": "2026-11-13",
+   "asof": "2026-11-14",
    "last": {
     "date": "2026-10-28",
     "bp": 0,
@@ -126,7 +126,7 @@
      4.0
     ],
     [
-     "2026-11-13",
+     "2026-11-14",
      4.0
     ]
    ],
@@ -1193,7 +1193,7 @@
  ],
  "log": [
   "OK   BIS policy rates (AU, CA, CH, GB, JP, NO, NZ, SE)",
-  "OK   USD  Fed       4.0% as of 2026-11-13 (FRED DFEDTARU), last: {'date': '2026-10-28', 'bp': 0, 'kind': 'hold'}",
+  "OK   USD  Fed       4.0% as of 2026-11-14 (FRED DFEDTARU), last: {'date': '2026-10-28', 'bp': 0, 'kind': 'hold'}",
   "OK   EUR  ECB       2.5% as of 2026-11-13 (FRED ECBDFR), last: {'date': '2026-10-29', 'bp': 0, 'kind': 'hold'}",
   "OK   GBP  own feed: 4.0% as of 2026-11-12",
   "OK   GBP  BoE       4.0% as of 2026-11-12 (own feed), last: {'date': '2026-11-05', 'bp': 25, 'kind': 'hike'}",
