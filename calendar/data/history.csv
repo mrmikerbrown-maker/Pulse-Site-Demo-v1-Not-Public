@@ -89,3 +89,7 @@ tv1001653880803,2026-11-13T13:30:00Z,US,PPI MoM,Oct,0.3,0.4,1.4,%,,key
 tv1001661130703,2026-11-16T02:00:00Z,CN,Fixed Asset Investment (YTD) YoY,Oct,-8.1,-7,-7.2,%,,medium
 tv1001661130701,2026-11-16T02:00:00Z,CN,Industrial Production YoY,Oct,4.8,5.3,5.5,%,,key
 tv1001661130702,2026-11-16T02:00:00Z,CN,Retail Sales YoY,Oct,0.4,0.8,1.1,%,,key
+tv1001693830005,2026-11-16T13:30:00Z,CA,Core Inflation Rate MoM s.a,Oct,0.1,,0.1,%,,key
+tv1001693830002,2026-11-16T13:30:00Z,CA,Inflation Rate MoM,Oct,0.2,0.4,0.1,%,,medium
+tv1001693830006,2026-11-16T13:30:00Z,CA,Inflation Rate YoY,Oct,3.1,3.2,3.1,%,,key
+tv1001652132001,2026-11-16T13:30:00Z,US,NY Empire State Manufacturing Index,Nov,7.8,18,25.5,,,medium
