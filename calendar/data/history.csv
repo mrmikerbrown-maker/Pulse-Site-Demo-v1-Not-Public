@@ -94,3 +94,7 @@ tv1001693830002,2026-11-16T13:30:00Z,CA,Inflation Rate MoM,Oct,0.2,0.4,0.1,%,,me
 tv1001693830006,2026-11-16T13:30:00Z,CA,Inflation Rate YoY,Oct,3.1,3.2,3.1,%,,key
 tv1001652132001,2026-11-16T13:30:00Z,US,NY Empire State Manufacturing Index,Nov,7.8,18,25.5,,,medium
 tv1001654813101,2026-11-16T17:00:00Z,US,NOPA Soybean Oil Stocks,Oct,1.171,1.089,1.053,,B,medium
+tv1001666572903,2026-11-17T07:00:00Z,GB,Average Earnings Excluding Bonus,Sep,3.5,3.6,3.7,%,,medium
+tv1001666572902,2026-11-17T07:00:00Z,GB,Average Earnings incl. Bonus (3Mo/Yr),Sep,3.6,3.5,3.8,%,,medium
+tv1001666572904,2026-11-17T07:00:00Z,GB,Employment Change,Sep,156,136,102,,K,medium
+tv1001666572905,2026-11-17T07:00:00Z,GB,Unemployment Rate,Sep,4.6,4.7,4.7,%,,key
