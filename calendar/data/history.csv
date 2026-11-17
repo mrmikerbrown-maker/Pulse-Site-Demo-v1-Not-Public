@@ -109,3 +109,5 @@ tv1001659552803,2026-11-17T14:15:00Z,US,Industrial Production MoM,Oct,-0.4,0.1,0
 tv1001664110601,2026-11-17T15:00:00Z,US,Business Inventories MoM,Sep,0.5,0.5,0.4,%,,medium
 tv1001668383701,2026-11-17T15:00:00Z,US,NAHB Housing Market Index,Nov,25,29,29,,,medium
 tv1001660034402,2026-11-17T21:30:00Z,US,API Crude Oil Stock Change,w/o Nov 9,5.278,-0.477,8.968,,M,medium
+tv1001663359903,2026-11-17T23:50:00Z,JP,Balance of Trade,Oct,-476.5,-956,-556.5,¥,B,key
+tv1001663359901,2026-11-17T23:50:00Z,JP,Exports YoY,Oct,20.5,20,16.5,%,,medium
