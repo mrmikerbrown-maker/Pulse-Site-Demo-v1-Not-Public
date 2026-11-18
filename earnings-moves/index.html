@@ -44,7 +44,9 @@ h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 .r.hd>div:nth-child(3),.r.hd>div:nth-child(4),.r>.v{text-align:right}
 .co b{display:block;color:var(--text);font-size:15px;font-weight:700}
 .co small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wh{font-size:13px;color:var(--text2)}.wh small{display:block;font-size:11px;color:var(--muted)}
+.wh{font-size:13px;color:var(--text2)}
+.tip{border-bottom:1px dotted var(--muted);cursor:help}
+.co small.wt{color:var(--dim);font-size:11px;margin-top:2px;font-variant-numeric:tabular-nums}.wh small{display:block;font-size:11px;color:var(--muted)}
 .v{color:var(--text);font-size:15px}
 .v.big{font-weight:700;font-size:16px}
 .v small{display:block;font-size:11px;color:var(--muted);font-weight:400}
@@ -129,19 +131,19 @@ details.how p{max-width:78ch;margin:10px 0}
 <div class="card" id="upc">
  <div class="chd"><h2>Reporting in the next two weeks</h2><small>Click a stock for its past reports</small></div>
  <div id="uplist"><div class="empty">Loading…</div></div>
- <div class="key"><span><i style="background:var(--band);border-right:2px solid var(--text)"></i>Move priced now (either direction)</span><span><i style="background:var(--up);border-radius:50%"></i>Past move up</span><span><i style="background:var(--down);border-radius:50%"></i>Past move down</span><span>Dots: size of each of the last 8 moves after results</span></div>
+ <div class="key"><span><i style="background:var(--band);border-right:2px solid var(--text)"></i>Options implied move (either direction)</span><span><i style="background:var(--up);border-radius:50%"></i>Past move up</span><span><i style="background:var(--down);border-radius:50%"></i>Past move down</span><span>Dots: size of each of the last 8 moves after results</span></div>
 </div>
 <div class="card" id="recc" hidden>
- <div class="chd"><h2>Results in the last 10 days</h2><small>Move priced the night before against the move that came</small></div>
+ <div class="chd"><h2>Results in the last 10 days</h2><small>Options implied move the night before against the move that came</small></div>
  <div id="reclist"></div>
 </div>
 <div class="srcbox" id="stamp"></div>
 <details class="how"><summary>How the numbers are worked out</summary>
-<p><b>Move priced (implied move).</b> The price of buying both the call and the put at the strike nearest the share price (a straddle), for the first options expiry after the results, divided by the share price. If the shares move by more than this in either direction, the straddle buyer makes money; by less, the seller does. It is taken from closing option prices before the report. It is only shown once the expiry is 5 trading days away or less: further out, most of the straddle's price is ordinary day-to-day movement rather than the results. When the expiry is a day or two after the report, the figure also covers those extra days, so it reads slightly high; the page says when.</p>
+<p><b>Options implied move.</b> The price of buying both the call and the put at the strike nearest the share price (a straddle), for the first options expiry after the results, divided by the share price. If the shares move by more than this in either direction, the straddle buyer makes money; by less, the seller does. It is taken from closing option prices before the report. It is only shown once the expiry is 5 trading days away or less: further out, most of the straddle's price is ordinary day-to-day movement rather than the results. When the expiry is a day or two after the report, the figure also covers those extra days, so it reads slightly high; the page says when.</p>
 <p><b>Past moves.</b> From the last close before the results to the first close after them. Results out before the US open are measured over that day; results after the close are measured over the next day. Report dates and timing come from Nasdaq's earnings calendar, going back about 3 years. Where Nasdaq doesn't say whether an older report came before the open or after the close, the company's usual timing is used.</p>
 <p><b>Past average.</b> The average size of the last 8 moves, ignoring direction.</p>
-<p><b>Priced vs past.</b> Options pricing more than 1.2 times the past average is marked "above past average"; under 0.8 times, "below past average".</p>
-<p>The options market started being saved on 18 Nov 2026, so the move priced before older reports isn't available. This page shows what markets price, not a forecast.</p>
+<p><b>Implied vs past.</b> Options pricing more than 1.2 times the past average is marked "above past average"; under 0.8 times, "below past average".</p>
+<p>The options market started being saved on 18 Nov 2026, so the options implied move before older reports isn't available. This page shows what markets price, not a forecast.</p>
 </details>
 <div class="foot" id="src">Data: options from Cboe (delayed), earnings dates from Nasdaq, past report dates and daily closes from Nasdaq, market values from TradingView. Updated each weekday after the US close.</div>
 </div>
@@ -153,10 +155,13 @@ function offMin(tz,d){var p={};new Intl.DateTimeFormat("en-US",{timeZone:tz,hour
 function nyTime(date,h,m){var g=Date.UTC(+date.slice(0,4),+date.slice(5,7)-1,+date.slice(8,10),h,m);var o=offMin("America/New_York",new Date(g+5*36e5));return new Date(g-o*6e4)}
 function lt(date,h,m){return ldn(nyTime(date,h,m),{hour:"2-digit",minute:"2-digit"})}
 function when(u){
- if(u.time==="bmo")return 'Before the US open<small>before '+lt(u.date,9,30)+' London</small>';
- if(u.time==="amc")return 'After the US close<small>after '+lt(u.date,16,0)+' London</small>';
- return 'Time not confirmed<small>before the open or after the close</small>';
+ if(u.time==="bmo")return '<span class="tip" title="Results come out before US trading starts at 9:30 New York time ('+lt(u.date,9,30)+' London), so the move shows in that day\'s close.">Before the US open</span>';
+ if(u.time==="amc")return '<span class="tip" title="Results come out after US trading ends at 16:00 New York time ('+lt(u.date,16,0)+' London), so the move shows in the next day\'s close.">After the US close</span>';
+ return '<span class="tip" title="The company hasn\'t said yet whether results come before the US open or after the US close.">Time not confirmed</span>';
 }
+function wts(s){var u=D.universe[s],w=u&&u.w;if(!w)return"";var f=function(x){return x>=1?x.toFixed(1):x.toFixed(2)},o=[];
+ if(w.SPX!=null)o.push("SPX "+f(w.SPX)+"%");if(w.NDX!=null)o.push("NDX "+f(w.NDX)+"%");if(w.DOW!=null)o.push("Dow "+f(w.DOW)+"%");
+ return o.length?'<small class="wt" title="Weight in the S&amp;P 500 (SPX), Nasdaq 100 (NDX) and Dow Jones">'+o.join(" · ")+'</small>':""}
 function pc(x,d){d=d==null?1:d;var a=Math.abs(x).toFixed(d);return(x>0?"+":x<0?"−":"")+a+"%"}
 function pm(x,d){return "±"+Math.abs(x).toFixed(d==null?1:d)+"%"}
 function cls(x){return x>0?"up":x<0?"dn":"mu"}
@@ -176,15 +181,15 @@ function strip(imp,moves){
 function upcoming(){
  var U=D.upcoming||[],h='',last="";
  if(!U.length){$("uplist").innerHTML='<div class="empty">No results due from these companies in the next two weeks.</div>';return}
- h+='<div class="r hd"><div>Company</div><div>Reports</div><div>Move priced</div><div>Past average</div><div>Past 8 moves vs priced</div></div>';
+ h+='<div class="r hd"><div>Company</div><div>Reports</div><div>Options implied move</div><div>Past average</div><div>Past 8 moves vs implied</div></div>';
  U.forEach(function(u){
   if(u.date!==last){h+='<div class="day">'+dayHead(u.date)+'</div>';last=u.date}
   var p=past(u.symbol,u.date).slice(-8),im=shown(u),out=reported(u);
   var big=im==null?'<span class="mu">–</span>':pm(im);
   var sm=im==null?(u.implied?'<small>shown 5 trading days before</small>':'<small>no options data</small>'):(u.implied.days_after>0?'<small>to '+dlabel(u.implied.expiry,{day:"numeric",month:"short"})+' expiry</small>':'<small>'+(u.implied.wide?'wide quotes':'&nbsp;')+'</small>');
-  h+='<div class="r'+(OPEN===u.symbol?" open":"")+'" data-s="'+u.symbol+'"><div class="co"><b>'+u.symbol+'</b><small>'+nm(u.symbol)+'</small></div>'+
+  h+='<div class="r'+(OPEN===u.symbol?" open":"")+'" data-s="'+u.symbol+'"><div class="co"><b>'+u.symbol+'</b><small>'+nm(u.symbol)+'</small>'+wts(u.symbol)+'</div>'+
    '<div class="wh">'+(out?'Reported, move due<small>first close after the results</small>':when(u))+'</div>'+
-   '<div class="v big"><small class="lbl">Priced</small>'+big+sm+'</div>'+
+   '<div class="v big"><small class="lbl">Implied</small>'+big+sm+'</div>'+
    '<div class="v avg"><small class="lbl">Past avg</small>'+(u.avg_abs!=null?pm(u.avg_abs):'<span class="mu">n/a</span>')+'<small>'+(u.n_past?'last '+u.n_past:'')+'</small></div>'+
    '<div class="sc">'+strip(im,p)+'<div class="flag">'+flag(im,u.avg_abs)+'</div></div></div>';
   if(OPEN===u.symbol)h+=detail(u.symbol,u);
@@ -197,16 +202,16 @@ function reported(u){var now=new Date();return u.time==="bmo"?now>=nyTime(u.date
 function recent(){
  var R=D.recent||[],h='';
  if(!R.length){$("reclist").innerHTML='<div class="empty">No results from these companies in the last 10 days.</div>';return}
- h+='<div class="rr hd"><div>Company</div><div>Reported</div><div>Move</div><div>Priced</div><div>Move vs priced</div></div>';
+ h+='<div class="rr hd"><div>Company</div><div>Reported</div><div>Move</div><div>Options implied move</div><div>Move vs implied</div></div>';
  R.forEach(function(r){
   var im=r.implied,a=Math.abs(r.move),mx=Math.max(a,im||0)*1.15||1,v='';
-  if(im!=null){v='<div class="vd">'+(a>im?"Moved more than priced":"Moved less than priced")+' ('+(a/im).toFixed(1)+'×)</div>'+
+  if(im!=null){v='<div class="vd">'+(a>im?"Moved more than implied":"Moved less than implied")+' ('+(a/im).toFixed(1)+'×)</div>'+
    '<div class="vs"><div class="ax"></div><div class="bd" style="left:0;width:'+(im/mx*100).toFixed(1)+'%;border-left:0"></div><i class="'+(r.move>=0?"u":"d")+'" style="left:'+(a/mx*100).toFixed(1)+'%"></i></div>'}
   else v='<div class="vd mu">Not saved: saving started 18 Nov</div>';
-  h+='<div class="rr'+(OPEN===r.symbol?" open":"")+'" data-s="'+r.symbol+'"><div class="co"><b>'+r.symbol+'</b><small>'+nm(r.symbol)+'</small></div>'+
+  h+='<div class="rr'+(OPEN===r.symbol?" open":"")+'" data-s="'+r.symbol+'"><div class="co"><b>'+r.symbol+'</b><small>'+nm(r.symbol)+'</small>'+wts(r.symbol)+'</div>'+
    '<div class="wh">'+dlabel(r.date)+'<small>'+(r.time==="bmo"?"before the open":"after the close")+'</small></div>'+
    '<div class="v a big"><small class="lbl">Moved</small><span class="'+cls(r.move)+'">'+pc(r.move)+'</span></div>'+
-   '<div class="v i"><small class="lbl">Priced</small>'+(im!=null?pm(im):'<span class="mu">n/a</span>')+'</div><div class="sc">'+v+'</div></div>';
+   '<div class="v i"><small class="lbl">Implied</small>'+(im!=null?pm(im):'<span class="mu">n/a</span>')+'</div><div class="sc">'+v+'</div></div>';
   if(OPEN===r.symbol)h+=detail(r.symbol,null);
  });
  $("reclist").innerHTML=h;bind("#reclist .rr[data-s]");
@@ -217,20 +222,20 @@ function detail(s,u){
  if(!M.length)return h+'<p>No past results found for '+s+'.</p></div>';
  var p8=M.filter(function(m){return !u||m.date<u.date}).slice(-8),avg=p8.reduce(function(a,m){return a+Math.abs(m.move)},0)/p8.length;
  if(u&&im!=null){var over=p8.filter(function(m){return Math.abs(m.move)>im}).length;
-  h+='<p>Options price a <b>'+pm(im)+'</b> move in '+name+' shares for the results on <b>'+dlabel(u.date,{weekday:"long",day:"numeric",month:"short"})+'</b> ('+(u.time==="bmo"?"before the US open":u.time==="amc"?"after the US close":"time not confirmed")+'). Over the last '+p8.length+' reports the shares moved <b>'+pm(avg)+'</b> on average, and moved more than '+pm(im)+' '+over+' time'+(over===1?'':'s')+' out of '+p8.length+'.'+(u.implied.days_after>0?' The nearest expiry is '+dlabel(u.implied.expiry,{weekday:"short",day:"numeric",month:"short"})+', so the move priced also covers '+u.implied.days_after+' extra day'+(u.implied.days_after>1?'s':'')+'.':'')+'</p>';}
- else{var l=M[M.length-1];h+='<p>'+name+' shares moved <b>'+pc(l.move)+'</b> after the results on '+dlabel(l.date,{weekday:"long",day:"numeric",month:"short"})+(l.implied!=null?', against <b>'+pm(l.implied)+'</b> priced the night before':'')+'. Over the last '+p8.length+' reports the average move was <b>'+pm(avg)+'</b>.</p>'}
+  h+='<p>Options imply a <b>'+pm(im)+'</b> move in '+name+' shares for the results on <b>'+dlabel(u.date,{weekday:"long",day:"numeric",month:"short"})+'</b> ('+(u.time==="bmo"?"before the US open":u.time==="amc"?"after the US close":"time not confirmed")+'). Over the last '+p8.length+' reports the shares moved <b>'+pm(avg)+'</b> on average, and moved more than '+pm(im)+' '+over+' time'+(over===1?'':'s')+' out of '+p8.length+'.'+(u.implied.days_after>0?' The nearest expiry is '+dlabel(u.implied.expiry,{weekday:"short",day:"numeric",month:"short"})+', so the options implied move also covers '+u.implied.days_after+' extra day'+(u.implied.days_after>1?'s':'')+'.':'')+'</p>';}
+ else{var l=M[M.length-1];h+='<p>'+name+' shares moved <b>'+pc(l.move)+'</b> after the results on '+dlabel(l.date,{weekday:"long",day:"numeric",month:"short"})+(l.implied!=null?', against an options implied move of <b>'+pm(l.implied)+'</b> implied the night before':'')+'. Over the last '+p8.length+' reports the average move was <b>'+pm(avg)+'</b>.</p>'}
  var mx=Math.max.apply(0,M.map(function(m){return Math.max(Math.abs(m.move),m.implied||0)}).concat([im||0,2]))*1.15,step=mx>20?10:mx>8?5:2;
  function y(v){return(50-v/mx*50).toFixed(2)+'%'}
  h+='<div class="bars"><div class="zero" style="top:50%"></div>';
  for(var g=step;g<mx;g+=step){h+='<div class="yl" style="top:'+y(g)+'">+'+g+'%</div><div class="yl" style="top:'+y(-g)+'">−'+g+'%</div>'}
  M.forEach(function(m){var a=Math.abs(m.move),top=m.move>=0;
-  h+='<div class="b" title="'+dlabel(m.date)+': '+pc(m.move)+(m.implied!=null?' · priced '+pm(m.implied):'')+'">'+
+  h+='<div class="b" title="'+dlabel(m.date)+': '+pc(m.move)+(m.implied!=null?' · implied '+pm(m.implied):'')+'">'+
    (m.implied!=null?'<div class="imp" style="top:'+y(m.implied)+';bottom:'+y(m.implied)+'"></div>':'')+
    '<div class="bar '+(top?"u":"d")+'" style="'+(top?'bottom:50%;height:':'top:50%;height:')+(a/mx*50).toFixed(2)+'%"></div>'+
    '<div class="val" style="'+(top?'bottom:calc(50% + '+(a/mx*50).toFixed(2)+'% + 2px)':'top:calc(50% + '+(a/mx*50).toFixed(2)+'% + 2px)')+'">'+pc(m.move)+'</div></div>'});
- if(im!=null)h+='<div class="now" style="top:'+y(im)+'"></div><div class="now" style="top:'+y(-im)+'"></div><div class="nowl" style="top:'+y(im)+'">Priced now '+pm(im)+'</div>';
+ if(im!=null)h+='<div class="now" style="top:'+y(im)+'"></div><div class="now" style="top:'+y(-im)+'"></div><div class="nowl" style="top:'+y(im)+'">Implied now '+pm(im)+'</div>';
  h+='</div><div class="bx">'+M.map(function(m){return '<span>'+dlabel(m.date,{month:"short"})+'<br>’'+m.date.slice(2,4)+'</span>'}).join("")+'</div>';
- h+='<div class="key"><span><i style="background:var(--up)"></i>Shares up after results</span><span><i style="background:var(--down)"></i>Shares down</span>'+(M.some(function(m){return m.implied!=null})?'<span><i style="border:1px dashed var(--muted)"></i>Move priced before that report</span>':'')+(im!=null?'<span><i style="border-top:1px dashed var(--text);height:0;width:14px;vertical-align:3px"></i>Move priced now</span>':'')+'</div>';
+ h+='<div class="key"><span><i style="background:var(--up)"></i>Shares up after results</span><span><i style="background:var(--down)"></i>Shares down</span>'+(M.some(function(m){return m.implied!=null})?'<span><i style="border:1px dashed var(--muted)"></i>Options implied move before that report</span>':'')+(im!=null?'<span><i style="border-top:1px dashed var(--text);height:0;width:14px;vertical-align:3px"></i>Options implied move now</span>':'')+'</div>';
  return h+'</div>';
 }
 
@@ -238,7 +243,7 @@ function bind(sel){document.querySelectorAll(sel).forEach(function(r){r.onclick=
 function look(s){
  var el=$("look");if(!s||!D.universe[s]){el.hidden=true;return}
  var u=(D.upcoming||[]).filter(function(x){return x.symbol===s})[0]||null;
- el.hidden=false;el.innerHTML='<div class="chd"><h2>'+s+' · '+nm(s)+'</h2><small>'+(u?'Next results '+dlabel(u.date)+(shown(u)!=null?' · priced '+pm(shown(u)):''):'No results due in the next two weeks')+'</small></div>'+detail(s,u);
+ el.hidden=false;var w=wts(s).replace('class="wt"','class="wt" style="display:block;margin-top:4px"');el.innerHTML='<div class="chd"><div><h2>'+s+' · '+nm(s)+'</h2>'+w+'</div><small>'+(u?'Next results '+dlabel(u.date)+(shown(u)!=null?' · options implied move '+pm(shown(u)):''):'No results due in the next two weeks')+'</small></div>'+detail(s,u);
 }
 function draw(){if(TAB==="up")upcoming();else recent()}
 function stamp(){

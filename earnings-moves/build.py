@@ -119,6 +119,22 @@ def tv_scan(extra_filter=None, cols=None, n=400):
     return [dict(zip(cols, r["d"])) for r in j.get("data", [])]
 
 
+def index_weights():
+    """{symbol: {"SPX": %, "NDX": %, "DOW": %}} from the Index Contribution page's latest snapshot."""
+    out = {}
+    try:
+        with open(os.path.join(HERE, "..", "index-contribution-site", "last-session.csv")) as f:
+            for r in csv.reader(f):
+                if len(r) > 7 and r[0] in ("SPX", "NDX", "DOW") and r[4]:
+                    try:
+                        out.setdefault(r[4].strip().upper(), {})[r[0]] = round(float(r[7]), 2)
+                    except ValueError:
+                        pass
+    except Exception as e:
+        note("Index weights could not be read: %s" % e)
+    return out
+
+
 def universe(prev):
     members = set(spy_members())
     try:
@@ -145,6 +161,10 @@ def universe(prev):
                 TV_HABIT[sym] = "bmo" if t == -1 else "amc"
     except Exception as e:
         print("TradingView timing lookup failed:", e)
+    W = index_weights()
+    for sym in uni:
+        if sym in W:
+            uni[sym]["w"] = W[sym]
     print("Universe:", len(uni), "S&P 500 stocks over $%.0fbn" % (MIN_CAP / 1e9), "; usual timing known for", len(TV_HABIT))
     if len(uni) < 50:
         note("Universe looked too small (%d), kept the previous one" % len(uni))
@@ -152,14 +172,49 @@ def universe(prev):
     return uni, nxt
 
 
+# Short names people actually use. Anything not listed gets the generic tidy-up in clean_name().
+SHORT = {
+    "Abbott Laboratories": "Abbott", "Advanced Micro Devices": "AMD", "Air Products and Chemicals": "Air Products",
+    "Altria Group": "Altria", "Amazon.com": "Amazon", "American Electric Power": "AEP", "Apollo Global Management": "Apollo",
+    "Arthur J. Gallagher & Co": "Gallagher", "Automatic Data Processing": "ADP", "Bank of New York Mellon": "BNY",
+    "Becton, Dickinson and": "BD", "Bristol-Myers Squibb": "Bristol Myers", "Cadence Design Systems": "Cadence",
+    "Capital One Financial": "Capital One", "Charles Schwab": "Schwab", "Chubb Limited": "Chubb", "Cigna Group": "Cigna",
+    "Cisco Systems": "Cisco", "Costco Wholesale": "Costco", "CRH public limited company": "CRH", "Dell Technologies": "Dell",
+    "Digital Realty Trust": "Digital Realty", "Edwards Lifesciences": "Edwards", "Eli Lilly and": "Eli Lilly",
+    "Emerson Electric": "Emerson", "Exxonmobil": "ExxonMobil", "Gilead Sciences": "Gilead", "Goldman Sachs Group": "Goldman Sachs",
+    "Hewlett Packard Enterprise": "HPE", "Hilton Worldwide": "Hilton", "Honeywell International": "Honeywell",
+    "Howmet Aerospace": "Howmet", "IDEXX Laboratories": "IDEXX", "Illinois Tool Works": "Illinois Tool Works",
+    "Interactive Brokers Group": "Interactive Brokers", "Intercontinental Exchange": "ICE",
+    "International Business Machines": "IBM", "JPMorgan Chase & Co": "JPMorgan", "Johnson Controls International": "Johnson Controls",
+    "Kinder Morgan Inc Class P": "Kinder Morgan", "KKR & Co": "KKR", "Lowe's Companies": "Lowe's", "Marathon Petroleum": "Marathon",
+    "Marriott International": "Marriott", "Marsh & McLennan Companies": "Marsh McLennan", "Marvell Technology": "Marvell",
+    "Merck & Co": "Merck", "Meta Platforms": "Meta", "Micron Technology": "Micron", "Mondelez International": "Mondelez",
+    "Monolithic Power Systems": "Monolithic Power", "Monster Beverage": "Monster", "Motorola Solutions": "Motorola",
+    "NIKE": "Nike", "NVIDIA": "Nvidia", "NXP Semiconductors NV": "NXP", "Occidental Petroleum": "Occidental",
+    "Palantir Technologies": "Palantir", "PNC Financial Services Group": "PNC", "Philip Morris International": "Philip Morris",
+    "QUALCOMM": "Qualcomm", "Regeneron Pharmaceuticals": "Regeneron", "Robinhood Markets": "Robinhood",
+    "Royal Caribbean Group": "Royal Caribbean", "SLB Limited": "SLB", "Seagate Technology": "Seagate",
+    "Simon Property Group": "Simon Property", "Southern": "Southern Co", "T-Mobile US": "T-Mobile", "TJX Companies": "TJX",
+    "Texas Instruments": "Texas Instruments", "Thermo Fisher Scientific": "Thermo Fisher", "Trane Technologies": "Trane",
+    "TransDigm Group": "TransDigm", "Travelers Companies": "Travelers", "Truist Financial": "Truist",
+    "Uber Technologies": "Uber", "United Parcel Service": "UPS", "UnitedHealth Group": "UnitedHealth", "Valero Energy": "Valero",
+    "Verizon Communications": "Verizon", "Vertex Pharmaceuticals": "Vertex", "W.W. Grainger": "Grainger",
+    "Walt Disney": "Disney", "Waste Management": "Waste Management", "Wells Fargo & Co": "Wells Fargo",
+    "Williams Companies": "Williams", "Xcel Energy": "Xcel", "Constellation Energy": "Constellation",
+    "Lumentum": "Lumentum", "CME Group": "CME", "Coca-Cola": "Coca-Cola", "Freeport-McMoRan": "Freeport",
+}
+
+
 def clean_name(s):
     import re
     s = (s or "").strip()
-    s = re.sub(r"\b(Class [A-C]|Common Stock|Ordinary Shares|New)\b", "", s)
+    s = re.sub(r"\b(Class [A-C]|Common Stock|Ordinary Shares)\b", "", s)
+    s = re.sub(r"^The\s+", "", s)
     for _ in range(3):
         s = re.sub(r"[ ,]+(Inc\.?|Incorporated|Corporation|Corp\.?|Co\.?|Company|plc|PLC|Plc|Ltd\.?|N\.V\.|Holdings|S\.A\.|AG|SE|L\.P\.)$", "", s.strip(" ,"))
     s = re.sub(r"\s*&$", " & Co", s.strip(" ,"))
-    return re.sub(r"\s+", " ", s).strip(" ,")
+    s = re.sub(r"\s+", " ", s).strip(" ,")
+    return SHORT.get(s, s)
 
 
 # ---------- calendar ----------
