@@ -34,8 +34,9 @@ RECENT_DAYS = 10       # calendar days of recent results shown
 HIST_N = 12            # past reports kept per stock
 HIST_REFRESH_DAYS = 6  # re-download a stock's past moves at least this often
 BROWSER = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
-# SEC asks automated tools to say who they are in the User-Agent.
-SEC_UA = "AlphaPulse site data job (github.com/mrmikerbrown-maker/Pulse-Site-Demo-v1-Not-Public)"
+# SEC asks automated tools to give a name and a contact email in the User-Agent, and refuses requests without one.
+# This is the repo owner's public GitHub no-reply address.
+SEC_UA = "AlphaPulse site data job 300206560+mrmikerbrown-maker@users.noreply.github.com"
 NASDAQ_H = {"Origin": "https://www.nasdaq.com", "Referer": "https://www.nasdaq.com/", "Accept": "application/json, text/plain, */*"}
 TV_H = {"Origin": "https://www.tradingview.com", "Referer": "https://www.tradingview.com/", "Content-Type": "application/json"}
 
@@ -182,6 +183,15 @@ def cboe_chain(sym):
     raise last
 
 
+def tdays(a, b):
+    n, d = 0, a
+    while d < b:
+        d += dt.timedelta(days=1)
+        if d.weekday() < 5:
+            n += 1
+    return n
+
+
 def mid(o):
     b, a = o.get("bid") or 0, o.get("ask") or 0
     if b > 0 and a > 0 and a >= b:
@@ -238,6 +248,9 @@ def implied_move(sym, report_date, when):
         "price": round(price, 2),
         "expiry": iso(exp),
         "days_after": (exp - first).days,  # extra days beyond the report day the expiry also covers
+        # trading days the straddle covers from the last close; the page only shows moves covering 5 or fewer,
+        # because further out the straddle is mostly ordinary day-to-day movement rather than the results
+        "tdays": tdays(session_today(), exp),
         "strikes": [p[0] for p in pts],
         "wide": spread > 0.25,  # bid/ask spread over 25% of the mid: treat with care
         "iv30": d.get("iv30"),
@@ -427,6 +440,10 @@ def main():
             days = list(closes)
             moves = []
             for d, when, hhmm in reps:
+                nd = [ct for cd, ct, _ in cal.get(s, []) if cd == d and ct != "tbc"]
+                sec_when = when
+                if nd:  # Nasdaq's stated timing wins for recent reports
+                    when = nd[0]
                 if when == "mid":  # filed during market hours: use the company's habit if we know it
                     when = habitual.get(s, "mid")
                 if when == "mid":
@@ -434,6 +451,9 @@ def main():
                 am = actual_move(closes, days, d, when)
                 if am:
                     moves.append({"date": d, "time": when, **am})
+                for cd, ct, _ in cal.get(s, []):
+                    if cd == d and ct != "tbc" and ct != sec_when:
+                        print("  %-6s timing check %s: SEC filing says %s (%s), Nasdaq says %s" % (s, d, sec_when, hhmm, ct))
             hist[s] = {"refreshed": iso(today_ny), "moves": moves[-HIST_N:], "last_close": closes[days[-1]], "last_date": days[-1]}
             print("  %-6s %d past reports, last %s" % (s, len(moves), moves[-1]["date"] if moves else "-"))
         except Exception as e:
