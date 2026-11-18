@@ -110,6 +110,14 @@ var GG=[
 ["Year to date (YTD)","From the last close of the previous year to now.",["year to date","year-to-date","YTD"]],
 ["ETF","Exchange-traded fund: a fund you buy and sell like a share, often tracking an index. SPY tracks the S&amp;P 500 and QQQ the Nasdaq 100.",["ETF","ETFs"]]
 ]],
+["Options and earnings",[
+["Options","Contracts giving the right, but not the obligation, to buy (a call) or sell (a put) a share at a set price (the strike) up to a set date (the expiry). Their prices show how much movement traders expect.",["options","options market","call","put"]],
+["Straddle","Buying a call and a put at the same strike and expiry. It pays off if the share moves a lot in either direction, so its price is the market's estimate of how big the move will be.",["straddle","straddles"]],
+["Implied move","The share-price move, up or down, that options are pricing for an event such as results: the at-the-money straddle price divided by the share price. If the shares move more than this, options were priced too cheaply for the news.",["implied move","implied moves","move priced"]],
+["Implied volatility","How much movement option prices imply, expressed as a yearly percentage. It rises before results and usually drops sharply straight after them (the 'vol crush').",["implied volatility","implied vol","vol crush"]],
+["Expiry","The date an option ends. Big US stocks have options expiring every Friday, some on other weekdays too.",["expiry","expiries"]],
+["Before the open / after the close","When a company releases results: before US trading starts at 9:30 New York time, or after it ends at 16:00. Results after the close show up in the next day's price.",["before the open","after the close","before the US open","after the US close"]]
+]],
 ["News and events",[
 ["Tariffs","Taxes a government puts on imported goods. News about tariffs can move markets more than economic data because it changes the outlook for growth, inflation and company profits.",["tariff","tariffs"]],
 ["Trade war / truce","A trade war is when countries keep raising tariffs against each other. A truce or a deal pauses or reduces them, which markets usually cheer.",["trade war","truce","trade deal"]],
