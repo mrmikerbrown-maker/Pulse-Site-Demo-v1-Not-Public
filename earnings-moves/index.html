@@ -65,13 +65,13 @@ h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 .bars .now{position:absolute;left:44px;right:0;border-top:1px dashed var(--text);opacity:.8}
 .bars .nowl{position:absolute;right:0;font-size:11px;color:var(--text);background:var(--card);padding:0 4px;transform:translateY(-50%)}
 .bars .yl{position:absolute;left:0;width:38px;text-align:right;font-size:10px;color:var(--dim);transform:translateY(-50%)}
-.b{flex:1;position:relative;min-width:0}
+.b{flex:1;position:relative;min-width:0;max-width:96px}
 .b .imp{position:absolute;left:12%;right:12%;border:1px dashed var(--muted);border-radius:3px;background:rgba(var(--accrgb),.04)}
 .b .bar{position:absolute;left:24%;right:24%;border-radius:3px}
 .b .bar.u{background:var(--up)}.b .bar.d{background:var(--down)}
 .b .val{position:absolute;left:-6px;right:-6px;text-align:center;font-size:11px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
 .bx{display:flex;gap:6px;padding-left:44px;font-size:10.5px;color:var(--muted);text-align:center}
-.bx span{flex:1;min-width:0;white-space:nowrap;overflow:hidden}
+.bx span{flex:1;min-width:0;max-width:96px;white-space:nowrap;overflow:hidden;line-height:1.25}
 .key{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:12px}
 .key i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:6px}
 /* recent table */
@@ -107,6 +107,7 @@ details.how p{max-width:78ch;margin:10px 0}
  .v small.lbl{display:block}
  .bars{height:180px;gap:3px;padding-left:36px}.bars .zero,.bars .now{left:36px}.bars .yl{width:30px}.bx{gap:3px;padding-left:36px}
  .b .val{font-size:9.5px}
+ .bars .yl{display:none}.bars{padding-left:0}.bars .zero,.bars .now{left:0}.bx{padding-left:0}
 }
 .v small.lbl{display:none;font-size:10px;letter-spacing:.06em;text-transform:uppercase}
 @media (max-width:760px){.v small.lbl{display:block}}
@@ -180,7 +181,7 @@ function upcoming(){
   if(u.date!==last){h+='<div class="day">'+dayHead(u.date)+'</div>';last=u.date}
   var p=past(u.symbol,u.date).slice(-8),im=shown(u),out=reported(u);
   var big=im==null?'<span class="mu">–</span>':pm(im);
-  var sm=im==null?(u.implied?'<small>shown 5 days out</small>':'<small>no options data</small>'):(u.implied.days_after>0?'<small>to '+dlabel(u.implied.expiry,{day:"numeric",month:"short"})+' expiry</small>':'<small>'+(u.implied.wide?'wide quotes':'&nbsp;')+'</small>');
+  var sm=im==null?(u.implied?'<small>shown 5 trading days before</small>':'<small>no options data</small>'):(u.implied.days_after>0?'<small>to '+dlabel(u.implied.expiry,{day:"numeric",month:"short"})+' expiry</small>':'<small>'+(u.implied.wide?'wide quotes':'&nbsp;')+'</small>');
   h+='<div class="r'+(OPEN===u.symbol?" open":"")+'" data-s="'+u.symbol+'"><div class="co"><b>'+u.symbol+'</b><small>'+nm(u.symbol)+'</small></div>'+
    '<div class="wh">'+(out?'Reported, move due<small>first close after the results</small>':when(u))+'</div>'+
    '<div class="v big"><small class="lbl">Priced</small>'+big+sm+'</div>'+
@@ -201,7 +202,7 @@ function recent(){
   var im=r.implied,a=Math.abs(r.move),mx=Math.max(a,im||0)*1.15||1,v='';
   if(im!=null){v='<div class="vd">'+(a>im?"Moved more than priced":"Moved less than priced")+' ('+(a/im).toFixed(1)+'×)</div>'+
    '<div class="vs"><div class="ax"></div><div class="bd" style="left:0;width:'+(im/mx*100).toFixed(1)+'%;border-left:0"></div><i class="'+(r.move>=0?"u":"d")+'" style="left:'+(a/mx*100).toFixed(1)+'%"></i></div>'}
-  else v='<div class="vd mu">Move priced not saved for this one</div>';
+  else v='<div class="vd mu">Not saved: saving started 18 Nov</div>';
   h+='<div class="rr'+(OPEN===r.symbol?" open":"")+'" data-s="'+r.symbol+'"><div class="co"><b>'+r.symbol+'</b><small>'+nm(r.symbol)+'</small></div>'+
    '<div class="wh">'+dlabel(r.date)+'<small>'+(r.time==="bmo"?"before the open":"after the close")+'</small></div>'+
    '<div class="v a big"><small class="lbl">Moved</small><span class="'+cls(r.move)+'">'+pc(r.move)+'</span></div>'+
@@ -228,7 +229,7 @@ function detail(s,u){
    '<div class="bar '+(top?"u":"d")+'" style="'+(top?'bottom:50%;height:':'top:50%;height:')+(a/mx*50).toFixed(2)+'%"></div>'+
    '<div class="val" style="'+(top?'bottom:calc(50% + '+(a/mx*50).toFixed(2)+'% + 2px)':'top:calc(50% + '+(a/mx*50).toFixed(2)+'% + 2px)')+'">'+pc(m.move)+'</div></div>'});
  if(im!=null)h+='<div class="now" style="top:'+y(im)+'"></div><div class="now" style="top:'+y(-im)+'"></div><div class="nowl" style="top:'+y(im)+'">Priced now '+pm(im)+'</div>';
- h+='</div><div class="bx">'+M.map(function(m){return '<span>'+dlabel(m.date,{month:"short",year:"2-digit"}).replace(" "," ’")+'</span>'}).join("")+'</div>';
+ h+='</div><div class="bx">'+M.map(function(m){return '<span>'+dlabel(m.date,{month:"short"})+'<br>’'+m.date.slice(2,4)+'</span>'}).join("")+'</div>';
  h+='<div class="key"><span><i style="background:var(--up)"></i>Shares up after results</span><span><i style="background:var(--down)"></i>Shares down</span>'+(M.some(function(m){return m.implied!=null})?'<span><i style="border:1px dashed var(--muted)"></i>Move priced before that report</span>':'')+(im!=null?'<span><i style="border-top:1px dashed var(--text);height:0;width:14px;vertical-align:3px"></i>Move priced now</span>':'')+'</div>';
  return h+'</div>';
 }

@@ -36,7 +36,7 @@ HIST_REFRESH_DAYS = 6  # re-download a stock's past moves at least this often
 HIST_YEARS = 3.1
 MAX_ARCHIVE_CALLS = 450  # Nasdaq calendar days read per run: the ~3-year backfill spreads over the first runs so none runs long
 WORKERS = 3              # downloads at once
-HIST_VERSION = 2         # bump to force every stock's past moves to be recomputed
+HIST_VERSION = 3         # bump to force every stock's past moves to be recomputed
 ARCH = os.path.join(HERE, "calendar-archive.json")
 BROWSER = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
 NASDAQ_H = {"Origin": "https://www.nasdaq.com", "Referer": "https://www.nasdaq.com/", "Accept": "application/json, text/plain, */*"}
@@ -321,6 +321,9 @@ def archive_reports(arch, sym, before):
         for s, t in arch["days"][d]:
             if s == sym:
                 if out and (dt.date.fromisoformat(d) - dt.date.fromisoformat(out[-1][0])).days < 20:
+                    # Nasdaq occasionally lists a company twice a few days apart (seen in Feb 2026, 9 cases in
+                    # 3 years); the later listing is the real one in the cases checked (CEG 24 Feb).
+                    out[-1] = (d, t)
                     continue
                 out.append((d, t))
     return out
