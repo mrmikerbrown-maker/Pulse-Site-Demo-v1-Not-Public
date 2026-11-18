@@ -111,3 +111,8 @@ tv1001668383701,2026-11-17T15:00:00Z,US,NAHB Housing Market Index,Nov,25,29,29,,
 tv1001660034402,2026-11-17T21:30:00Z,US,API Crude Oil Stock Change,w/o Nov 9,5.278,-0.477,8.968,,M,medium
 tv1001663359903,2026-11-17T23:50:00Z,JP,Balance of Trade,Oct,-476.5,-956,-556.5,¥,B,key
 tv1001663359901,2026-11-17T23:50:00Z,JP,Exports YoY,Oct,20.5,20,16.5,%,,medium
+tv1001654033504,2026-11-18T07:00:00Z,GB,Core Inflation Rate MoM,Oct,0.3,0.3,0.2,%,,key
+tv1001654033505,2026-11-18T07:00:00Z,GB,Core Inflation Rate YoY,Oct,2.8,2.8,2.8,%,,medium
+tv1001654033506,2026-11-18T07:00:00Z,GB,Inflation Rate MoM,Oct,0.5,0.5,0.4,%,,medium
+tv1001654033507,2026-11-18T07:00:00Z,GB,Inflation Rate YoY,Oct,3.6,3.6,3.5,%,,key
+tv1001654033503,2026-11-18T07:00:00Z,GB,Services Inflation MoM,Oct,0.2,0.2,0,%,,medium
