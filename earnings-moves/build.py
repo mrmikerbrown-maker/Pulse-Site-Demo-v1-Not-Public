@@ -10,9 +10,9 @@ Sources (all free, no key, all checked from GitHub Actions on 18 Nov 2026):
 - Options: Cboe's delayed quotes (15 min delayed), the full chain for one stock per call.
   Implied move = price of the at-the-money straddle (call + put) for the first expiry after the report,
   divided by the share price. Strikes either side of the share price are blended.
-- Past report dates and timing: the same Nasdaq calendar, read back about 3 years and kept in calendar-archive.json
+- Past report dates and timing: the same Nasdaq calendar, read back about 2 years and kept in calendar-archive.json
   (SEC EDGAR was tried first, but www.sec.gov refuses GitHub's servers).
-- Daily closes for actual past moves: Nasdaq historical prices (about 3 years).
+- Daily closes for actual past moves: Nasdaq historical prices (about 2 years).
 
 There is no free archive of old option prices, so the implied move for past reports only exists from the day this
 job started saving them (implied-log.csv, one row per stock per run, kept for good).
@@ -31,10 +31,10 @@ NY, LDN = ZoneInfo("America/New_York"), ZoneInfo("Europe/London")
 MIN_CAP = 50e9
 AHEAD_DAYS = 14        # calendar days of upcoming reports shown
 RECENT_DAYS = 10       # calendar days of recent results shown
-HIST_N = 12            # past reports kept per stock
+HIST_N = 8             # past reports kept per stock (2 years)
 HIST_REFRESH_DAYS = 6  # re-download a stock's past moves at least this often
-HIST_YEARS = 3.1
-MAX_ARCHIVE_CALLS = 900  # Nasdaq calendar days read per run (the first run backfills ~3 years)
+HIST_YEARS = 2.1
+MAX_ARCHIVE_CALLS = 600  # Nasdaq calendar days read per run (the first run backfills ~2 years)
 ARCH = os.path.join(HERE, "calendar-archive.json")
 BROWSER = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
 NASDAQ_H = {"Origin": "https://www.nasdaq.com", "Referer": "https://www.nasdaq.com/", "Accept": "application/json, text/plain, */*"}
@@ -263,7 +263,7 @@ def implied_move(sym, report_date, when):
 def update_archive(arch, members, today):
     """Keeps calendar-archive.json: for each weekday back to HIST_YEARS ago, the S&P 500 members that reported
     and when. Each past day is downloaded once (the last RECENT_DAYS are re-read in case Nasdaq corrected them);
-    the first run fills in about 3 years, later runs only add new days."""
+    the first run fills in about 2 years, later runs only add new days."""
     days = arch.setdefault("days", {})
     start = today - dt.timedelta(days=int(365 * HIST_YEARS))
     want, d = [], today
@@ -283,6 +283,9 @@ def update_archive(arch, members, today):
             fails += 1
             print("Nasdaq calendar archive", d, "failed:", e)
         time.sleep(0.25)
+        if len(days) % 50 == 0:  # save as we go, so a slow run that gets stopped still keeps what it read
+            with open(ARCH, "w") as f:
+                json.dump(arch, f, separators=(",", ":"))
     print("Calendar archive: %d days read this run, %d failed, %d days held" % (len(want), fails, len(days)))
     if fails > 5:
         note("Nasdaq calendar history failed for %d day(s); they'll be retried next run" % fails)
