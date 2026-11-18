@@ -34,7 +34,9 @@ RECENT_DAYS = 10       # calendar days of recent results shown
 HIST_N = 12            # past reports kept per stock (3 years)
 HIST_REFRESH_DAYS = 6  # re-download a stock's past moves at least this often
 HIST_YEARS = 3.1
-MAX_ARCHIVE_CALLS = 250  # Nasdaq calendar days read per run: the ~3-year backfill spreads over the first few runs so none runs long
+MAX_ARCHIVE_CALLS = 450  # Nasdaq calendar days read per run: the ~3-year backfill spreads over the first runs so none runs long
+WORKERS = 3              # downloads at once
+HIST_VERSION = 2         # bump to force every stock's past moves to be recomputed
 ARCH = os.path.join(HERE, "calendar-archive.json")
 BROWSER = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
 NASDAQ_H = {"Origin": "https://www.nasdaq.com", "Referer": "https://www.nasdaq.com/", "Accept": "application/json, text/plain, */*"}
@@ -43,6 +45,7 @@ TV_H = {"Origin": "https://www.tradingview.com", "Referer": "https://www.trading
 S = requests.Session()
 S.headers["User-Agent"] = BROWSER
 problems = []
+TV_HABIT = {}
 
 
 def note(msg):
@@ -132,7 +135,17 @@ def universe(prev):
                 t = r.get("earnings_release_next_time")
                 nxt[sym] = {"date": dt.datetime.fromtimestamp(r["earnings_release_next_date"], NY).date().isoformat(),
                             "time": "bmo" if t == -1 else "amc" if t == 1 else "tbc"}
-    print("Universe:", len(uni), "S&P 500 stocks over $%.0fbn" % (MIN_CAP / 1e9))
+    # Each company's usual timing (before the open / after the close), used for past reports where Nasdaq's
+    # calendar doesn't say. TradingView: -1 = before the open, 1 = after the close.
+    try:
+        for r in tv_scan(cols=["name", "earnings_release_time", "earnings_release_next_time"]):
+            sym = (r["name"] or "").replace("/", ".").upper()
+            t = r.get("earnings_release_time") or r.get("earnings_release_next_time")
+            if sym in uni and t in (-1, 1):
+                TV_HABIT[sym] = "bmo" if t == -1 else "amc"
+    except Exception as e:
+        print("TradingView timing lookup failed:", e)
+    print("Universe:", len(uni), "S&P 500 stocks over $%.0fbn" % (MIN_CAP / 1e9), "; usual timing known for", len(TV_HABIT))
     if len(uni) < 50:
         note("Universe looked too small (%d), kept the previous one" % len(uni))
         return prev.get("universe") or uni, nxt
@@ -263,7 +276,7 @@ def implied_move(sym, report_date, when):
 def update_archive(arch, members, today):
     """Keeps calendar-archive.json: for each weekday back to HIST_YEARS ago, the S&P 500 members that reported
     and when. Each past day is downloaded once (the last RECENT_DAYS are re-read in case Nasdaq corrected them);
-    the first few runs fill in about 3 years, 250 days at a time; later runs only add new days."""
+    the first runs fill in about 3 years, 450 days at a time; later runs only add new days."""
     days = arch.setdefault("days", {})
     start = today - dt.timedelta(days=int(365 * HIST_YEARS))
     want, d = [], today
@@ -273,19 +286,25 @@ def update_archive(arch, members, today):
         d -= dt.timedelta(days=1)
     want = want[:MAX_ARCHIVE_CALLS]
     fails = 0
-    for d in want:
-        try:
-            j = fetch("https://api.nasdaq.com/api/calendar/earnings?date=" + iso(d), headers=NASDAQ_H).json()
-            rows = ((j.get("data") or {}).get("rows") or [])
-            days[iso(d)] = sorted([(r.get("symbol") or "").upper().replace("/", "."), TIME_MAP.get(r.get("time"), "tbc")]
-                                  for r in rows if (r.get("symbol") or "").upper().replace("/", ".") in members)
-        except Exception as e:
-            fails += 1
-            print("Nasdaq calendar archive", d, "failed:", e)
-        time.sleep(0.25)
-        if len(days) % 50 == 0:  # save as we go, so a slow run that gets stopped still keeps what it read
-            with open(ARCH, "w") as f:
-                json.dump(arch, f, separators=(",", ":"))
+
+    def one(d):
+        j = fetch("https://api.nasdaq.com/api/calendar/earnings?date=" + iso(d), headers=NASDAQ_H, tries=2, timeout=20).json()
+        rows = ((j.get("data") or {}).get("rows") or [])
+        return sorted([(r.get("symbol") or "").upper().replace("/", "."), TIME_MAP.get(r.get("time"), "tbc")]
+                      for r in rows if (r.get("symbol") or "").upper().replace("/", ".") in members)
+
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(WORKERS) as ex:
+        for n, (d, fut) in enumerate([(d, ex.submit(one, d)) for d in want]):
+            try:
+                days[iso(d)] = fut.result()
+            except Exception as e:
+                fails += 1
+                print("Nasdaq calendar archive", d, "failed:", e)
+            if n % 50 == 49:  # save as we go, so a slow run that gets stopped still keeps what it read
+                with open(ARCH, "w") as f:
+                    json.dump(arch, f, separators=(",", ":"))
+    arch["_read_this_run"] = len(want)
     print("Calendar archive: %d days read this run, %d failed, %d days held" % (len(want), fails, len(days)))
     if fails > 5:
         note("Nasdaq calendar history failed for %d day(s); they'll be retried next run" % fails)
@@ -380,6 +399,8 @@ def main():
         for d, t, eps in lst:
             if d >= iso(today_ny) or (d == iso(sess) and t == "amc"):
                 if s not in upcoming:
+                    if t == "tbc" and tv_next.get(s, {}).get("date") == d:
+                        t = tv_next[s]["time"]
                     upcoming[s] = {"date": d, "time": t, "eps_fc": eps}
     # Backup / gap fill from TradingView for upcoming dates Nasdaq didn't list.
     for s, v in tv_next.items():
@@ -433,31 +454,43 @@ def main():
         json.dump(arch, f, separators=(",", ":"))
     recent_set = {s for s, lst in cal.items() for d, t, _ in lst if d < iso(today_ny)}
     hist_fail = 0
+    backfilling = arch.get("_read_this_run", 0) > RECENT_DAYS + 2  # older days just added: recompute every stock
+    todo = []
     for s in sorted(syms):
         h = hist.get(s) or {}
-        stale = not h.get("refreshed") or (today_ny - dt.date.fromisoformat(h["refreshed"])).days >= HIST_REFRESH_DAYS
-        if not (stale or s in upcoming or s in recent_set):
-            continue
-        reps = archive_reports(arch, s, iso(today_ny + dt.timedelta(days=1)))
-        if not reps:
-            continue
-        try:
-            closes = nasdaq_closes(s, since - dt.timedelta(days=7))
-            days = list(closes)
-            moves = []
-            for d, when in reps:
-                if when == "tbc":  # timing not stated: use the company's most frequent timing
-                    ts = [t for _, t in reps if t != "tbc"]
-                    when = max(set(ts), key=ts.count) if ts else "amc"
-                am = actual_move(closes, days, d, when)
-                if am:
-                    moves.append({"date": d, "time": when, **am})
-            hist[s] = {"refreshed": iso(today_ny), "moves": moves[-HIST_N:], "last_close": closes[days[-1]], "last_date": days[-1]}
-            print("  %-6s %d past reports, last %s" % (s, len(moves), moves[-1]["date"] if moves else "-"))
-        except Exception as e:
-            hist_fail += 1
-            print("  %-6s history failed: %s" % (s, e))
-        time.sleep(0.3)
+        stale = (not h.get("refreshed") or h.get("v") != HIST_VERSION or backfilling
+                 or (today_ny - dt.date.fromisoformat(h["refreshed"])).days >= HIST_REFRESH_DAYS)
+        if stale or s in upcoming or s in recent_set:
+            reps = archive_reports(arch, s, iso(today_ny + dt.timedelta(days=1)))
+            if reps:
+                todo.append((s, reps))
+
+    def one(item):
+        s, reps = item
+        closes = nasdaq_closes(s, since - dt.timedelta(days=7))
+        days = list(closes)
+        moves = []
+        ts = [t for _, t in reps if t != "tbc"] + [t for _, t, _ in cal.get(s, []) if t != "tbc"]
+        habit = max(set(ts), key=ts.count) if ts else TV_HABIT.get(s, "amc")
+        for d, when in reps:
+            stated = when != "tbc"
+            if not stated:  # Nasdaq's older calendar days rarely say: use the company's usual timing
+                when = habit
+            am = actual_move(closes, days, d, when)
+            if am:
+                moves.append({"date": d, "time": when, **am, **({} if stated else {"time_assumed": 1})})
+        return {"v": HIST_VERSION, "refreshed": iso(today_ny), "moves": moves[-HIST_N:], "last_close": closes[days[-1]], "last_date": days[-1]}
+
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(WORKERS) as ex:
+        for (s, _), fut in [(it, ex.submit(one, it)) for it in todo]:
+            try:
+                hist[s] = fut.result()
+                m = hist[s]["moves"]
+                print("  %-6s %d past reports, last %s" % (s, len(m), m[-1]["date"] if m else "-"))
+            except Exception as e:
+                hist_fail += 1
+                print("  %-6s history failed: %s" % (s, e))
     if hist_fail:
         note("Past moves could not be refreshed for %d stock(s); older data kept" % hist_fail)
 
