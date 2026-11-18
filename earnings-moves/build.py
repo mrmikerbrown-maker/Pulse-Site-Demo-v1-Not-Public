@@ -34,7 +34,7 @@ RECENT_DAYS = 10       # calendar days of recent results shown
 HIST_N = 12            # past reports kept per stock (3 years)
 HIST_REFRESH_DAYS = 6  # re-download a stock's past moves at least this often
 HIST_YEARS = 3.1
-MAX_ARCHIVE_CALLS = 900  # Nasdaq calendar days read per run (the first run backfills ~3 years)
+MAX_ARCHIVE_CALLS = 250  # Nasdaq calendar days read per run: the ~3-year backfill spreads over the first few runs so none runs long
 ARCH = os.path.join(HERE, "calendar-archive.json")
 BROWSER = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
 NASDAQ_H = {"Origin": "https://www.nasdaq.com", "Referer": "https://www.nasdaq.com/", "Accept": "application/json, text/plain, */*"}
@@ -263,7 +263,7 @@ def implied_move(sym, report_date, when):
 def update_archive(arch, members, today):
     """Keeps calendar-archive.json: for each weekday back to HIST_YEARS ago, the S&P 500 members that reported
     and when. Each past day is downloaded once (the last RECENT_DAYS are re-read in case Nasdaq corrected them);
-    the first run fills in about 3 years, later runs only add new days."""
+    the first few runs fill in about 3 years, 250 days at a time; later runs only add new days."""
     days = arch.setdefault("days", {})
     start = today - dt.timedelta(days=int(365 * HIST_YEARS))
     want, d = [], today
