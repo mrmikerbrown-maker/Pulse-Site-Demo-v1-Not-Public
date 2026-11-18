@@ -10,8 +10,8 @@ Sources (all free, no key, all checked from GitHub Actions on 18 Nov 2026):
 - Options: Cboe's delayed quotes (15 min delayed), the full chain for one stock per call.
   Implied move = price of the at-the-money straddle (call + put) for the first expiry after the report,
   divided by the share price. Strikes either side of the share price are blended.
-- Past report dates: SEC EDGAR, the 8-K filings with item 2.02 ("results of operations"), which companies file
-  with each earnings release. The filing time says whether it came before the open or after the close.
+- Past report dates and timing: the same Nasdaq calendar, read back about 3 years and kept in calendar-archive.json
+  (SEC EDGAR was tried first, but www.sec.gov refuses GitHub's servers).
 - Daily closes for actual past moves: Nasdaq historical prices (about 3 years).
 
 There is no free archive of old option prices, so the implied move for past reports only exists from the day this
@@ -33,10 +33,10 @@ AHEAD_DAYS = 14        # calendar days of upcoming reports shown
 RECENT_DAYS = 10       # calendar days of recent results shown
 HIST_N = 12            # past reports kept per stock
 HIST_REFRESH_DAYS = 6  # re-download a stock's past moves at least this often
+HIST_YEARS = 3.1
+MAX_ARCHIVE_CALLS = 900  # Nasdaq calendar days read per run (the first run backfills ~3 years)
+ARCH = os.path.join(HERE, "calendar-archive.json")
 BROWSER = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
-# SEC asks automated tools to give a name and a contact email in the User-Agent, and refuses requests without one.
-# This is the repo owner's public GitHub no-reply address.
-SEC_UA = "AlphaPulse site data job 300206560+mrmikerbrown-maker@users.noreply.github.com"
 NASDAQ_H = {"Origin": "https://www.nasdaq.com", "Referer": "https://www.nasdaq.com/", "Accept": "application/json, text/plain, */*"}
 TV_H = {"Origin": "https://www.tradingview.com", "Referer": "https://www.tradingview.com/", "Content-Type": "application/json"}
 
@@ -140,12 +140,13 @@ def universe(prev):
 
 
 def clean_name(s):
+    import re
     s = (s or "").strip()
-    for tail in [", Inc.", " Inc.", " Inc", " Corporation", " Corp.", " Corp", " Incorporated", " Co.", " plc", " PLC",
-                 " Ltd.", " N.V.", " Holdings", " Company", " & Co."]:
-        if s.endswith(tail):
-            s = s[: -len(tail)].rstrip(",")
-    return s.replace("Common Stock", "").replace("Class A", "").replace("Class B", "").strip(" ,")
+    s = re.sub(r"\b(Class [A-C]|Common Stock|Ordinary Shares|New)\b", "", s)
+    for _ in range(3):
+        s = re.sub(r"[ ,]+(Inc\.?|Incorporated|Corporation|Corp\.?|Co\.?|Company|plc|PLC|Plc|Ltd\.?|N\.V\.|Holdings|S\.A\.|AG|SE|L\.P\.)$", "", s.strip(" ,"))
+    s = re.sub(r"\s*&$", " & Co", s.strip(" ,"))
+    return re.sub(r"\s+", " ", s).strip(" ,")
 
 
 # ---------- calendar ----------
@@ -258,42 +259,49 @@ def implied_move(sym, report_date, when):
     }
 
 
-# ---------- past report dates (SEC) ----------
-def sec_ciks():
-    j = fetch("https://www.sec.gov/files/company_tickers.json", headers={"User-Agent": SEC_UA}).json()
-    return {v["ticker"].upper().replace("-", "."): v["cik_str"] for v in j.values()}
+# ---------- past report dates (Nasdaq calendar archive) ----------
+def update_archive(arch, members, today):
+    """Keeps calendar-archive.json: for each weekday back to HIST_YEARS ago, the S&P 500 members that reported
+    and when. Each past day is downloaded once (the last RECENT_DAYS are re-read in case Nasdaq corrected them);
+    the first run fills in about 3 years, later runs only add new days."""
+    days = arch.setdefault("days", {})
+    start = today - dt.timedelta(days=int(365 * HIST_YEARS))
+    want, d = [], today
+    while d >= start:
+        if d.weekday() < 5 and (iso(d) not in days or d >= today - dt.timedelta(days=RECENT_DAYS)):
+            want.append(d)
+        d -= dt.timedelta(days=1)
+    want = want[:MAX_ARCHIVE_CALLS]
+    fails = 0
+    for d in want:
+        try:
+            j = fetch("https://api.nasdaq.com/api/calendar/earnings?date=" + iso(d), headers=NASDAQ_H).json()
+            rows = ((j.get("data") or {}).get("rows") or [])
+            days[iso(d)] = sorted([(r.get("symbol") or "").upper().replace("/", "."), TIME_MAP.get(r.get("time"), "tbc")]
+                                  for r in rows if (r.get("symbol") or "").upper().replace("/", ".") in members)
+        except Exception as e:
+            fails += 1
+            print("Nasdaq calendar archive", d, "failed:", e)
+        time.sleep(0.25)
+    print("Calendar archive: %d days read this run, %d failed, %d days held" % (len(want), fails, len(days)))
+    if fails > 5:
+        note("Nasdaq calendar history failed for %d day(s); they'll be retried next run" % fails)
+    for k in [k for k in days if k < iso(start)]:
+        del days[k]
+    return arch
 
 
-def sec_reports(cik, since):
-    """[(date, 'bmo'|'amc'|'mid')] of 8-K item 2.02 filings since `since`."""
-    base = "https://data.sec.gov/submissions/"
-    j = fetch(base + "CIK%010d.json" % cik, headers={"User-Agent": SEC_UA}).json()
-    blocks = [j["filings"]["recent"]]
-    oldest = min(blocks[0]["filingDate"]) if blocks[0]["filingDate"] else "9999"
-    for f in j["filings"].get("files", []):
-        if oldest <= iso(since):
-            break
-        if f.get("filingTo", "9999") >= iso(since):
-            time.sleep(0.15)
-            blk = fetch(base + f["name"], headers={"User-Agent": SEC_UA}).json()
-            blocks.append(blk)
-            oldest = min(oldest, f.get("filingFrom", oldest))
+def archive_reports(arch, sym, before):
     out = []
-    for b in blocks:
-        for form, fd, acc, items in zip(b["form"], b["filingDate"], b["acceptanceDateTime"], b["items"]):
-            if form != "8-K" or "2.02" not in (items or "") or fd < iso(since):
-                continue
-            # EDGAR stamps acceptance times in US Eastern time (the trailing Z is misleading).
-            hh = int(acc[11:13]) + int(acc[14:16]) / 60.0 if len(acc) >= 16 else 12
-            when = "bmo" if hh < 9.5 else "amc" if hh >= 16 else "mid"
-            out.append((fd, when, acc[11:16]))
-    out.sort()
-    keep = []
-    for r in out:  # one per quarter: drop follow-up filings within 20 days of the first
-        if keep and (dt.date.fromisoformat(r[0]) - dt.date.fromisoformat(keep[-1][0])).days < 20:
-            continue
-        keep.append(r)
-    return keep
+    for d in sorted(arch.get("days", {})):
+        if d >= before:
+            break
+        for s, t in arch["days"][d]:
+            if s == sym:
+                if out and (dt.date.fromisoformat(d) - dt.date.fromisoformat(out[-1][0])).days < 20:
+                    continue
+                out.append((d, t))
+    return out
 
 
 # ---------- prices ----------
@@ -416,12 +424,10 @@ def main():
 
     # Past moves: refresh stocks reporting soon or recently, and any not refreshed for a while.
     hist = prev.get("history", {})
-    since = today_ny - dt.timedelta(days=int(365 * 3.1))
-    try:
-        ciks = sec_ciks()
-    except Exception as e:
-        ciks = {}
-        note("SEC ticker list failed: %s" % e)
+    since = today_ny - dt.timedelta(days=int(365 * HIST_YEARS))
+    arch = update_archive(load_json(ARCH), set(spy_members()), today_ny)
+    with open(ARCH, "w") as f:
+        json.dump(arch, f, separators=(",", ":"))
     recent_set = {s for s, lst in cal.items() for d, t, _ in lst if d < iso(today_ny)}
     hist_fail = 0
     for s in sorted(syms):
@@ -429,37 +435,26 @@ def main():
         stale = not h.get("refreshed") or (today_ny - dt.date.fromisoformat(h["refreshed"])).days >= HIST_REFRESH_DAYS
         if not (stale or s in upcoming or s in recent_set):
             continue
-        if not ciks or s not in ciks:
-            if s not in ciks and ciks:
-                print("  %-6s not in SEC ticker list" % s)
+        reps = archive_reports(arch, s, iso(today_ny + dt.timedelta(days=1)))
+        if not reps:
             continue
         try:
-            reps = sec_reports(ciks[s], since)
-            time.sleep(0.15)
             closes = nasdaq_closes(s, since - dt.timedelta(days=7))
             days = list(closes)
             moves = []
-            for d, when, hhmm in reps:
-                nd = [ct for cd, ct, _ in cal.get(s, []) if cd == d and ct != "tbc"]
-                sec_when = when
-                if nd:  # Nasdaq's stated timing wins for recent reports
-                    when = nd[0]
-                if when == "mid":  # filed during market hours: use the company's habit if we know it
-                    when = habitual.get(s, "mid")
-                if when == "mid":
-                    when = "bmo" if hhmm < "12:00" else "amc"
+            for d, when in reps:
+                if when == "tbc":  # timing not stated: use the company's most frequent timing
+                    ts = [t for _, t in reps if t != "tbc"]
+                    when = max(set(ts), key=ts.count) if ts else "amc"
                 am = actual_move(closes, days, d, when)
                 if am:
                     moves.append({"date": d, "time": when, **am})
-                for cd, ct, _ in cal.get(s, []):
-                    if cd == d and ct != "tbc" and ct != sec_when:
-                        print("  %-6s timing check %s: SEC filing says %s (%s), Nasdaq says %s" % (s, d, sec_when, hhmm, ct))
             hist[s] = {"refreshed": iso(today_ny), "moves": moves[-HIST_N:], "last_close": closes[days[-1]], "last_date": days[-1]}
             print("  %-6s %d past reports, last %s" % (s, len(moves), moves[-1]["date"] if moves else "-"))
         except Exception as e:
             hist_fail += 1
             print("  %-6s history failed: %s" % (s, e))
-        time.sleep(0.35)
+        time.sleep(0.3)
     if hist_fail:
         note("Past moves could not be refreshed for %d stock(s); older data kept" % hist_fail)
 

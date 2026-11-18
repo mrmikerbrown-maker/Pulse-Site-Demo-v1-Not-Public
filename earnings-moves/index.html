@@ -136,13 +136,13 @@ details.how p{max-width:78ch;margin:10px 0}
 </div>
 <div class="srcbox" id="stamp"></div>
 <details class="how"><summary>How the numbers are worked out</summary>
-<p><b>Move priced (implied move).</b> The price of buying both the call and the put at the strike nearest the share price (a straddle), for the first options expiry after the results, divided by the share price. If the shares move by more than this in either direction, the straddle buyer makes money; by less, the seller does. It is taken from closing option prices before the report. When that expiry is a few days after the report, the figure also covers those extra days, so it reads slightly high; the page says when.</p>
-<p><b>Past moves.</b> From the last close before the results to the first close after them. Results out before the US open are measured over that day; results after the close are measured over the next day. Report dates come from the 8-K filings companies send the SEC with each earnings release.</p>
+<p><b>Move priced (implied move).</b> The price of buying both the call and the put at the strike nearest the share price (a straddle), for the first options expiry after the results, divided by the share price. If the shares move by more than this in either direction, the straddle buyer makes money; by less, the seller does. It is taken from closing option prices before the report. It is only shown once the expiry is 5 trading days away or less: further out, most of the straddle's price is ordinary day-to-day movement rather than the results. When the expiry is a day or two after the report, the figure also covers those extra days, so it reads slightly high; the page says when.</p>
+<p><b>Past moves.</b> From the last close before the results to the first close after them. Results out before the US open are measured over that day; results after the close are measured over the next day. Report dates and timing come from Nasdaq's earnings calendar, going back about 3 years.</p>
 <p><b>Past average.</b> The average size of the last 8 moves, ignoring direction.</p>
 <p><b>Priced vs past.</b> Options pricing more than 1.2 times the past average is marked "above past average"; under 0.8 times, "below past average".</p>
 <p>The options market started being saved on 18 Nov 2026, so the move priced before older reports isn't available. This page shows what markets price, not a forecast.</p>
 </details>
-<div class="foot" id="src">Data: options from Cboe (delayed), earnings dates from Nasdaq, past report dates from SEC EDGAR filings, daily closes from Nasdaq, market values from TradingView. Updated each weekday after the US close.</div>
+<div class="foot" id="src">Data: options from Cboe (delayed), earnings dates from Nasdaq, past report dates and daily closes from Nasdaq, market values from TradingView. Updated each weekday after the US close.</div>
 </div>
 <script>
 var D=null,$=function(i){return document.getElementById(i)},OPEN=null,TAB="up";
@@ -178,9 +178,9 @@ function upcoming(){
  h+='<div class="r hd"><div>Company</div><div>Reports</div><div>Move priced</div><div>Past average</div><div>Past 8 moves vs priced</div></div>';
  U.forEach(function(u){
   if(u.date!==last){h+='<div class="day">'+dayHead(u.date)+'</div>';last=u.date}
-  var p=past(u.symbol,u.date).slice(-8),im=u.implied?u.implied.move:null,out=reported(u);
-  var big=im==null?'<span class="mu">n/a</span>':pm(im);
-  var sm=im==null?'':(u.implied.days_after>0?'<small>to '+dlabel(u.implied.expiry,{day:"numeric",month:"short"})+' expiry</small>':'<small>'+(u.implied.wide?'wide quotes':'&nbsp;')+'</small>');
+  var p=past(u.symbol,u.date).slice(-8),im=shown(u),out=reported(u);
+  var big=im==null?'<span class="mu">–</span>':pm(im);
+  var sm=im==null?(u.implied?'<small>shown 5 days out</small>':'<small>no options data</small>'):(u.implied.days_after>0?'<small>to '+dlabel(u.implied.expiry,{day:"numeric",month:"short"})+' expiry</small>':'<small>'+(u.implied.wide?'wide quotes':'&nbsp;')+'</small>');
   h+='<div class="r'+(OPEN===u.symbol?" open":"")+'" data-s="'+u.symbol+'"><div class="co"><b>'+u.symbol+'</b><small>'+nm(u.symbol)+'</small></div>'+
    '<div class="wh">'+(out?'Reported, move due<small>first close after the results</small>':when(u))+'</div>'+
    '<div class="v big"><small class="lbl">Priced</small>'+big+sm+'</div>'+
@@ -190,6 +190,7 @@ function upcoming(){
  });
  $("uplist").innerHTML=h;bind("#uplist .r[data-s]");
 }
+function shown(u){return u.implied&&(u.implied.tdays==null||u.implied.tdays<=5)?u.implied.move:null}
 function reported(u){var now=new Date();return u.time==="bmo"?now>=nyTime(u.date,9,30):u.time==="amc"?now>=nyTime(u.date,16,0):false}
 
 function recent(){
@@ -211,7 +212,7 @@ function recent(){
 }
 
 function detail(s,u){
- var H=D.history[s],M=H?H.moves.slice(-12):[],name=nm(s)||s,im=u&&u.implied?u.implied.move:null,h='<div class="det">';
+ var H=D.history[s],M=H?H.moves.slice(-12):[],name=nm(s)||s,im=u?shown(u):null,h='<div class="det">';
  if(!M.length)return h+'<p>No past results found for '+s+'.</p></div>';
  var p8=M.filter(function(m){return !u||m.date<u.date}).slice(-8),avg=p8.reduce(function(a,m){return a+Math.abs(m.move)},0)/p8.length;
  if(u&&im!=null){var over=p8.filter(function(m){return Math.abs(m.move)>im}).length;
@@ -236,12 +237,12 @@ function bind(sel){document.querySelectorAll(sel).forEach(function(r){r.onclick=
 function look(s){
  var el=$("look");if(!s||!D.universe[s]){el.hidden=true;return}
  var u=(D.upcoming||[]).filter(function(x){return x.symbol===s})[0]||null;
- el.hidden=false;el.innerHTML='<div class="chd"><h2>'+s+' · '+nm(s)+'</h2><small>'+(u?'Next results '+dlabel(u.date)+(u.implied?' · priced '+pm(u.implied.move):''):'No results due in the next two weeks')+'</small></div>'+detail(s,u);
+ el.hidden=false;el.innerHTML='<div class="chd"><h2>'+s+' · '+nm(s)+'</h2><small>'+(u?'Next results '+dlabel(u.date)+(shown(u)!=null?' · priced '+pm(shown(u)):''):'No results due in the next two weeks')+'</small></div>'+detail(s,u);
 }
 function draw(){if(TAB==="up")upcoming();else recent()}
 function stamp(){
  var g=new Date(D.generated),age=(Date.now()-g)/864e5;
- $("stamp").innerHTML='<div><span>Source</span>Cboe delayed options; Nasdaq earnings calendar and closes; SEC filings</div><div><span>Updates</span>Weekdays after the US close, around 21:40 London</div>'+
+ $("stamp").innerHTML='<div><span>Source</span>Cboe delayed options; Nasdaq earnings calendar and daily closes</div><div><span>Updates</span>Weekdays after the US close, around 21:40 London</div>'+
   '<div><span>Options prices as of</span><b'+(age>4?' class="old"':'')+'>'+dlabel(D.session)+' close</b></div>'+
   '<div><span>Last refreshed</span><b'+(age>4?' class="old"':'')+'>'+ldn(g,{weekday:"short",day:"numeric",month:"short"}).replace(",","")+', '+ldn(g,{hour:"2-digit",minute:"2-digit"})+' London</b></div>';
  var w=[];if(age>4)w.push("The data hasn't refreshed since "+ldn(g,{weekday:"short",day:"numeric",month:"short"})+".");
