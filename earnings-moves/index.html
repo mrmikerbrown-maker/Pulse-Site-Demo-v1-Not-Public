@@ -46,7 +46,8 @@ h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 .co small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wh{font-size:13px;color:var(--text2)}
 .tip{border-bottom:1px dotted var(--muted);cursor:help}
-.co small.wt{color:var(--dim);font-size:11px;margin-top:2px;font-variant-numeric:tabular-nums}.wh small{display:block;font-size:11px;color:var(--muted)}
+.co small.wt b.ix{display:inline;font-size:inherit;font-weight:600;color:var(--muted)}
+.co small.wt{white-space:normal;overflow:visible;color:var(--dim);font-size:11px;margin-top:2px;font-variant-numeric:tabular-nums}.wh small{display:block;font-size:11px;color:var(--muted)}
 .v{color:var(--text);font-size:15px}
 .v.big{font-weight:700;font-size:16px}
 .v small{display:block;font-size:11px;color:var(--muted);font-weight:400}
@@ -159,9 +160,17 @@ function when(u){
  if(u.time==="amc")return '<span class="tip" title="Results come out after US trading ends at 16:00 New York time ('+lt(u.date,16,0)+' London), so the move shows in the next day\'s close.">After the US close</span>';
  return '<span class="tip" title="The company hasn\'t said yet whether results come before the US open or after the US close.">Time not confirmed</span>';
 }
-function wts(s){var u=D.universe[s],w=u&&u.w;if(!w)return"";var f=function(x){return x>=1?x.toFixed(1):x.toFixed(2)},o=[];
- if(w.SPX!=null)o.push("SPX "+f(w.SPX)+"%");if(w.NDX!=null)o.push("NDX "+f(w.NDX)+"%");if(w.DOW!=null)o.push("Dow "+f(w.DOW)+"%");
- return o.length?'<small class="wt" title="Weight in the S&amp;P 500 (SPX), Nasdaq 100 (NDX) and Dow Jones">'+o.join(" · ")+'</small>':""}
+var IXN={SPX:["SPX","S&amp;P 500"],NDX:["NDX","Nasdaq 100"],DOW:["Dow","Dow"]};
+/* Index weights under each name. With an options implied move, each also shows the index move that this stock
+   alone would cause, all else equal: weight × implied move (e.g. SPX 5.9% → ±0.41%). */
+function wts(s,im){var u=D.universe[s],w=u&&u.w;if(!w)return"";var f=function(x){return x>=1?x.toFixed(1):x.toFixed(2)},o=[];
+ ["SPX","NDX","DOW"].forEach(function(k){if(w[k]!=null)o.push(IXN[k][0]+" "+f(w[k])+"%"+(im!=null?' <b class="ix">→ '+pm(w[k]*im/100,2)+'</b>':''))});
+ return o.length?'<small class="wt" title="Weight in the S&amp;P 500 (SPX), Nasdaq 100 (NDX) and Dow Jones'+(im!=null?'. After the arrow: how far this stock alone would move each index if it moves by its options implied move, all else equal':'')+'">'+o.join(" · ")+'</small>':""}
+function ixSentence(s,im,name){var u=D.universe[s],w=u&&u.w,L=D.indices||{},o=[];if(!w||im==null)return"";
+ ["SPX","NDX","DOW"].forEach(function(k){if(w[k]==null)return;var p=w[k]*im/100,pts=L[k]?L[k]*p/100:null;pts=pts==null?null:pts<10?pts.toFixed(1):Math.round(pts).toLocaleString("en-GB");
+  o.push('the '+IXN[k][1]+' by <b>'+pm(p,2)+'</b>'+(pts!=null?' (±'+pts+' pts)':''))});
+ if(!o.length)return"";var last=o.pop();
+ return ' All else equal, a '+pm(im)+' move in '+name+' on its own would move '+(o.length?o.join(", ")+' and '+last:last)+'.'}
 function pc(x,d){d=d==null?1:d;var a=Math.abs(x).toFixed(d);return(x>0?"+":x<0?"−":"")+a+"%"}
 function pm(x,d){return "±"+Math.abs(x).toFixed(d==null?1:d)+"%"}
 function cls(x){return x>0?"up":x<0?"dn":"mu"}
@@ -187,7 +196,7 @@ function upcoming(){
   var p=past(u.symbol,u.date).slice(-8),im=shown(u),out=reported(u);
   var big=im==null?'<span class="mu">–</span>':pm(im);
   var sm=im==null?(u.implied?'<small>shown 5 trading days before</small>':'<small>no options data</small>'):(u.implied.days_after>0?'<small>to '+dlabel(u.implied.expiry,{day:"numeric",month:"short"})+' expiry</small>':'<small>'+(u.implied.wide?'wide quotes':'&nbsp;')+'</small>');
-  h+='<div class="r'+(OPEN===u.symbol?" open":"")+'" data-s="'+u.symbol+'"><div class="co"><b>'+u.symbol+'</b><small>'+nm(u.symbol)+'</small>'+wts(u.symbol)+'</div>'+
+  h+='<div class="r'+(OPEN===u.symbol?" open":"")+'" data-s="'+u.symbol+'"><div class="co"><b>'+u.symbol+'</b><small>'+nm(u.symbol)+'</small>'+wts(u.symbol,im)+'</div>'+
    '<div class="wh">'+(out?'Reported, move due<small>first close after the results</small>':when(u))+'</div>'+
    '<div class="v big"><small class="lbl">Implied</small>'+big+sm+'</div>'+
    '<div class="v avg"><small class="lbl">Past avg</small>'+(u.avg_abs!=null?pm(u.avg_abs):'<span class="mu">n/a</span>')+'<small>'+(u.n_past?'last '+u.n_past:'')+'</small></div>'+
@@ -222,7 +231,7 @@ function detail(s,u){
  if(!M.length)return h+'<p>No past results found for '+s+'.</p></div>';
  var p8=M.filter(function(m){return !u||m.date<u.date}).slice(-8),avg=p8.reduce(function(a,m){return a+Math.abs(m.move)},0)/p8.length;
  if(u&&im!=null){var over=p8.filter(function(m){return Math.abs(m.move)>im}).length;
-  h+='<p>Options imply a <b>'+pm(im)+'</b> move in '+name+' shares for the results on <b>'+dlabel(u.date,{weekday:"long",day:"numeric",month:"short"})+'</b> ('+(u.time==="bmo"?"before the US open":u.time==="amc"?"after the US close":"time not confirmed")+'). Over the last '+p8.length+' reports the shares moved <b>'+pm(avg)+'</b> on average, and moved more than '+pm(im)+' '+over+' time'+(over===1?'':'s')+' out of '+p8.length+'.'+(u.implied.days_after>0?' The nearest expiry is '+dlabel(u.implied.expiry,{weekday:"short",day:"numeric",month:"short"})+', so the options implied move also covers '+u.implied.days_after+' extra day'+(u.implied.days_after>1?'s':'')+'.':'')+'</p>';}
+  h+='<p>Options imply a <b>'+pm(im)+'</b> move in '+name+' shares for the results on <b>'+dlabel(u.date,{weekday:"long",day:"numeric",month:"short"})+'</b> ('+(u.time==="bmo"?"before the US open":u.time==="amc"?"after the US close":"time not confirmed")+'). Over the last '+p8.length+' reports the shares moved <b>'+pm(avg)+'</b> on average, and moved more than '+pm(im)+' '+over+' time'+(over===1?'':'s')+' out of '+p8.length+'.'+(u.implied.days_after>0?' The nearest expiry is '+dlabel(u.implied.expiry,{weekday:"short",day:"numeric",month:"short"})+', so the options implied move also covers '+u.implied.days_after+' extra day'+(u.implied.days_after>1?'s':'')+'.':'')+ixSentence(s,im,name)+'</p>';}
  else{var l=M[M.length-1];h+='<p>'+name+' shares moved <b>'+pc(l.move)+'</b> after the results on '+dlabel(l.date,{weekday:"long",day:"numeric",month:"short"})+(l.implied!=null?', against an options implied move of <b>'+pm(l.implied)+'</b> implied the night before':'')+'. Over the last '+p8.length+' reports the average move was <b>'+pm(avg)+'</b>.</p>'}
  var mx=Math.max.apply(0,M.map(function(m){return Math.max(Math.abs(m.move),m.implied||0)}).concat([im||0,2]))*1.15,step=mx>20?10:mx>8?5:2;
  function y(v){return(50-v/mx*50).toFixed(2)+'%'}

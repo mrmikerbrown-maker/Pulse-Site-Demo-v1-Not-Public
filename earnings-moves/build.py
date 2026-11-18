@@ -119,6 +119,19 @@ def tv_scan(extra_filter=None, cols=None, n=400):
     return [dict(zip(cols, r["d"])) for r in j.get("data", [])]
 
 
+def index_levels():
+    """Latest close of each index from the Index Contribution snapshot, for turning % into index points."""
+    out = {}
+    try:
+        with open(os.path.join(HERE, "..", "index-contribution-site", "last-session.csv")) as f:
+            for r in csv.reader(f):
+                if len(r) > 3 and r[0] in ("IDX_SPX", "IDX_NDX", "IDX_DOW"):
+                    out[r[0][4:]] = float(r[3].replace(",", ""))
+    except Exception as e:
+        print("Index levels could not be read:", e)
+    return out
+
+
 def index_weights():
     """{symbol: {"SPX": %, "NDX": %, "DOW": %}} from the Index Contribution page's latest snapshot."""
     out = {}
@@ -589,6 +602,7 @@ def main():
         "session": iso(sess),
         "min_cap_bn": MIN_CAP / 1e9,
         "universe": uni,
+        "indices": index_levels(),
         "upcoming": up_list,
         "recent": recent,
         "history": {s: hist[s] for s in sorted(hist) if s in uni},
