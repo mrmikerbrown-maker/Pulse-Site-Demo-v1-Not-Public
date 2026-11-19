@@ -40,11 +40,12 @@ h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 .day{display:flex;justify-content:space-between;align-items:baseline;gap:6px 16px;flex-wrap:wrap}
 .day .ixd{letter-spacing:0;text-transform:none;font-weight:400;font-size:12.5px;color:var(--text2);cursor:help}
 .day .ixd b{color:var(--text);font-weight:700;font-variant-numeric:tabular-nums}
-.eps{display:block;font-size:11.5px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
+.eps{display:block;white-space:nowrap;font-size:11.5px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
 .eps b{font-weight:700}
 .bx.sv{margin-top:4px}.bx.sv span{font-variant-numeric:tabular-nums;font-weight:600;font-size:11px}
 .svw{position:relative}.svw .lb{position:absolute;left:0;top:4px;font-size:10.5px;color:var(--muted)}
-@media (max-width:760px){.svw .lb{position:static;display:block;margin-top:6px}}
+.bx.sv i{font-style:normal}.bx.sv i.sm{display:none}
+@media (max-width:760px){.svw .lb{position:static;display:block;margin-top:6px}.bx.sv i.lg{display:none}.bx.sv i.sm{display:inline}}
 .sum{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:4px 0 16px}
 .sum div{border:1px solid var(--line);border-radius:10px;padding:12px 14px}
 .sum span{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
@@ -225,7 +226,7 @@ function strip(imp,moves){
 function sx(x){return x==null?'<span class="mu">n/a</span>':'<b class="'+cls(x)+'">'+pc(x)+'</b>'}
 function surpLine(m){if(!m||(m.eps_s==null&&m.rev_s==null))return"";var o=[];
  if(m.eps_s!=null)o.push('EPS '+sx(m.eps_s));if(m.rev_s!=null)o.push('Rev '+sx(m.rev_s));
- return '<span class="eps" title="Earnings per share (EPS) and revenue against the analysts\' forecast before the report">'+o.join(" · ")+' vs forecast</span>'}
+ return '<span class="eps" title="Earnings per share (EPS) and revenue: % above or below the analysts\' forecast before the report">'+o.join(" · ")+'</span>'}
 function usd(x,eps){if(x==null)return"n/a";if(eps)return(x<0?"−$":"$")+Math.abs(x).toFixed(2);var a=Math.abs(x);return "$"+(a>=1e9?(a/1e9).toFixed(1)+"bn":(a/1e6).toFixed(0)+"m")}
 function surpSentence(m){if(!m||m.eps==null)return"";var t=' EPS came in at <b>'+usd(m.eps,1)+'</b>'+(m.eps_fc!=null?' against a '+usd(m.eps_fc,1)+' forecast ('+sx(m.eps_s)+')':'');
  if(m.rev!=null)t+=', revenue at <b>'+usd(m.rev)+'</b>'+(m.rev_fc!=null?' against '+usd(m.rev_fc)+' ('+sx(m.rev_s)+')':'');return t+'.'}
@@ -292,7 +293,7 @@ function detail(s,u){
  if(im!=null)h+='<div class="now" style="top:'+y(im)+'"></div><div class="now" style="top:'+y(-im)+'"></div><div class="nowl" style="top:'+y(im)+'">Implied now '+pm(im)+'</div>';
  h+='</div><div class="bx">'+M.map(function(m){return '<span>'+dlabel(m.date,{month:"short"})+'<br>’'+m.date.slice(2,4)+'</span>'}).join("")+'</div>';
  ["eps_s","rev_s"].forEach(function(k){if(!M.some(function(m){return m[k]!=null}))return;
-  h+='<div class="svw"><span class="lb">'+(k==="eps_s"?"EPS":"Rev")+'</span><div class="bx sv">'+M.map(function(m){return '<span class="'+(m[k]==null?"mu":cls(m[k]))+'">'+(m[k]==null?"–":pc(m[k],0))+'</span>'}).join("")+'</div></div>'});
+  h+='<div class="svw"><span class="lb">'+(k==="eps_s"?"EPS":"Rev")+'</span><div class="bx sv">'+M.map(function(m){return '<span class="'+(m[k]==null?"mu":cls(m[k]))+'">'+(m[k]==null?"–":'<i class="lg">'+pc(m[k],Math.abs(m[k])<10?1:0)+'</i><i class="sm">'+(Math.round(m[k])===0?"0":pc(m[k],0).replace("%",""))+'</i>')+'</span>'}).join("")+'</div></div>'});
  h+='<div class="key"><span><i style="background:var(--up)"></i>Shares up after results</span><span><i style="background:var(--down)"></i>Shares down</span>'+(M.some(function(m){return m.implied!=null})?'<span><i style="border:1px dashed var(--muted)"></i>Options implied move before that report</span>':'')+(im!=null?'<span><i style="border-top:1px dashed var(--text);height:0;width:14px;vertical-align:3px"></i>Options implied move now</span>':'')+(M.some(function(m){return m.eps_s!=null||m.rev_s!=null})?'<span>EPS / Rev: % above or below the forecast</span>':'')+'</div>';
  return h+'</div>';
 }
