@@ -58,7 +58,8 @@ h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 .strip .bd{position:absolute;left:0;top:5px;height:16px;background:var(--band);border-right:2px solid var(--text);border-radius:3px 0 0 3px}
 .strip i{position:absolute;top:8px;width:10px;height:10px;margin-left:-5px;border-radius:50%;border:2px solid var(--card)}
 .strip i.u{background:var(--up)}.strip i.d{background:var(--down)}
-.flag{font-size:11px;color:var(--muted);margin-top:3px;text-align:right}
+.flag{font-size:11.5px;color:var(--muted);margin-top:2px;text-align:right}.flag b{color:var(--text)}
+.stx{position:relative;height:14px;font-size:10.5px;color:var(--dim);font-variant-numeric:tabular-nums}.stx span{position:absolute;top:0;white-space:nowrap}.stx span.imp{color:var(--text2)}
 /* detail */
 .det{padding:6px 0 18px;border-bottom:1px solid var(--line)}
 .det p{margin:6px 0 12px;font-size:14px;color:var(--text2);max-width:78ch}
@@ -132,7 +133,7 @@ details.how p{max-width:78ch;margin:10px 0}
 <div class="card" id="upc">
  <div class="chd"><h2>Reporting in the next two weeks</h2><small>Click a stock for its past reports</small></div>
  <div id="uplist"><div class="empty">Loading…</div></div>
- <div class="key"><span><i style="background:var(--band);border-right:2px solid var(--text)"></i>Options implied move (either direction)</span><span><i style="background:var(--up);border-radius:50%"></i>Past move up</span><span><i style="background:var(--down);border-radius:50%"></i>Past move down</span><span>Dots: size of each of the last 8 moves after results</span></div>
+ <div class="key"><span><i style="background:var(--band);border-right:2px solid var(--text)"></i>Options implied move (either direction)</span><span><i style="background:var(--up);border-radius:50%"></i>Past move up</span><span><i style="background:var(--down);border-radius:50%"></i>Past move down</span><span>Each dot is one of the last 8 moves after results, placed by size: further right means bigger</span></div>
 </div>
 <div class="card" id="recc" hidden>
  <div class="chd"><h2>Results in the last 10 days</h2><small>Options implied move the night before against the move that came</small></div>
@@ -143,7 +144,7 @@ details.how p{max-width:78ch;margin:10px 0}
 <p><b>Options implied move.</b> The price of buying both the call and the put at the strike nearest the share price (a straddle), for the first options expiry after the results, divided by the share price. If the shares move by more than this in either direction, the straddle buyer makes money; by less, the seller does. It is taken from closing option prices before the report. It is only shown once the expiry is 5 trading days away or less: further out, most of the straddle's price is ordinary day-to-day movement rather than the results. When the expiry is a day or two after the report, the figure also covers those extra days, so it reads slightly high; the page says when.</p>
 <p><b>Past moves.</b> From the last close before the results to the first close after them. Results out before the US open are measured over that day; results after the close are measured over the next day. Report dates and timing come from Nasdaq's earnings calendar, going back about 3 years. Where Nasdaq doesn't say whether an older report came before the open or after the close, the timing the company used for its other reports is applied.</p>
 <p><b>Past average.</b> The average size of the last 8 moves, ignoring direction.</p>
-<p><b>Implied vs past.</b> Options pricing more than 1.2 times the past average is marked "above past average"; under 0.8 times, "below past average".</p>
+<p><b>Past moves vs implied.</b> The line of dots shows each of the last 8 moves after results by size, ignoring direction, against today's options implied move (the shaded bar). Dots past the end of the bar were bigger moves than the options now imply; the count under it says how many.</p>
 <p>The options market started being saved on 18 Nov 2026, so the options implied move before older reports isn't available. This page shows what markets price, not a forecast.</p>
 </details>
 <div class="foot" id="src">Data: options from Cboe (delayed), earnings dates from Nasdaq, past report dates and daily closes from Nasdaq, market values from TradingView. Updated each weekday after the US close.</div>
@@ -178,12 +179,16 @@ function todayLdn(){return ldn(new Date(),{year:"numeric",month:"2-digit",day:"2
 function dayHead(s){var t=todayLdn(),tm=new Date(new Date(t+"T12:00:00Z").getTime()+864e5).toISOString().slice(0,10);return(s===t?"Today · ":s===tm?"Tomorrow · ":"")+dlabel(s,{weekday:"long",day:"numeric",month:"short"})}
 function nm(s){var u=D.universe[s];return u?u.name:""}
 function past(s,before){var h=D.history[s];if(!h)return[];return h.moves.filter(function(m){return !before||m.date<before})}
-function flag(imp,avg){if(imp==null||!avg)return"";var r=imp/avg;return r>1.2?"Above past average":r<0.8?"Below past average":"Close to past average"}
+function flag(imp,moves){if(imp==null||!moves.length)return"";var n=moves.filter(function(m){return Math.abs(m.move)>imp}).length;
+ return '<b>'+n+' of '+moves.length+'</b> past moves were bigger than the implied move'}
 
 function strip(imp,moves){
  var mx=Math.max(imp||0,Math.max.apply(0,moves.map(function(m){return Math.abs(m.move)}).concat([1])))*1.08,h='<div class="strip"><div class="ax"></div>';
  if(imp!=null)h+='<div class="bd" style="width:'+(imp/mx*100).toFixed(1)+'%"></div>';
  moves.forEach(function(m){h+='<i class="'+(m.move>=0?"u":"d")+'" style="left:'+(Math.abs(m.move)/mx*100).toFixed(1)+'%" title="'+dlabel(m.date)+': '+pc(m.move)+'"></i>'});
+ h+='</div><div class="stx"><span style="left:0">0%</span>';
+ if(imp!=null){var x=imp/mx*100;h+='<span class="imp" style="left:'+x.toFixed(1)+'%;transform:translateX('+(x>80?'-100%':'-50%')+')">'+pm(imp)+' implied</span>'}
+ else h+='<span style="right:0">'+pm(mx/1.08)+'</span>';
  return h+'</div>';
 }
 
@@ -200,7 +205,7 @@ function upcoming(){
    '<div class="wh">'+(out?'Reported, move due<small>first close after the results</small>':when(u))+'</div>'+
    '<div class="v big"><small class="lbl">Implied</small>'+big+sm+'</div>'+
    '<div class="v avg"><small class="lbl">Past avg</small>'+(u.avg_abs!=null?pm(u.avg_abs):'<span class="mu">n/a</span>')+'<small>'+(u.n_past?'last '+u.n_past:'')+'</small></div>'+
-   '<div class="sc">'+strip(im,p)+'<div class="flag">'+flag(im,u.avg_abs)+'</div></div></div>';
+   '<div class="sc">'+strip(im,p)+'<div class="flag">'+flag(im,p)+'</div></div></div>';
   if(OPEN===u.symbol)h+=detail(u.symbol,u);
  });
  $("uplist").innerHTML=h;bind("#uplist .r[data-s]");
