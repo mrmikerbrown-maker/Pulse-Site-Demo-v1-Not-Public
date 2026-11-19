@@ -37,6 +37,29 @@ h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 /* upcoming table */
 .day{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:16px 0 6px;border-bottom:1px solid var(--line)}
 .day:first-of-type{padding-top:6px}
+.day{display:flex;justify-content:space-between;align-items:baseline;gap:6px 16px;flex-wrap:wrap}
+.day .ixd{letter-spacing:0;text-transform:none;font-weight:400;font-size:12.5px;color:var(--text2);cursor:help}
+.day .ixd b{color:var(--text);font-weight:700;font-variant-numeric:tabular-nums}
+.eps{display:block;font-size:11.5px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
+.eps b{font-weight:700}
+.bx.sv{margin-top:4px}.bx.sv span{font-variant-numeric:tabular-nums;font-weight:600;font-size:11px}
+.svw{position:relative}.svw .lb{position:absolute;left:0;top:4px;font-size:10.5px;color:var(--muted)}
+@media (max-width:760px){.svw .lb{position:static;display:block;margin-top:6px}}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:4px 0 16px}
+.sum div{border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.sum span{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.sum b{font-size:24px;font-variant-numeric:tabular-nums;color:var(--text)}.sum small{display:block;color:var(--text2);font-size:12.5px;margin-top:2px}
+.sr{display:grid;grid-template-columns:minmax(150px,1.2fr) 70px 120px 90px minmax(200px,1.6fr);gap:14px;align-items:center;padding:11px 8px;margin:0 -8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;cursor:pointer;border-radius:8px}
+.sr:hover,.sr.open{background:var(--hl)}
+.sr.hd{cursor:default}.sr.hd:hover{background:none}
+.sr.hd>div{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.sr>.n{text-align:right}.sr .co b{display:block}
+.rs{position:relative;height:16px}.rs .ax{position:absolute;left:0;right:0;top:7px;height:2px;background:var(--line)}
+.rs .one{position:absolute;top:0;bottom:0;left:50%;border-left:2px solid var(--text)}
+.rs i{position:absolute;top:3px;width:10px;height:10px;margin-left:-5px;border-radius:50%;border:2px solid var(--card)}
+.rs i.u{background:var(--up)}.rs i.d{background:var(--down)}
+.rsx{position:relative;height:14px;font-size:10.5px;color:var(--muted)}.rsx span{position:absolute;white-space:nowrap}
+@media (max-width:760px){.sum{grid-template-columns:1fr}.sr{grid-template-columns:1fr auto auto}.sr .rsw{grid-column:1/-1}.sr.hd{display:none}.sr .n.rt{display:none}}
 .r{display:grid;grid-template-columns:minmax(150px,1.3fr) 120px 100px 96px minmax(180px,1.6fr);gap:14px;align-items:center;padding:11px 8px;margin:0 -8px;border-bottom:1px solid var(--line);cursor:pointer;border-radius:8px;font-variant-numeric:tabular-nums}
 .r:hover,.r.open{background:var(--hl)}
 .r.hd{cursor:default;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;padding-top:4px;padding-bottom:8px}
@@ -127,7 +150,7 @@ details.how p{max-width:78ch;margin:10px 0}
 <h1>Earnings Moves</h1>
 <p class="sub">How big a share-price move the options market is pricing for each large US company's results, against how far the shares actually moved after past reports. Covers S&amp;P 500 companies worth over $50bn.</p>
 <div class="dwarn" id="dwarn" hidden></div>
-<div class="seg" id="tabs"><button data-t="up" class="on">Coming up</button><button data-t="rec">Latest results</button></div>
+<div class="seg" id="tabs"><button data-t="up" class="on">Coming up</button><button data-t="rec">Latest results</button><button data-t="sc">Scorecard</button></div>
 <div class="find"><input id="q" list="ql" placeholder="Find a stock, e.g. NVDA or Nvidia" autocomplete="off" aria-label="Find a stock"><datalist id="ql"></datalist><small id="qn"></small></div>
 <div class="card" id="look" hidden></div>
 <div class="card" id="upc">
@@ -139,15 +162,22 @@ details.how p{max-width:78ch;margin:10px 0}
  <div class="chd"><h2>Results in the last 10 days</h2><small>Options implied move the night before against the move that came</small></div>
  <div id="reclist"></div>
 </div>
+<div class="card" id="scc" hidden>
+ <div class="chd"><h2>Options implied move vs what happened</h2><small>Every report since options were first saved on 18 Nov 2026</small></div>
+ <div id="sclist"></div>
+</div>
 <div class="srcbox" id="stamp"></div>
 <details class="how"><summary>How the numbers are worked out</summary>
 <p><b>Options implied move.</b> The price of buying both the call and the put at the strike nearest the share price (a straddle), for the first options expiry after the results, divided by the share price. If the shares move by more than this in either direction, the straddle buyer makes money; by less, the seller does. It is taken from closing option prices before the report. It is only shown once the expiry is 5 trading days away or less: further out, most of the straddle's price is ordinary day-to-day movement rather than the results. When the expiry is a day or two after the report, the figure also covers those extra days, so it reads slightly high; the page says when.</p>
 <p><b>Past moves.</b> From the last close before the results to the first close after them. Results out before the US open are measured over that day; results after the close are measured over the next day. Report dates and timing come from Nasdaq's earnings calendar, going back about 3 years. Where Nasdaq doesn't say whether an older report came before the open or after the close, the timing the company used for its other reports is applied.</p>
 <p><b>Past average.</b> The average size of the last 8 moves, ignoring direction.</p>
 <p><b>Past moves vs implied.</b> The line of dots shows each of the last 8 moves after results by size, ignoring direction, against today's options implied move (the shaded bar). Dots past the end of the bar were bigger moves than the options now imply; the count under it says how many.</p>
+<p><b>Index options line.</b> On each day's heading: the move SPX options imply for that day's US session, and the same for the Nasdaq 100 (from QQQ options, because NDX options don't expire every day). Options expiring on each day are compared with those expiring the day before, which leaves that one session's share of the move. It covers everything that day, including economic data, central banks and the results, so a busy day shows a bigger number. Results out after the US close show up in the next day's session.</p>
+<p><b>EPS and revenue.</b> Earnings per share and revenue against the analysts' forecast before the report, and the % difference (the surprise). From TradingView for the latest report, saved each night from 19 Nov 2026 so a history builds up; earlier EPS figures from Nasdaq, which has no revenue forecasts.</p>
+<p><b>Scorecard.</b> Each report since 18 Nov 2026 where the options implied move was saved the night before: the move that came divided by the implied move. Under 1× the shares moved less than options implied; over 1×, more.</p>
 <p>The options market started being saved on 18 Nov 2026, so the options implied move before older reports isn't available. This page shows what markets price, not a forecast.</p>
 </details>
-<div class="foot" id="src">Data: options from Cboe (delayed), earnings dates from Nasdaq, past report dates and daily closes from Nasdaq, market values from TradingView. Updated each weekday after the US close.</div>
+<div class="foot" id="src">Data: options from Cboe (delayed), earnings dates from Nasdaq, past report dates and daily closes from Nasdaq, market values, EPS and revenue from TradingView, earlier EPS from Nasdaq. Updated each weekday after the US close.</div>
 </div>
 <script>
 var D=null,$=function(i){return document.getElementById(i)},OPEN=null,TAB="up";
@@ -192,12 +222,24 @@ function strip(imp,moves){
  return h+'</div>';
 }
 
+function sx(x){return x==null?'<span class="mu">n/a</span>':'<b class="'+cls(x)+'">'+pc(x)+'</b>'}
+function surpLine(m){if(!m||(m.eps_s==null&&m.rev_s==null))return"";var o=[];
+ if(m.eps_s!=null)o.push('EPS '+sx(m.eps_s));if(m.rev_s!=null)o.push('Rev '+sx(m.rev_s));
+ return '<span class="eps" title="Earnings per share (EPS) and revenue against the analysts\' forecast before the report">'+o.join(" · ")+' vs forecast</span>'}
+function usd(x,eps){if(x==null)return"n/a";if(eps)return(x<0?"−$":"$")+Math.abs(x).toFixed(2);var a=Math.abs(x);return "$"+(a>=1e9?(a/1e9).toFixed(1)+"bn":(a/1e6).toFixed(0)+"m")}
+function surpSentence(m){if(!m||m.eps==null)return"";var t=' EPS came in at <b>'+usd(m.eps,1)+'</b>'+(m.eps_fc!=null?' against a '+usd(m.eps_fc,1)+' forecast ('+sx(m.eps_s)+')':'');
+ if(m.rev!=null)t+=', revenue at <b>'+usd(m.rev)+'</b>'+(m.rev_fc!=null?' against '+usd(m.rev_fc)+' ('+sx(m.rev_s)+')':'');return t+'.'}
+function fcSentence(s){var f=(D.universe[s]||{}).fc;if(!f||(f.eps==null&&f.rev==null))return"";var o=[];if(f.eps!=null)o.push('EPS <b>'+usd(f.eps,1)+'</b>');if(f.rev!=null)o.push('revenue <b>'+usd(f.rev)+'</b>');return ' Analysts forecast '+o.join(" and ")+' for the quarter.'}
+function ixDay(d){var x=(D.index_days||{})[d];if(!x||(x.SPX==null&&x.NDX==null))return"";var o=[];
+ if(x.SPX!=null)o.push('SPX <b>'+pm(x.SPX,2)+'</b>');if(x.NDX!=null)o.push('Nasdaq 100 <b>'+pm(x.NDX,2)+'</b>');
+ return '<span class="ixd" title="How far index options imply the index moves over this one US session, from options expiring that day against those expiring the day before. Covers everything that day: data, central banks and every company reporting. Results out after the US close count in the next session. Nasdaq 100 from QQQ options.">Index options imply for the day: '+o.join(" · ")+'</span>'}
+
 function upcoming(){
  var U=D.upcoming||[],h='',last="";
  if(!U.length){$("uplist").innerHTML='<div class="empty">No results due from these companies in the next two weeks.</div>';return}
  h+='<div class="r hd"><div>Company</div><div>Reports</div><div>Options implied move</div><div>Past average</div><div>Past 8 moves vs implied</div></div>';
  U.forEach(function(u){
-  if(u.date!==last){h+='<div class="day">'+dayHead(u.date)+'</div>';last=u.date}
+  if(u.date!==last){h+='<div class="day"><span>'+dayHead(u.date)+'</span>'+ixDay(u.date)+'</div>';last=u.date}
   var p=past(u.symbol,u.date).slice(-8),im=shown(u),out=reported(u);
   var big=im==null?'<span class="mu">–</span>':pm(im);
   var sm=im==null?(u.implied?'<small>shown 5 trading days before</small>':'<small>no options data</small>'):(u.implied.days_after>0?'<small>to '+dlabel(u.implied.expiry,{day:"numeric",month:"short"})+' expiry</small>':'<small>'+(u.implied.wide?'wide quotes':'&nbsp;')+'</small>');
@@ -223,7 +265,7 @@ function recent(){
    '<div class="vs"><div class="ax"></div><div class="bd" style="left:0;width:'+(im/mx*100).toFixed(1)+'%;border-left:0"></div><i class="'+(r.move>=0?"u":"d")+'" style="left:'+(a/mx*100).toFixed(1)+'%"></i></div>'}
   else v='<div class="vd mu">Not saved: saving started 18 Nov</div>';
   h+='<div class="rr'+(OPEN===r.symbol?" open":"")+'" data-s="'+r.symbol+'"><div class="co"><b>'+r.symbol+'</b><small>'+nm(r.symbol)+'</small>'+wts(r.symbol)+'</div>'+
-   '<div class="wh">'+dlabel(r.date)+'<small>'+(r.time==="bmo"?"before the open":"after the close")+'</small></div>'+
+   '<div class="wh">'+dlabel(r.date)+'<small>'+(r.time==="bmo"?"before the open":"after the close")+'</small>'+surpLine(r)+'</div>'+
    '<div class="v a big"><small class="lbl">Moved</small><span class="'+cls(r.move)+'">'+pc(r.move)+'</span></div>'+
    '<div class="v i"><small class="lbl">Implied</small>'+(im!=null?pm(im):'<span class="mu">n/a</span>')+'</div><div class="sc">'+v+'</div></div>';
   if(OPEN===r.symbol)h+=detail(r.symbol,null);
@@ -236,20 +278,22 @@ function detail(s,u){
  if(!M.length)return h+'<p>No past results found for '+s+'.</p></div>';
  var p8=M.filter(function(m){return !u||m.date<u.date}).slice(-8),avg=p8.reduce(function(a,m){return a+Math.abs(m.move)},0)/p8.length;
  if(u&&im!=null){var over=p8.filter(function(m){return Math.abs(m.move)>im}).length;
-  h+='<p>Options imply a <b>'+pm(im)+'</b> move in '+name+' shares for the results on <b>'+dlabel(u.date,{weekday:"long",day:"numeric",month:"short"})+'</b> ('+(u.time==="bmo"?"before the US open":u.time==="amc"?"after the US close":"time not confirmed")+'). Over the last '+p8.length+' reports the shares moved <b>'+pm(avg)+'</b> on average, and moved more than '+pm(im)+' '+over+' time'+(over===1?'':'s')+' out of '+p8.length+'.'+(u.implied.days_after>0?' The nearest expiry is '+dlabel(u.implied.expiry,{weekday:"short",day:"numeric",month:"short"})+', so the options implied move also covers '+u.implied.days_after+' extra day'+(u.implied.days_after>1?'s':'')+'.':'')+ixSentence(s,im,name)+'</p>';}
- else{var l=M[M.length-1];h+='<p>'+name+' shares moved <b>'+pc(l.move)+'</b> after the results on '+dlabel(l.date,{weekday:"long",day:"numeric",month:"short"})+(l.implied!=null?', against an options implied move of <b>'+pm(l.implied)+'</b> implied the night before':'')+'. Over the last '+p8.length+' reports the average move was <b>'+pm(avg)+'</b>.</p>'}
+  h+='<p>Options imply a <b>'+pm(im)+'</b> move in '+name+' shares for the results on <b>'+dlabel(u.date,{weekday:"long",day:"numeric",month:"short"})+'</b> ('+(u.time==="bmo"?"before the US open":u.time==="amc"?"after the US close":"time not confirmed")+'). Over the last '+p8.length+' reports the shares moved <b>'+pm(avg)+'</b> on average, and moved more than '+pm(im)+' '+over+' time'+(over===1?'':'s')+' out of '+p8.length+'.'+(u.implied.days_after>0?' The nearest expiry is '+dlabel(u.implied.expiry,{weekday:"short",day:"numeric",month:"short"})+', so the options implied move also covers '+u.implied.days_after+' extra day'+(u.implied.days_after>1?'s':'')+'.':'')+ixSentence(s,im,name)+(reported(u)?'':fcSentence(s))+'</p>';}
+ else{var l=M[M.length-1];h+='<p>'+name+' shares moved <b>'+pc(l.move)+'</b> after the results on '+dlabel(l.date,{weekday:"long",day:"numeric",month:"short"})+(l.implied!=null?', against an options implied move of <b>'+pm(l.implied)+'</b> implied the night before':'')+'.'+surpSentence(l)+' Over the last '+p8.length+' reports the average move was <b>'+pm(avg)+'</b>.</p>'}
  var mx=Math.max.apply(0,M.map(function(m){return Math.max(Math.abs(m.move),m.implied||0)}).concat([im||0,2]))*1.15,step=mx>20?10:mx>8?5:2;
  function y(v){return(50-v/mx*50).toFixed(2)+'%'}
  h+='<div class="bars"><div class="zero" style="top:50%"></div>';
  for(var g=step;g<mx;g+=step){h+='<div class="yl" style="top:'+y(g)+'">+'+g+'%</div><div class="yl" style="top:'+y(-g)+'">−'+g+'%</div>'}
  M.forEach(function(m){var a=Math.abs(m.move),top=m.move>=0;
-  h+='<div class="b" title="'+dlabel(m.date)+': '+pc(m.move)+(m.implied!=null?' · implied '+pm(m.implied):'')+'">'+
+  h+='<div class="b" title="'+dlabel(m.date)+': '+pc(m.move)+(m.implied!=null?' · implied '+pm(m.implied):'')+(m.eps_s!=null?' · EPS '+pc(m.eps_s)+' vs forecast':'')+(m.rev_s!=null?' · revenue '+pc(m.rev_s):'')+'">'+
    (m.implied!=null?'<div class="imp" style="top:'+y(m.implied)+';bottom:'+y(m.implied)+'"></div>':'')+
    '<div class="bar '+(top?"u":"d")+'" style="'+(top?'bottom:50%;height:':'top:50%;height:')+(a/mx*50).toFixed(2)+'%"></div>'+
    '<div class="val" style="'+(top?'bottom:calc(50% + '+(a/mx*50).toFixed(2)+'% + 2px)':'top:calc(50% + '+(a/mx*50).toFixed(2)+'% + 2px)')+'">'+pc(m.move)+'</div></div>'});
  if(im!=null)h+='<div class="now" style="top:'+y(im)+'"></div><div class="now" style="top:'+y(-im)+'"></div><div class="nowl" style="top:'+y(im)+'">Implied now '+pm(im)+'</div>';
  h+='</div><div class="bx">'+M.map(function(m){return '<span>'+dlabel(m.date,{month:"short"})+'<br>’'+m.date.slice(2,4)+'</span>'}).join("")+'</div>';
- h+='<div class="key"><span><i style="background:var(--up)"></i>Shares up after results</span><span><i style="background:var(--down)"></i>Shares down</span>'+(M.some(function(m){return m.implied!=null})?'<span><i style="border:1px dashed var(--muted)"></i>Options implied move before that report</span>':'')+(im!=null?'<span><i style="border-top:1px dashed var(--text);height:0;width:14px;vertical-align:3px"></i>Options implied move now</span>':'')+'</div>';
+ ["eps_s","rev_s"].forEach(function(k){if(!M.some(function(m){return m[k]!=null}))return;
+  h+='<div class="svw"><span class="lb">'+(k==="eps_s"?"EPS":"Rev")+'</span><div class="bx sv">'+M.map(function(m){return '<span class="'+(m[k]==null?"mu":cls(m[k]))+'">'+(m[k]==null?"–":pc(m[k],0))+'</span>'}).join("")+'</div></div>'});
+ h+='<div class="key"><span><i style="background:var(--up)"></i>Shares up after results</span><span><i style="background:var(--down)"></i>Shares down</span>'+(M.some(function(m){return m.implied!=null})?'<span><i style="border:1px dashed var(--muted)"></i>Options implied move before that report</span>':'')+(im!=null?'<span><i style="border-top:1px dashed var(--text);height:0;width:14px;vertical-align:3px"></i>Options implied move now</span>':'')+(M.some(function(m){return m.eps_s!=null||m.rev_s!=null})?'<span>EPS / Rev: % above or below the forecast</span>':'')+'</div>';
  return h+'</div>';
 }
 
@@ -259,7 +303,26 @@ function look(s){
  var u=(D.upcoming||[]).filter(function(x){return x.symbol===s})[0]||null;
  el.hidden=false;var w=wts(s).replace('class="wt"','class="wt" style="display:block;margin-top:4px"');el.innerHTML='<div class="chd"><div><h2>'+s+' · '+nm(s)+'</h2>'+w+'</div><small>'+(u?'Next results '+dlabel(u.date)+(shown(u)!=null?' · options implied move '+pm(shown(u)):''):'No results due in the next two weeks')+'</small></div>'+detail(s,u);
 }
-function draw(){if(TAB==="up")upcoming();else recent()}
+function scorecard(){
+ var rows=[],all=[];
+ Object.keys(D.history).forEach(function(s){var m=D.history[s].moves.filter(function(x){return x.implied!=null&&x.implied>0});
+  if(m.length){rows.push({s:s,m:m,last:m[m.length-1].date});m.forEach(function(x){all.push(Math.abs(x.move)/x.implied)})}});
+ if(!all.length){$("sclist").innerHTML='<div class="empty">Fills in as companies report: each report needs the options implied move saved the night before, which started on 18 Nov 2026.</div>';return}
+ rows.sort(function(a,b){return a.last<b.last?1:a.last>b.last?-1:a.s<b.s?-1:1});
+ var less=all.filter(function(r){return r<1}).length,so=all.slice().sort(function(a,b){return a-b}),n=so.length,med=n%2?so[(n-1)/2]:(so[n/2-1]+so[n/2])/2;
+ var h='<div class="sum"><div><span>Reports tracked</span><b>'+n+'</b><small>since 18 Nov 2026</small></div>'+
+  '<div><span>Moved less than implied</span><b>'+less+' of '+n+'</b><small>'+Math.round(less/n*100)+'% of the time options priced a bigger move than came</small></div>'+
+  '<div><span>Median move ÷ implied</span><b>'+med.toFixed(1)+'×</b><small>half the moves were under '+Math.round(med*100)+'% of the options implied move</small></div></div>';
+ h+='<div class="sr hd"><div>Company</div><div class="n">Reports</div><div class="n">Moved more than implied</div><div class="n rt">Average move ÷ implied</div><div>Each report: move ÷ implied</div></div>';
+ rows.forEach(function(r){var q=r.m.map(function(x){return Math.abs(x.move)/x.implied}),over=q.filter(function(x){return x>1}).length,avg=q.reduce(function(a,b){return a+b},0)/q.length;
+  h+='<div class="sr'+(OPEN===r.s?" open":"")+'" data-s="'+r.s+'"><div class="co"><b>'+r.s+'</b><small>'+nm(r.s)+'</small></div><div class="n">'+q.length+'</div><div class="n"><b>'+over+' of '+q.length+'</b></div><div class="n rt">'+avg.toFixed(1)+'×</div>'+
+   '<div class="rsw"><div class="rs"><div class="ax"></div><div class="one"></div>'+r.m.map(function(x,i){return '<i class="'+(x.move>=0?"u":"d")+'" style="left:'+(Math.min(q[i],2)/2*100).toFixed(1)+'%" title="'+dlabel(x.date)+': moved '+pc(x.move)+' against '+pm(x.implied)+' implied ('+q[i].toFixed(1)+'×)"></i>'}).join("")+
+   '</div><div class="rsx"><span style="left:0">0</span><span style="left:50%;transform:translateX(-50%)">1× = moved the implied move</span><span style="right:0">2×+</span></div></div></div>';
+  if(OPEN===r.s)h+=detail(r.s,null)});
+ h+='<div class="key"><span><i style="background:var(--up);border-radius:50%"></i>Shares went up</span><span><i style="background:var(--down);border-radius:50%"></i>Shares went down</span><span>Dots right of the line moved more than options implied</span></div>';
+ $("sclist").innerHTML=h;bind("#sclist .sr[data-s]");
+}
+function draw(){if(TAB==="up")upcoming();else if(TAB==="sc")scorecard();else recent()}
 function stamp(){
  var g=new Date(D.generated),age=(Date.now()-g)/864e5;
  $("stamp").innerHTML='<div><span>Source</span>Cboe delayed options; Nasdaq earnings calendar and daily closes</div><div><span>Updates</span>Weekdays after the US close, around 21:40 London</div>'+
@@ -269,7 +332,7 @@ function stamp(){
  if(D.problems&&D.problems.length)w.push("Last run: "+D.problems.join("; ")+".");
  $("dwarn").hidden=!w.length;if(w.length)$("dwarn").innerHTML="<b>Data warning.</b> "+w.join(" ");
 }
-document.querySelectorAll("#tabs button").forEach(function(b){b.onclick=function(){TAB=b.getAttribute("data-t");document.querySelectorAll("#tabs button").forEach(function(x){x.className=x===b?"on":""});$("upc").hidden=TAB!=="up";$("recc").hidden=TAB!=="rec";OPEN=null;draw()}});
+document.querySelectorAll("#tabs button").forEach(function(b){b.onclick=function(){TAB=b.getAttribute("data-t");document.querySelectorAll("#tabs button").forEach(function(x){x.className=x===b?"on":""});$("upc").hidden=TAB!=="up";$("recc").hidden=TAB!=="rec";$("scc").hidden=TAB!=="sc";OPEN=null;draw()}});
 $("theme").onclick=function(){var l=document.documentElement.classList.toggle("light");try{localStorage.setItem("ict-theme",l?"light":"dark")}catch(e){}};
 function pick(v){v=(v||"").trim().toUpperCase();if(!v){look(null);return}
  var s=D.universe[v]?v:Object.keys(D.universe).filter(function(k){return(D.universe[k].name||"").toUpperCase()===v||(k+" · "+D.universe[k].name).toUpperCase()===v})[0];

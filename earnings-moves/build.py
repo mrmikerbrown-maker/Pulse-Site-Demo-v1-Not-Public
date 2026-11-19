@@ -324,6 +324,20 @@ def sessions_between(a, b):
     return n
 
 
+def forward(chain, price):
+    """The index level the options themselves are priced off (put-call parity at the strike where call and put
+    are closest), so options quoted after the index has moved overnight, or on the morning of a gap, still give
+    an at-the-money straddle rather than one that is partly in the money."""
+    best = None
+    for k, v in chain.items():
+        if "C" in v and "P" in v and abs(k / price - 1) < 0.05:
+            c, _ = mid(v["C"])
+            p, _ = mid(v["P"])
+            if c is not None and p is not None and (best is None or abs(c - p) < best[0]):
+                best = (abs(c - p), k + c - p)
+    return best[1] if best else price
+
+
 def index_days(sess):
     """{date: {"SPX": %, "NDX": %}}: the move index options imply for each coming session on its own.
     Straddles on consecutive daily expiries are turned into one day's move: an at-the-money straddle grows with
@@ -347,11 +361,12 @@ def index_days(sess):
             prev_var, prev_exp, n = 0.0, sess, 0
             for exp in sorted(by):
                 try:
-                    st, spread, _ = atm_straddle(by[exp], price)
+                    fwd = forward(by[exp], price)
+                    st, spread, _ = atm_straddle(by[exp], fwd)
                 except ValueError as e:
                     print("  %s %s: %s" % (ix, exp, e))
                     continue
-                var = (st / price * 100) ** 2
+                var = (st / fwd * 100) ** 2
                 gap = sessions_between(prev_exp, exp)
                 if var > prev_var and gap == 1:
                     out.setdefault(iso(exp), {})[ix] = round(math.sqrt(var - prev_var), 2)
