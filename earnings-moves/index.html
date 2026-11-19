@@ -41,7 +41,7 @@ h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 .day .ixd{letter-spacing:0;text-transform:none;font-weight:400;font-size:12.5px;color:var(--text2);cursor:help}
 .day .ixd b{color:var(--text);font-weight:700;font-variant-numeric:tabular-nums}
 .eps{display:block;white-space:nowrap;font-size:11.5px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
-.eps b{font-weight:700}
+.eps b{font-weight:700;color:var(--text)}.eps b.up{color:var(--up)}.eps b.dn{color:var(--down)}
 .bx.sv{margin-top:4px}.bx.sv span{font-variant-numeric:tabular-nums;font-weight:600;font-size:11px}
 .svw{position:relative}.svw .lb{position:absolute;left:0;top:4px;font-size:10.5px;color:var(--muted)}
 .bx.sv i{font-style:normal}.bx.sv i.sm{display:none}
@@ -226,10 +226,14 @@ function strip(imp,moves){
 }
 
 function sx(x){return x==null?'<span class="mu">n/a</span>':'<b class="'+cls(x)+'">'+pc(x)+'</b>'}
-function surpLine(m){if(!m||(m.eps_s==null&&m.rev_s==null))return"";var o=[];
- if(m.eps_s!=null)o.push('EPS '+sx(m.eps_s));if(m.rev_s!=null)o.push('Rev '+sx(m.rev_s));
- return '<span class="eps" data-tip="Earnings per share (EPS) and revenue: % above or below the analysts\' forecast before the report">'+o.join(" · ")+'</span>'}
-function usd(x,eps){if(x==null)return"n/a";if(eps)return(x<0?"−$":"$")+Math.abs(x).toFixed(2);var a=Math.abs(x);return "$"+(a>=1e9?(a/1e9).toFixed(1)+"bn":(a/1e6).toFixed(0)+"m")}
+function bm(x){return x==null?"":Math.abs(x)<0.5?"in":x>0?"up":"dn"}
+function bmw(x){return Math.abs(x)<0.5?"in line with":x>0?"beat":"missed"}
+/* Reported EPS and revenue: the actual figure (green beat, red miss, white within ±0.5% of the forecast), then the forecast. */
+function surpLine(m){if(!m||(m.eps==null&&m.rev==null))return"";var h='';
+ if(m.eps!=null)h+='<span class="eps" data-tip="Earnings per share (EPS): reported '+usd(m.eps,1)+(m.eps_fc!=null?', '+bmw(m.eps_s)+' the analysts\' forecast of '+usd(m.eps_fc,1)+' ('+pc(m.eps_s)+')':'')+'">EPS <b class="'+bm(m.eps_s)+'">'+usd(m.eps,1)+'</b>'+(m.eps_fc!=null?' vs '+usd(m.eps_fc,1):'')+'</span>';
+ if(m.rev!=null)h+='<span class="eps" data-tip="Revenue: reported '+usd(m.rev)+(m.rev_fc!=null?', '+bmw(m.rev_s)+' the analysts\' forecast of '+usd(m.rev_fc)+' ('+pc(m.rev_s)+')':'')+'">Rev <b class="'+bm(m.rev_s)+'">'+usd(m.rev)+'</b>'+(m.rev_fc!=null?' vs '+usd(m.rev_fc):'')+'</span>';
+ return h}
+function usd(x,eps){if(x==null)return"n/a";if(eps)return(x<0?"−$":"$")+Math.abs(x).toFixed(2);var a=Math.abs(x);return "$"+(a>=1e9?(a/1e9).toFixed(a>=1e11?1:2)+"bn":(a/1e6).toFixed(0)+"m")}
 function fcLine(f){if(!f||(f.eps==null&&f.rev==null))return"";var t=' data-tip="Analysts\' forecasts for this report: earnings per share (EPS) and revenue"',h='';
  if(f.eps!=null)h+='<span class="eps"'+t+'>EPS forecast <b>'+usd(f.eps,1)+'</b></span>';if(f.rev!=null)h+='<span class="eps"'+t+'>Rev forecast <b>'+usd(f.rev)+'</b></span>';return h}
 function surpSentence(m){if(!m||m.eps==null)return"";var t=' EPS came in at <b>'+usd(m.eps,1)+'</b>'+(m.eps_fc!=null?' against a '+usd(m.eps_fc,1)+' forecast ('+sx(m.eps_s)+')':'');
