@@ -763,6 +763,16 @@ def main():
         if (s, u["date"]) in done:
             continue
         past = [m["move"] for m in (hist.get(s) or {}).get("moves", []) if m["date"] < u["date"]][-8:]
+        # EPS/revenue: the actual figures once the company has reported, else the forecasts for the quarter.
+        sp = surprise_for(surp, s, u["date"])
+        if sp:
+            u["surp"] = {k: v for k, v in sp.items() if k != "src"}
+        else:
+            f = dict(uni.get(s, {}).get("fc") or {})
+            if f.get("eps") is None and u.get("eps_fc") is not None:
+                f["eps"] = u["eps_fc"]
+            if f.get("eps") is not None or f.get("rev") is not None:
+                u["fc"] = f
         up_list.append({"symbol": s, **u, "avg_abs": round(sum(abs(x) for x in past) / len(past), 2) if past else None,
                         "n_past": len(past)})
     up_list.sort(key=lambda u: (u["date"], {"bmo": 0, "tbc": 1, "amc": 2}.get(u["time"], 1), -uni.get(u["symbol"], {}).get("cap", 0)))
