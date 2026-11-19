@@ -127,3 +127,5 @@ tv1001684524201,2026-11-19T00:30:00Z,AU,Employment Change,Oct,-43.5,25,-39.3,,K,
 tv1001684524203,2026-11-19T00:30:00Z,AU,Unemployment Rate,Oct,4.9,4.7,4.7,%,,medium
 tv1001694046002,2026-11-19T13:30:00Z,US,Initial Jobless Claims,w/o Nov 9,203,197,202,,K,medium
 tv1001661069103,2026-11-19T13:30:00Z,US,Philadelphia Fed Manufacturing Index,Nov,6.3,20,20.9,,,medium
+tv1001663598901,2026-11-19T23:30:00Z,JP,Core Inflation Rate YoY,Oct,2.2,2.3,2.1,%,,medium
+tv1001663598904,2026-11-19T23:30:00Z,JP,Inflation Rate YoY,Oct,2.3,,2.1,%,,key
