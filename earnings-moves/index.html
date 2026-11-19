@@ -230,9 +230,11 @@ function surpLine(m){if(!m||(m.eps_s==null&&m.rev_s==null))return"";var o=[];
  if(m.eps_s!=null)o.push('EPS '+sx(m.eps_s));if(m.rev_s!=null)o.push('Rev '+sx(m.rev_s));
  return '<span class="eps" data-tip="Earnings per share (EPS) and revenue: % above or below the analysts\' forecast before the report">'+o.join(" · ")+'</span>'}
 function usd(x,eps){if(x==null)return"n/a";if(eps)return(x<0?"−$":"$")+Math.abs(x).toFixed(2);var a=Math.abs(x);return "$"+(a>=1e9?(a/1e9).toFixed(1)+"bn":(a/1e6).toFixed(0)+"m")}
+function fcLine(f){if(!f||(f.eps==null&&f.rev==null))return"";var t=' data-tip="Analysts\' forecasts for this report: earnings per share (EPS) and revenue"',h='';
+ if(f.eps!=null)h+='<span class="eps"'+t+'>EPS forecast <b>'+usd(f.eps,1)+'</b></span>';if(f.rev!=null)h+='<span class="eps"'+t+'>Rev forecast <b>'+usd(f.rev)+'</b></span>';return h}
 function surpSentence(m){if(!m||m.eps==null)return"";var t=' EPS came in at <b>'+usd(m.eps,1)+'</b>'+(m.eps_fc!=null?' against a '+usd(m.eps_fc,1)+' forecast ('+sx(m.eps_s)+')':'');
  if(m.rev!=null)t+=', revenue at <b>'+usd(m.rev)+'</b>'+(m.rev_fc!=null?' against '+usd(m.rev_fc)+' ('+sx(m.rev_s)+')':'');return t+'.'}
-function fcSentence(s){var f=(D.universe[s]||{}).fc;if(!f||(f.eps==null&&f.rev==null))return"";var o=[];if(f.eps!=null)o.push('EPS <b>'+usd(f.eps,1)+'</b>');if(f.rev!=null)o.push('revenue <b>'+usd(f.rev)+'</b>');return ' Analysts forecast '+o.join(" and ")+' for the quarter.'}
+function fcSentence(u){var f=u&&u.fc;if(!f||(f.eps==null&&f.rev==null))return"";var o=[];if(f.eps!=null)o.push('EPS <b>'+usd(f.eps,1)+'</b>');if(f.rev!=null)o.push('revenue <b>'+usd(f.rev)+'</b>');return ' Analysts forecast '+o.join(" and ")+' for the quarter.'}
 function ixDay(d){var x=(D.index_days||{})[d];if(!x||(x.SPX==null&&x.NDX==null))return"";var o=[];
  if(x.SPX!=null)o.push('SPX <b>'+pm(x.SPX,2)+'</b>');if(x.NDX!=null)o.push('Nasdaq 100 <b>'+pm(x.NDX,2)+'</b>');
  return '<span class="ixd tip" tabindex="0" data-nogloss data-tip="How far index options imply the index moves over this one US session, from options expiring that day against those expiring the day before. Covers everything that day: data, central banks and every company reporting. Results out after the US close count in the next session. Nasdaq 100 from QQQ options.">Index options imply for the day: '+o.join(" · ")+'</span>'}
@@ -247,7 +249,7 @@ function upcoming(){
   var big=im==null?'<span class="mu">–</span>':pm(im);
   var sm=im==null?(u.implied?'<small>shown 5 trading days before</small>':'<small>no options data</small>'):(u.implied.days_after>0?'<small>to '+dlabel(u.implied.expiry,{day:"numeric",month:"short"})+' expiry</small>':'<small>'+(u.implied.wide?'wide quotes':'&nbsp;')+'</small>');
   h+='<div class="r'+(OPEN===u.symbol?" open":"")+'" data-s="'+u.symbol+'"><div class="co"><b>'+u.symbol+'</b><small>'+nm(u.symbol)+'</small>'+wts(u.symbol,im)+'</div>'+
-   '<div class="wh">'+(out?'Reported, move due<small>first close after the results</small>':when(u))+'</div>'+
+   '<div class="wh">'+(out?'Reported, move due<small>first close after the results</small>':when(u))+(u.surp?surpLine(u.surp):fcLine(u.fc))+'</div>'+
    '<div class="v big"><small class="lbl">Implied</small>'+big+sm+'</div>'+
    '<div class="v avg"><small class="lbl">Past avg</small>'+(u.avg_abs!=null?pm(u.avg_abs):'<span class="mu">n/a</span>')+'<small>'+(u.n_past?'last '+u.n_past:'')+'</small></div>'+
    '<div class="sc">'+strip(im,p)+'<div class="flag">'+flag(im,p)+'</div></div></div>';
@@ -281,8 +283,8 @@ function detail(s,u){
  if(!M.length)return h+'<p>No past results found for '+s+'.</p></div>';
  var p8=M.filter(function(m){return !u||m.date<u.date}).slice(-8),avg=p8.reduce(function(a,m){return a+Math.abs(m.move)},0)/p8.length;
  if(u&&im!=null){var over=p8.filter(function(m){return Math.abs(m.move)>im}).length;
-  h+='<p>Options imply a <b>'+pm(im)+'</b> move in '+name+' shares for the results on <b>'+dlabel(u.date,{weekday:"long",day:"numeric",month:"short"})+'</b> ('+(u.time==="bmo"?"before the US open":u.time==="amc"?"after the US close":"time not confirmed")+'). Over the last '+p8.length+' reports the shares moved <b>'+pm(avg)+'</b> on average, and moved more than '+pm(im)+' '+over+' time'+(over===1?'':'s')+' out of '+p8.length+'.'+(u.implied.days_after>0?' The nearest expiry is '+dlabel(u.implied.expiry,{weekday:"short",day:"numeric",month:"short"})+', so the options implied move also covers '+u.implied.days_after+' extra day'+(u.implied.days_after>1?'s':'')+'.':'')+ixSentence(s,im,name)+(reported(u)?'':fcSentence(s))+'</p>';}
- else{var l=M[M.length-1];h+='<p>'+name+' shares moved <b>'+pc(l.move)+'</b> after the results on '+dlabel(l.date,{weekday:"long",day:"numeric",month:"short"})+(l.implied!=null?', against an options implied move of <b>'+pm(l.implied)+'</b> implied the night before':'')+'.'+surpSentence(l)+' Over the last '+p8.length+' reports the average move was <b>'+pm(avg)+'</b>.</p>'}
+  h+='<p>Options imply a <b>'+pm(im)+'</b> move in '+name+' shares for the results on <b>'+dlabel(u.date,{weekday:"long",day:"numeric",month:"short"})+'</b> ('+(u.time==="bmo"?"before the US open":u.time==="amc"?"after the US close":"time not confirmed")+'). Over the last '+p8.length+' reports the shares moved <b>'+pm(avg)+'</b> on average, and moved more than '+pm(im)+' '+over+' time'+(over===1?'':'s')+' out of '+p8.length+'.'+(u.implied.days_after>0?' The nearest expiry is '+dlabel(u.implied.expiry,{weekday:"short",day:"numeric",month:"short"})+', so the options implied move also covers '+u.implied.days_after+' extra day'+(u.implied.days_after>1?'s':'')+'.':'')+ixSentence(s,im,name)+(u.surp?surpSentence(u.surp):fcSentence(u))+'</p>';}
+ else{var l=M[M.length-1];h+='<p>'+(u?name+' reports on <b>'+dlabel(u.date,{weekday:"long",day:"numeric",month:"short"})+'</b>.'+(u.surp?surpSentence(u.surp):fcSentence(u))+' ':'')+name+' shares moved <b>'+pc(l.move)+'</b> after the results on '+dlabel(l.date,{weekday:"long",day:"numeric",month:"short"})+(l.implied!=null?', against an options implied move of <b>'+pm(l.implied)+'</b> implied the night before':'')+'.'+surpSentence(l)+' Over the last '+p8.length+' reports the average move was <b>'+pm(avg)+'</b>.</p>'}
  var mx=Math.max.apply(0,M.map(function(m){return Math.max(Math.abs(m.move),m.implied||0)}).concat([im||0,2]))*1.15,step=mx>20?10:mx>8?5:2;
  function y(v){return(50-v/mx*50).toFixed(2)+'%'}
  h+='<div class="bars"><div class="zero" style="top:50%"></div>';
