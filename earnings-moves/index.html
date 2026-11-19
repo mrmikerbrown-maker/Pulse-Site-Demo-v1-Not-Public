@@ -139,6 +139,8 @@ details.how p{max-width:78ch;margin:10px 0}
 }
 .v small.lbl{display:none;font-size:10px;letter-spacing:.06em;text-transform:uppercase}
 @media (max-width:760px){.v small.lbl{display:block}}
+#emtip{position:fixed;z-index:70;display:none;max-width:300px;background:var(--card);color:var(--text2);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px rgba(0,0,0,.28);padding:10px 13px;font-size:13px;line-height:1.45;text-transform:none;letter-spacing:normal;font-weight:400;white-space:normal}
+.tip.on{border-bottom-color:var(--text)}
 </style>
 <script src="../nav.js" defer></script>
 <link rel="icon" type="image/png" sizes="32x32" href="../brand/logo/icon-32.png">
@@ -188,9 +190,9 @@ function offMin(tz,d){var p={};new Intl.DateTimeFormat("en-US",{timeZone:tz,hour
 function nyTime(date,h,m){var g=Date.UTC(+date.slice(0,4),+date.slice(5,7)-1,+date.slice(8,10),h,m);var o=offMin("America/New_York",new Date(g+5*36e5));return new Date(g-o*6e4)}
 function lt(date,h,m){return ldn(nyTime(date,h,m),{hour:"2-digit",minute:"2-digit"})}
 function when(u){
- if(u.time==="bmo")return '<span class="tip" title="Results come out before US trading starts at 9:30 New York time ('+lt(u.date,9,30)+' London), so the move shows in that day\'s close.">Before the US open</span>';
- if(u.time==="amc")return '<span class="tip" title="Results come out after US trading ends at 16:00 New York time ('+lt(u.date,16,0)+' London), so the move shows in the next day\'s close.">After the US close</span>';
- return '<span class="tip" title="The company hasn\'t said yet whether results come before the US open or after the US close.">Time not confirmed</span>';
+ if(u.time==="bmo")return '<span class="tip" tabindex="0" data-tip="Results come out before US trading starts at 9:30 New York time ('+lt(u.date,9,30)+' London), so the move shows in that day\'s close.">Before the US open</span>';
+ if(u.time==="amc")return '<span class="tip" tabindex="0" data-tip="Results come out after US trading ends at 16:00 New York time ('+lt(u.date,16,0)+' London), so the move shows in the next day\'s close.">After the US close</span>';
+ return '<span class="tip" tabindex="0" data-tip="The company hasn\'t said yet whether results come before the US open or after the US close.">Time not confirmed</span>';
 }
 var IXN={SPX:["SPX","S&amp;P 500"],NDX:["NDX","Nasdaq 100"],DOW:["Dow","Dow"]};
 /* Index weights under each name. With an options implied move, each also shows the index move that this stock
@@ -226,14 +228,14 @@ function strip(imp,moves){
 function sx(x){return x==null?'<span class="mu">n/a</span>':'<b class="'+cls(x)+'">'+pc(x)+'</b>'}
 function surpLine(m){if(!m||(m.eps_s==null&&m.rev_s==null))return"";var o=[];
  if(m.eps_s!=null)o.push('EPS '+sx(m.eps_s));if(m.rev_s!=null)o.push('Rev '+sx(m.rev_s));
- return '<span class="eps" title="Earnings per share (EPS) and revenue: % above or below the analysts\' forecast before the report">'+o.join(" · ")+'</span>'}
+ return '<span class="eps" data-tip="Earnings per share (EPS) and revenue: % above or below the analysts\' forecast before the report">'+o.join(" · ")+'</span>'}
 function usd(x,eps){if(x==null)return"n/a";if(eps)return(x<0?"−$":"$")+Math.abs(x).toFixed(2);var a=Math.abs(x);return "$"+(a>=1e9?(a/1e9).toFixed(1)+"bn":(a/1e6).toFixed(0)+"m")}
 function surpSentence(m){if(!m||m.eps==null)return"";var t=' EPS came in at <b>'+usd(m.eps,1)+'</b>'+(m.eps_fc!=null?' against a '+usd(m.eps_fc,1)+' forecast ('+sx(m.eps_s)+')':'');
  if(m.rev!=null)t+=', revenue at <b>'+usd(m.rev)+'</b>'+(m.rev_fc!=null?' against '+usd(m.rev_fc)+' ('+sx(m.rev_s)+')':'');return t+'.'}
 function fcSentence(s){var f=(D.universe[s]||{}).fc;if(!f||(f.eps==null&&f.rev==null))return"";var o=[];if(f.eps!=null)o.push('EPS <b>'+usd(f.eps,1)+'</b>');if(f.rev!=null)o.push('revenue <b>'+usd(f.rev)+'</b>');return ' Analysts forecast '+o.join(" and ")+' for the quarter.'}
 function ixDay(d){var x=(D.index_days||{})[d];if(!x||(x.SPX==null&&x.NDX==null))return"";var o=[];
  if(x.SPX!=null)o.push('SPX <b>'+pm(x.SPX,2)+'</b>');if(x.NDX!=null)o.push('Nasdaq 100 <b>'+pm(x.NDX,2)+'</b>');
- return '<span class="ixd" title="How far index options imply the index moves over this one US session, from options expiring that day against those expiring the day before. Covers everything that day: data, central banks and every company reporting. Results out after the US close count in the next session. Nasdaq 100 from QQQ options.">Index options imply for the day: '+o.join(" · ")+'</span>'}
+ return '<span class="ixd tip" tabindex="0" data-nogloss data-tip="How far index options imply the index moves over this one US session, from options expiring that day against those expiring the day before. Covers everything that day: data, central banks and every company reporting. Results out after the US close count in the next session. Nasdaq 100 from QQQ options.">Index options imply for the day: '+o.join(" · ")+'</span>'}
 
 function upcoming(){
  var U=D.upcoming||[],h='',last="";
@@ -346,6 +348,18 @@ fetch("data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()
  $("recc").hidden=true;draw();
  var hs=decodeURIComponent(location.hash.slice(1)).toUpperCase();if(hs&&D.universe[hs]){$("q").value=hs;look(hs)}
 }).catch(function(){$("uplist").innerHTML='<div class="empty">The data could not load. Try again in a minute.</div>'});
+
+/* Pop-up for the dotted-underlined terms: shows on hover with a mouse, on tap on a phone (the tap doesn't open the row). */
+(function(){var t=document.createElement("div"),cur=null,tm=0,fine=matchMedia("(hover:hover) and (pointer:fine)");t.id="emtip";t.setAttribute("role","tooltip");document.body.appendChild(t);
+ function show(el){clearTimeout(tm);if(cur)cur.classList.remove("on");cur=el;el.classList.add("on");t.textContent=el.getAttribute("data-tip");t.style.display="block";t.style.visibility="hidden";
+  var r=el.getBoundingClientRect(),w=Math.min(300,innerWidth-24);t.style.width=w+"px";t.style.left=Math.max(12,Math.min(innerWidth-w-12,r.left+r.width/2-w/2))+"px";
+  var h=t.offsetHeight,top=r.bottom+8;if(top+h>innerHeight-8&&r.top-h-8>8)top=r.top-h-8;t.style.top=Math.max(8,top)+"px";t.style.visibility="visible"}
+ function hide(){clearTimeout(tm);t.style.display="none";if(cur)cur.classList.remove("on");cur=null}
+ document.addEventListener("mouseover",function(e){if(!fine.matches)return;var el=e.target.closest&&e.target.closest("[data-tip]");if(el){if(el!==cur){clearTimeout(tm);tm=setTimeout(function(){show(el)},80)}else clearTimeout(tm)}else if(cur){clearTimeout(tm);tm=setTimeout(hide,150)}});
+ document.addEventListener("click",function(e){var el=e.target.closest&&e.target.closest("[data-tip]");if(el&&!fine.matches){e.stopPropagation();e.preventDefault();if(cur===el)hide();else show(el)}else if(!el)hide()},true);
+ document.addEventListener("focusin",function(e){if(e.target.getAttribute&&e.target.getAttribute("data-tip")&&e.target.matches(":focus-visible"))show(e.target)});
+ document.addEventListener("focusout",hide);document.addEventListener("keydown",function(e){if(e.key==="Escape")hide()});
+ addEventListener("scroll",hide,{passive:true});addEventListener("resize",hide)})();
 </script>
 </body>
 </html>
