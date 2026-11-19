@@ -19,7 +19,8 @@ job started saving them (implied-log.csv, one row per stock per run, kept for go
 
 If a source fails, the last good numbers are kept, the problem is listed in data.json "problems" and the job still
 finishes green."""
-import csv, json, os, sys, time, datetime as dt
+import csv
+import math, json, os, sys, time, datetime as dt
 from zoneinfo import ZoneInfo
 import requests
 
@@ -38,6 +39,13 @@ MAX_ARCHIVE_CALLS = 450  # Nasdaq calendar days read per run: the ~3-year backfi
 WORKERS = 3              # downloads at once
 HIST_VERSION = 3         # bump to force every stock's past moves to be recomputed
 ARCH = os.path.join(HERE, "calendar-archive.json")
+SURP = os.path.join(HERE, "surprises.json")  # EPS and revenue against forecasts, per report, kept between runs
+# US market holidays (NYSE), so index options expiries either side of one count as one session apart
+HOLIDAYS = {"2026-11-26", "2026-12-25", "2027-01-01", "2027-01-18", "2027-02-15", "2027-03-26", "2027-05-31",
+            "2027-06-18", "2027-07-05", "2027-09-06", "2027-11-25", "2027-12-24", "2028-01-17", "2028-02-21"}
+# Index options used for each index's implied move per session: SPX has options expiring every weekday;
+# NDX options don't, so QQQ (the Nasdaq 100 ETF), which does, stands in for the Nasdaq 100.
+IDX_OPT = {"SPX": ("_SPX", "SPXW"), "NDX": ("QQQ", "QQQ")}
 BROWSER = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
 NASDAQ_H = {"Origin": "https://www.nasdaq.com", "Referer": "https://www.nasdaq.com/", "Accept": "application/json, text/plain, */*"}
 TV_H = {"Origin": "https://www.tradingview.com", "Referer": "https://www.tradingview.com/", "Content-Type": "application/json"}
@@ -281,6 +289,82 @@ def mid(o):
     return None, None
 
 
+def atm_straddle(chain, price):
+    """chain = {strike: {"C": option, "P": option}} for one expiry. Call + put at the money, interpolated between
+    the strikes either side of the price. Returns (straddle, worst bid/ask spread as a share of mid, [(strike, ...)])."""
+    strikes = sorted(k for k, v in chain.items() if "C" in v and "P" in v)
+    below = [k for k in strikes if k <= price]
+    above = [k for k in strikes if k >= price]
+    if not below or not above:
+        raise ValueError("price outside strikes")
+    pts = []
+    for k in sorted({below[-1], above[0]}):
+        c, cs = mid(chain[k]["C"])
+        p, ps = mid(chain[k]["P"])
+        if c is None or p is None:
+            continue
+        pts.append((k, c + p, max(cs, ps)))
+    if not pts:
+        raise ValueError("no two-sided quotes at the money")
+    if len(pts) == 2 and pts[1][0] != pts[0][0]:
+        w = (price - pts[0][0]) / (pts[1][0] - pts[0][0])
+        straddle = pts[0][1] * (1 - w) + pts[1][1] * w
+    else:
+        straddle = pts[0][1]
+    return straddle, max(p[2] for p in pts), pts
+
+
+def sessions_between(a, b):
+    """US trading sessions after date a up to and including date b."""
+    n, d = 0, a
+    while d < b:
+        d += dt.timedelta(days=1)
+        if d.weekday() < 5 and iso(d) not in HOLIDAYS:
+            n += 1
+    return n
+
+
+def index_days(sess):
+    """{date: {"SPX": %, "NDX": %}}: the move index options imply for each coming session on its own.
+    Straddles on consecutive daily expiries are turned into one day's move: an at-the-money straddle grows with
+    the square root of time, so (move to expiry)^2 minus (move to the expiry before)^2 leaves that one session's
+    share. A busy day (CPI, payrolls, the Fed, Nvidia results) shows up as a bigger number than the days around it."""
+    out = {}
+    for ix, (sym, root) in IDX_OPT.items():
+        try:
+            d = fetch("https://cdn.cboe.com/api/global/delayed_quotes/options/%s.json" % sym, tries=2, timeout=90).json()["data"]
+            price = d.get("current_price") or d.get("close")
+            by = {}
+            for o in d["options"]:
+                code = o["option"]
+                if code[:-15] != root:
+                    continue
+                tail = code[-15:]
+                exp = dt.date(2000 + int(tail[:2]), int(tail[2:4]), int(tail[4:6]))
+                if exp <= sess or (exp - sess).days > 21:
+                    continue
+                by.setdefault(exp, {}).setdefault(int(tail[7:]) / 1000.0, {})[tail[6]] = o
+            prev_var, prev_exp, n = 0.0, sess, 0
+            for exp in sorted(by):
+                try:
+                    st, spread, _ = atm_straddle(by[exp], price)
+                except ValueError as e:
+                    print("  %s %s: %s" % (ix, exp, e))
+                    continue
+                var = (st / price * 100) ** 2
+                gap = sessions_between(prev_exp, exp)
+                if var > prev_var and gap == 1:
+                    out.setdefault(iso(exp), {})[ix] = round(math.sqrt(var - prev_var), 2)
+                    n += 1
+                prev_var, prev_exp = max(prev_var, var), exp
+            print("Index options %s (%s): %d sessions" % (ix, sym, n))
+            if not n:
+                note("%s options gave no per-day implied moves" % ix)
+        except Exception as e:
+            note("%s index options failed: %s" % (ix, e))
+    return out
+
+
 def implied_move(sym, report_date, when):
     """ATM straddle for the first expiry on/after the day the report hits the price."""
     root, d = cboe_chain(sym)
@@ -304,26 +388,7 @@ def implied_move(sym, report_date, when):
     if not by:
         raise ValueError("no expiry after %s" % first)
     exp = min(by)
-    strikes = sorted(k for k, v in by[exp].items() if "C" in v and "P" in v)
-    below = [k for k in strikes if k <= price]
-    above = [k for k in strikes if k >= price]
-    if not below or not above:
-        raise ValueError("price outside strikes")
-    pts = []
-    for k in sorted({below[-1], above[0]}):
-        c, cs = mid(by[exp][k]["C"])
-        p, ps = mid(by[exp][k]["P"])
-        if c is None or p is None:
-            continue
-        pts.append((k, c + p, max(cs, ps)))
-    if not pts:
-        raise ValueError("no two-sided quotes at the money")
-    if len(pts) == 2 and pts[1][0] != pts[0][0]:
-        w = (price - pts[0][0]) / (pts[1][0] - pts[0][0])
-        straddle = pts[0][1] * (1 - w) + pts[1][1] * w
-    else:
-        straddle = pts[0][1]
-    spread = max(p[2] for p in pts)
+    straddle, spread, pts = atm_straddle(by[exp], price)
     return {
         "move": round(straddle / price * 100, 2),
         "straddle": round(straddle, 2),
@@ -397,6 +462,81 @@ def archive_reports(arch, sym, before):
     return out
 
 
+# ---------- EPS and revenue against forecasts ----------
+def tv_surprises(uni, surp):
+    """Latest reported quarter from TradingView: EPS and revenue, actual vs forecast. Saved per report date so
+    the history builds up (TradingView only gives the latest quarter). Also returns the next quarter's forecasts."""
+    cols = ["name", "earnings_release_date", "earnings_per_share_fq", "earnings_per_share_forecast_fq", "eps_surprise_percent_fq",
+            "revenue_fq", "revenue_forecast_fq", "revenue_surprise_percent_fq",
+            "earnings_per_share_forecast_next_fq", "revenue_forecast_next_fq"]
+    fc = {}
+    try:
+        rows = tv_scan(cols=cols, n=500)
+    except Exception as e:
+        note("TradingView EPS/revenue lookup failed: %s" % e)
+        return fc
+    r2 = lambda x, n=2: None if x is None else round(x, n)
+    for r in rows:
+        sym = (r["name"] or "").replace("/", ".").upper()
+        if sym not in uni:
+            continue
+        if r.get("earnings_per_share_forecast_next_fq") is not None or r.get("revenue_forecast_next_fq") is not None:
+            fc[sym] = {"eps": r2(r.get("earnings_per_share_forecast_next_fq")), "rev": r2(r.get("revenue_forecast_next_fq"), -6)}
+        if not r.get("earnings_release_date") or r.get("earnings_per_share_fq") is None:
+            continue
+        d = dt.datetime.fromtimestamp(r["earnings_release_date"], NY).date().isoformat()
+        rec = {"eps": r2(r.get("earnings_per_share_fq")), "eps_fc": r2(r.get("earnings_per_share_forecast_fq")),
+               "eps_s": r2(r.get("eps_surprise_percent_fq"), 1), "rev": r2(r.get("revenue_fq"), -6),
+               "rev_fc": r2(r.get("revenue_forecast_fq"), -6), "rev_s": r2(r.get("revenue_surprise_percent_fq"), 1), "src": "TradingView"}
+        surp.setdefault(sym, {})[d] = {k: v for k, v in rec.items() if v is not None}
+    return fc
+
+
+def nasdaq_eps_history(syms, surp, today):
+    """EPS vs forecast for each company's last 4 reports, from Nasdaq (no revenue there). Read once per company,
+    then again after each new report. Doesn't overwrite TradingView's record of the same report."""
+    def one(s):
+        j = fetch("https://api.nasdaq.com/api/company/%s/earnings-surprise" % s.replace(".", "%5E"), headers=NASDAQ_H, tries=2, timeout=20).json()
+        rows = ((((j.get("data") or {}).get("earningsSurpriseTable") or {}).get("rows")) or [])
+        out = {}
+        for r in rows:
+            try:
+                m, d, y = r["dateReported"].split("/")
+                out["%s-%02d-%02d" % (y, int(m), int(d))] = {"eps": money(r.get("eps")), "eps_fc": money(r.get("consensusForecast")),
+                                                           "eps_s": money(r.get("percentageSurprise")), "src": "Nasdaq"}
+            except Exception:
+                pass
+        return out
+    from concurrent.futures import ThreadPoolExecutor
+    fails = 0
+    with ThreadPoolExecutor(WORKERS) as ex:
+        for s, fut in [(s, ex.submit(one, s)) for s in syms]:
+            try:
+                got = fut.result()
+                cur = surp.setdefault(s, {})
+                for d, rec in got.items():
+                    if not any(abs((dt.date.fromisoformat(d) - dt.date.fromisoformat(k)).days) <= 3 and v.get("src") == "TradingView" for k, v in cur.items()):
+                        cur[d] = {k: v for k, v in rec.items() if v is not None}
+                cur["_nasdaq"] = iso(today)
+            except Exception as e:
+                fails += 1
+                print("  %-6s Nasdaq EPS history failed: %s" % (s, e))
+    if fails > len(syms) / 3 and fails > 5:
+        note("Nasdaq EPS history failed for %d stock(s)" % fails)
+
+
+def surprise_for(surp, sym, date):
+    """The EPS/revenue record closest to a report date (within 3 days)."""
+    best = None
+    for k, v in (surp.get(sym) or {}).items():
+        if k.startswith("_"):
+            continue
+        gap = abs((dt.date.fromisoformat(k) - dt.date.fromisoformat(date)).days)
+        if gap <= 3 and (best is None or gap < best[0] or (gap == best[0] and v.get("src") == "TradingView")):
+            best = (gap, v)
+    return best[1] if best else None
+
+
 # ---------- prices ----------
 def nasdaq_closes(sym, since):
     s = sym.replace(".", "%5E") if "." in sym else sym
@@ -457,6 +597,11 @@ def main():
 
     uni, tv_next = universe(prev)
     syms = set(uni)
+    surp = load_json(SURP)
+    fc = tv_surprises(uni, surp)
+    for s, f in fc.items():
+        uni[s]["fc"] = f
+    idx_days = index_days(sess) or prev.get("index_days") or {}
 
     # Calendar: recent past plus the next AHEAD_DAYS.
     cal, fails = nasdaq_calendar(syms, today_ny - dt.timedelta(days=RECENT_DAYS), today_ny + dt.timedelta(days=AHEAD_DAYS))
@@ -565,6 +710,21 @@ def main():
     if hist_fail:
         note("Past moves could not be refreshed for %d stock(s); older data kept" % hist_fail)
 
+    # EPS history from Nasdaq: once per company, and again for companies that reported in the last few days.
+    need = [s for s in sorted(syms) if not (surp.get(s) or {}).get("_nasdaq") or
+            (s in recent_set and (surp.get(s) or {}).get("_nasdaq", "") < iso(today_ny - dt.timedelta(days=1)))]
+    print("Nasdaq EPS history to read:", len(need))
+    nasdaq_eps_history(need, surp, today_ny)
+    with open(SURP, "w") as f:
+        json.dump({s: surp[s] for s in sorted(surp)}, f, separators=(",", ":"))
+    for s, h in hist.items():
+        for m in h.get("moves", []):
+            for k in ("eps", "eps_fc", "eps_s", "rev", "rev_fc", "rev_s"):
+                m.pop(k, None)
+            sp = surprise_for(surp, s, m["date"])
+            if sp:
+                m.update({k: v for k, v in sp.items() if k != "src"})
+
     # Attach the implied move captured before each past report (from our own log).
     for s, h in hist.items():
         for m in h.get("moves", []):
@@ -603,6 +763,7 @@ def main():
         "min_cap_bn": MIN_CAP / 1e9,
         "universe": uni,
         "indices": index_levels(),
+        "index_days": idx_days,
         "upcoming": up_list,
         "recent": recent,
         "history": {s: hist[s] for s in sorted(hist) if s in uni},

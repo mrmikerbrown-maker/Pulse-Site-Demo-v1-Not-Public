@@ -24,4 +24,4 @@ jobs:
       - run: python build.py
       - env:
           GH_TOKEN: ${{ github.token }}
-        run: bash ../.github/save.sh "Update earnings moves data" data.json implied-log.csv calendar-archive.json
+        run: bash ../.github/save.sh "Update earnings moves data" data.json implied-log.csv calendar-archive.json surprises.json
