@@ -1,5 +1,5 @@
 Index,Google ticker,Sector,Ref mcap $bn (NDX rows: QQQ weight % / price on weights date x1000),Symbol,Name,In top 50,Weight %,% chg,Dow pts,Check: sum of members (pts),Check: weights sum %,"Prev close (NDX rows, rolls the weights)","Company name (static, for the site's stock lookup)"
-IDX_SPX,,,"7,175.83",SPX,19 Nov 16:59,,"7,323.63",-2.018124892,,-146.3422526,100,,
+IDX_SPX,,,"7,175.83",SPX,19 Nov 16:59,,"7,323.63",-2.018124892,,-146.5539301,100,,
 IDX_NDX,,,"26,517.05",NDX,19 Nov 17:15,,"27,116.26",-2.209781142,,-595.2443417,100,,
 IDX_DOW,,,"49,097.06",DOW,19 Nov 16:59,,"50,198.17",-2.193526178,,"-1,095.41",100,,
 DIVISOR,,,,DOW,,,0.168229,,,,,,
@@ -45,7 +45,7 @@ SPX,NYSE:MS,FIN,289.5,MS,Morgan Stanley,TRUE,0.3423677423,-3.42,,,,,Morgan Stanl
 SPX,NYSE:CAT,IND,286.3,CAT,"Caterpillar, Inc.",TRUE,0.4061118326,-3.83,,,,,"Caterpillar, Inc."
 SPX,NASDAQ:TXN,IT,274.9,TXN,Texas Instruments Incorporated,TRUE,0.4221517996,-2.28,,,,,Texas Instruments Incorporated
 SPX,NYSE:GS,FIN,260.5,GS,"Goldman Sachs Group, Inc.",TRUE,0.4009840332,-2.94,,,,,"Goldman Sachs Group, Inc. (The)"
-SPX,NYSE:RTX,IND,269.6,RTX,RTX Corporation,TRUE,0.4221268182,-2.03,,,,,RTX Corporation
+SPX,NYSE:RTX,IND,269.6,RTX,RTX Corporation,TRUE,0.4221268182,-2.4,,,,,RTX Corporation
 SPX,NASDAQ:CRWD,IT,256.4,CRWD,"CrowdStrike Holdings, Inc.",TRUE,0.372554754,2.71,,,,,"CrowdStrike Holdings, Inc."
 SPX,NYSE:TMO,HC,257.7,TMO,Thermo Fisher Scientific Inc,TRUE,0.4048921886,-0.58,,,,,Thermo Fisher Scientific Inc
 SPX,NASDAQ:NFLX,COM,254.9,NFLX,"Netflix, Inc.",TRUE,0.3893599977,-2.27,,,,,"Netflix, Inc."
@@ -156,7 +156,7 @@ SPX,NASDAQ:APP,COM,76.5,APP,,FALSE,0.1122102411,-3.04,,,,,Applovin Corporation
 SPX,NYSE:EOG,EN,86.8,EOG,,FALSE,0.1273182867,-0.13,,,,,"EOG Resources, Inc."
 SPX,NYSE:ECL,MAT,85,ECL,,FALSE,0.1246780457,-1.12,,,,,Ecolab Inc.
 SPX,NASDAQ:REGN,HC,95.5,REGN,,FALSE,0.1400794514,-2.35,,,,,"Regeneron Pharmaceuticals, Inc."
-SPX,NYSE:MCO,FIN,85.2,MCO,,FALSE,0.1249714058,-1.96,,,,,Moody's Corporation
+SPX,NYSE:MCO,FIN,85.2,MCO,,FALSE,0.1249714058,-2.18,,,,,Moody's Corporation
 SPX,NASDAQ:LITE,IT,76.2,LITE,,FALSE,0.111770201,-2.89,,,,,Lumentum Holdings Inc.
 SPX,NYSE:RCL,CD,82.2,RCL,,FALSE,0.1205710042,-5.46,,,,,Royal Caribbean Cruises Ltd.
 SPX,NASDAQ:HOOD,FIN,76.6,HOOD,,FALSE,0.1123569212,-0.75,,,,,"Robinhood Markets, Inc."
@@ -182,7 +182,7 @@ SPX,NASDAQ:ROST,CD,72.9,ROST,,FALSE,0.1069297592,-3.41,,,,,"Ross Stores, Inc."
 SPX,NYSE:RSG,IND,74.7,RSG,,FALSE,0.1095700002,-1.07,,,,,"Republic Services, Inc."
 SPX,NYSE:GM,CD,73.7,GM,,FALSE,0.1081031996,0,,,,,General Motors Company
 SPX,NYSE:FDX,IND,73.4,FDX,,FALSE,0.1076631595,-1.15,,,,,FedEx Corporation
-SPX,NYSE:CMI,IND,68.8,CMI,,FALSE,0.100915877,-1.4,,,,,Cummins Inc.
+SPX,NYSE:CMI,IND,68.8,CMI,,FALSE,0.100915877,-1.91,,,,,Cummins Inc.
 SPX,NASDAQ:ORLY,CD,71.3,ORLY,,FALSE,0.1045828783,-0.81,,,,,"O'Reilly Automotive, Inc."
 SPX,NASDAQ:HON,IND,69.3,HON,,FALSE,0.1016492773,-2.18,,,,,Honeywell International Inc.
 SPX,NASDAQ:AEP,UT,70.9,AEP,,FALSE,0.1039961581,-1.21,,,,,"American Electric Power Company, Inc."
@@ -199,7 +199,7 @@ SPX,NYSE:BE,IND,60.1,BE,,FALSE,0.08815471232,-1.68,,,,,Bloom Energy Corporation
 SPX,NYSE:TDG,IND,63.4,TDG,,FALSE,0.09299515409,-1.6,,,,,Transdigm Group Inc.
 SPX,NYSE:ALL,FIN,65.7,ALL,,FALSE,0.09636879533,0.07,,,,,Allstate Corporation (The)
 SPX,NYSE:GWW,IND,64,GWW,,FALSE,0.09387523442,-1.67,,,,,"W.W. Grainger, Inc."
-SPX,NYSE:TEL,IT,61.7,TEL,,FALSE,0.09050159318,-0.41,,,,,TE Connectivity plc
+SPX,NYSE:TEL,IT,61.7,TEL,,FALSE,0.09050159318,-0.78,,,,,TE Connectivity plc
 SPX,NYSE:MET,FIN,63.6,MET,,FALSE,0.0932885142,-2.19,,,,,"MetLife, Inc."
 SPX,NYSE:COR,HC,63.1,COR,,FALSE,0.09255511393,-2.03,,,,,"Cencora, Inc."
 SPX,NYSE:OXY,EN,64,OXY,,FALSE,0.09387523442,0.09,,,,,Occidental Petroleum Corporation
@@ -417,7 +417,7 @@ SPX,NASDAQ:FSLR,IT,18.7,FSLR,,FALSE,0.02742917006,0.64,,,,,"First Solar, Inc."
 SPX,NYSE:DD,IND,18.9,DD,,FALSE,0.02772253016,-0.36,,,,,"DuPont de Nemours, Inc."
 SPX,NYSE:ZBH,HC,18,ZBH,,FALSE,0.02640240968,-1.81,,,,,"Zimmer Biomet Holdings, Inc."
 SPX,NYSE:RVTY,HC,17.5,RVTY,,FALSE,0.02566900941,-0.55,,,,,"Revvity, Inc."
-SPX,NYSE:SNA,IND,18.3,SNA,,FALSE,0.02684244984,-1.22,,,,,Snap-On Incorporated
+SPX,NYSE:SNA,IND,18.3,SNA,,FALSE,0.02684244984,-1.98,,,,,Snap-On Incorporated
 SPX,NYSE:BG,CS,18.6,BG,,FALSE,0.02728249,-1.55,,,,,Bunge Limited
 SPX,NASDAQ:NDSN,IND,18,NDSN,,FALSE,0.02640240968,-1.72,,,,,Nordson Corporation
 SPX,NASDAQ:LNT,UT,18.6,LNT,,FALSE,0.02728249,-0.94,,,,,Alliant Energy Corporation
