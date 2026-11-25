@@ -118,6 +118,16 @@ var GG=[
 ["Expiry","The date an option ends. Big US stocks have options expiring every Friday, some on other weekdays too.",["expiry","expiries"]],
 ["Before the open / after the close","When a company releases results: before US trading starts at 9:30 New York time, or after it ends at 16:00. Results after the close show up in the next day's price.",["before the open","after the close","before the US open","after the US close"]]
 ]],
+["Positioning",[
+["Commitments of Traders (COT)","A weekly report from the CFTC, the US futures regulator, showing how many futures contracts each type of trader holds long and short. Positions are taken on Tuesday and published on Friday.",["Commitments of Traders","COT report"]],
+["Speculators (non-commercial)","Traders in a futures market who are there to profit from price moves rather than to hedge a business. In the CFTC's oldest report they are called 'non-commercial'. It is the figure news wires quote as 'speculators'.",["speculator","speculators","non-commercial"]],
+["Managed money","Hedge funds and commodity trading advisers (CTAs) in the CFTC's commodity report. It is the usual measure of speculators in oil, metals and crops.",["managed money"]],
+["Leveraged funds","Hedge funds and other trading firms in the CFTC's report on financial futures (currencies, bonds, stock indices). Narrower than 'non-commercial', which also includes asset managers.",["leveraged funds"]],
+["Net position","Long contracts minus short contracts. A positive number is net long (betting on a rise), a negative number is net short.",["net position","net long","net short"]],
+["Open interest","The total number of futures contracts still open in a market. Used to compare positions in markets of different sizes.",["open interest","open contracts"]],
+["Crowded trade","When many traders hold the same position. If the news turns against it, they can all rush to exit at once and the move can be sharp.",["crowded","crowding"]],
+["Basis trade","Buying a bond and selling its futures contract to earn the small price gap between them. It makes hedge funds look very short Treasury futures even when they are not betting on higher yields.",["basis trade"]]
+]],
 ["News and events",[
 ["Tariffs","Taxes a government puts on imported goods. News about tariffs can move markets more than economic data because it changes the outlook for growth, inflation and company profits.",["tariff","tariffs"]],
 ["Trade war / truce","A trade war is when countries keep raising tariffs against each other. A truce or a deal pauses or reduces them, which markets usually cheer.",["trade war","truce","trade deal"]],
