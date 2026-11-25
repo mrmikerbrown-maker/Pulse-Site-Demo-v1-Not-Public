@@ -30,15 +30,18 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
 .tk{display:flex;align-items:stretch;gap:8px;margin:0 0 14px;min-height:36px}
 .tk-l{flex:none;display:flex;flex-direction:column;justify-content:center;padding:0 10px 0 2px;font-size:11px;line-height:1.2;color:var(--muted);border-right:1px solid var(--line)}
 .tk-l b{font-size:13px;color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
-.tk-v{flex:1;min-width:0;overflow:hidden;position:relative;-webkit-mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 40px),transparent);cursor:pointer}
+.tk-v{flex:1;min-width:0;overflow:hidden;position:relative;-webkit-mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 40px),transparent);}
 .tk-t{display:flex;gap:8px;width:max-content;animation:tick var(--dur,150s) linear infinite}
-.tk-v:hover .tk-t,.tk-v.paused .tk-t{animation-play-state:paused}
+.tk-v.paused .tk-t{animation-play-state:paused}
+.tk-pp{appearance:none;flex:none;align-self:center;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text2);cursor:pointer}
+.tk-pp:hover{color:var(--text);border-color:var(--accent)}
+.tk-pp svg{width:12px;height:12px;fill:currentColor}
+.tk-pp .i-play,.tk-pp.paused .i-pause{display:none}.tk-pp.paused .i-play{display:block}
 @keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 .tc{flex:none;display:flex;gap:8px;align-items:baseline;padding:7px 11px;border-radius:9px;font-size:13px;border:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
 .tc i{font-style:normal;color:var(--text2)}.tc b{font-weight:700;color:var(--text2)}
 .tc.u{background:rgba(var(--uprgb),.10);border-color:rgba(var(--uprgb),.28)}.tc.u b{color:var(--up)}
 .tc.d{background:rgba(var(--dnrgb),.10);border-color:rgba(var(--dnrgb),.28)}.tc.d b{color:var(--down)}
-@media (prefers-reduced-motion:reduce){.tk-v{overflow-x:auto;-webkit-mask-image:none;mask-image:none}.tk-t{animation:none}}
 
 /* ---------- Four tiles ---------- */
 .tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
@@ -121,9 +124,10 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
  <h1>What's moving markets today</h1>
  <p class="sub">Your daily view of the markets: live prices, what's coming up, and what it all means.</p>
 
- <div class="tk" aria-label="Latest prices">
+ <div class="tk" aria-label="Latest prices" data-nogloss>
   <div class="tk-l">Prices<b id="tk-asof">…</b></div>
-  <div class="tk-v" id="tk-v" title="Hover or tap to pause"><div class="tk-t" id="tk"></div></div>
+  <div class="tk-v" id="tk-v"><div class="tk-t" id="tk"></div></div>
+  <button class="tk-pp" id="tk-pp" type="button" aria-label="Pause the prices" title="Pause"><svg class="i-pause" viewBox="0 0 12 12" aria-hidden="true"><rect x="2" y="1.5" width="3" height="9" rx=".6"/><rect x="7" y="1.5" width="3" height="9" rx=".6"/></svg><svg class="i-play" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 1.6v8.8a.6.6 0 0 0 .9.5l7-4.4a.6.6 0 0 0 0-1L3.9 1.1a.6.6 0 0 0-.9.5z"/></svg></button>
  </div>
 
  <div class="tiles">
@@ -188,6 +192,15 @@ function tile(id,html,cls){var t=$(id),w=t.querySelector(".wait,.tb");var d=docu
  $("new-back").onclick=function(){$("new").hidden=false;$("new").scrollIntoView({behavior:"smooth",block:"center"})};
 })();
 
+/* ---------- Ticker play / pause button ----------
+   Plays when the page opens. Only for visitors whose device asks for reduced motion does it start paused. */
+(function(){
+ var b=$("tk-pp"),v=$("tk-v");
+ function set(p){v.classList.toggle("paused",p);b.classList.toggle("paused",p);b.setAttribute("aria-label",p?"Play the prices":"Pause the prices");b.title=p?"Play":"Pause"}
+ set(matchMedia("(prefers-reduced-motion: reduce)").matches);
+ b.onclick=function(){set(!v.classList.contains("paused"))};
+})();
+
 /* ---------- Cross-asset data: one file feeds the ticker, the biggest-mover tile, the summary and the Cross-Asset card ----------
    Same rule as cross-asset/index.html: try the copy on raw.githubusercontent.com first (the job saves every 5 minutes
    without rebuilding the site), fall back to the site copy, and keep whichever is newer. */
@@ -216,8 +229,7 @@ CA.then(function(d){
  var items=R.map(function(r){var v=r.mv[0],c=dirC(r,v);return '<span class="tc '+c+'"><i>'+esc(r.n)+(r.g==="Index futures"&&r.id!=="vix"?" futures":"")+"</i><b>"+(v>0?"▲ ":v<0?"▼ ":"")+mvTxt(r,v)+"</b></span>"}).join("");
  $("tk").innerHTML=items+items;$("tk").style.setProperty("--dur",Math.round(R.length*4.5)+"s");
  $("tk-asof").textContent=hhmm(d.asof);
- $("tk-v").title="Prices as of "+hhmm(d.asof)+" London (refreshed every 5 minutes on weekdays). Hover or tap to pause.";
- $("tk-v").onclick=function(){this.classList.toggle("paused")};
+ $("tk-v").title="Prices as of "+hhmm(d.asof)+" London, refreshed every 5 minutes on weekdays.";
 
  /* S&P 500 futures today (CME E-mini, front month): trades nearly 24 hours, so it shows today's move even before the
     US cash market opens at 14:30 London. During the cash session the tile adds the stock driving the cash index most. */
