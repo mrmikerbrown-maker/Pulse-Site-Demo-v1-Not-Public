@@ -14,6 +14,7 @@ var TOOLS=[
  ["Home",HUB],
  ["This week",HUB+"calendar/"],
  ["Markets",[
+  ["Cross-Asset Moves",HUB+"cross-asset/","Today's moves in stocks, yields, FX and commodities, against a typical day"],
   ["Index Contribution",HUB+"index-contribution-site/","Which stocks moved the S&amp;P 500, Nasdaq 100 and Dow"],
   ["Market Clock",HUB+"clock/","When markets open, close and move most"],
   ["Earnings Moves",HUB+"earnings-moves/","Move options price for big US companies' results, against past moves"],

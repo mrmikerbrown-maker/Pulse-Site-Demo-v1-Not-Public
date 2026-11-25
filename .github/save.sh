@@ -13,7 +13,8 @@ for i in 1 2 3 4 5 6; do
   if git push -q; then
     echo "Saved"
     # Pushes made by a job don't start a GitHub Pages build on their own, so ask for one.
-    gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" >/dev/null 2>&1 || true
+    # NO_PAGES=1 skips that (for jobs that save very often: GitHub allows about 10 site builds an hour).
+    [ -n "${NO_PAGES:-}" ] || gh api -X POST "repos/${GITHUB_REPOSITORY}/pages/builds" >/dev/null 2>&1 || true
     exit 0
   fi
   echo "Another job saved first; pulling its change and trying again ($i)"
