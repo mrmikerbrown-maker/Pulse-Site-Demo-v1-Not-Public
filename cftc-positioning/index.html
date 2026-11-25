@@ -130,7 +130,7 @@ details.how ul{margin:10px 0 0;padding-left:18px;font-size:13.5px;max-width:75ch
 <div class="tip" id="tip"></div>
 <script>
 var D,$=function(i){return document.getElementById(i)},G="All",W="std",S="grp",OPEN=null;
-var GN={FX:"FX",Rates:"Rates",Equities:"Stock indices, VIX and bitcoin",Commodities:"Commodities"};
+var GN={FX:"FX",Rates:"Rates",Equities:"Stock indices and VIX",Commodities:"Commodities"};
 function ldn(iso,o){return new Date(iso).toLocaleString("en-GB",Object.assign({timeZone:"Europe/London"},o))}
 function day(d){return ldn(d+"T12:00:00Z",{weekday:"short",day:"numeric",month:"short"}).replace(",","")}
 function k(n,sig){var a=Math.abs(n),s=n<0?"−":(sig&&n>0?"+":"");return s+(a>=1e6?(a/1e6).toFixed(2)+"m":a>=1e4?(a/1e3).toFixed(0)+"k":a>=1e3?(a/1e3).toFixed(1)+"k":a)}
