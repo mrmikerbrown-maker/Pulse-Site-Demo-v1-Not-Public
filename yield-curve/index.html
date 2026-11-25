@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Yield Curves</title>
+<script>try{var t=localStorage.getItem("ict-theme");if(t?t==="light":matchMedia("(prefers-color-scheme: light)").matches)document.documentElement.classList.add("light")}catch(e){}</script>
+<style>
+:root{--bg:#050505;--card:#100F0E;--line:#26231F;--text:#F5F1E8;--text2:#CFC9BC;--muted:#8F897E;--dim:#625D55;--accent:#F5F1E8;--grid:#1C1A17;color-scheme:dark}
+:root.light{--bg:#F5F1E8;--card:#FBF9F3;--line:#E0D9CA;--text:#050505;--text2:#38342E;--muted:#6B655A;--dim:#A29B8E;--accent:#050505;--grid:#ECE6D9;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text2);line-height:1.4;padding-bottom:env(safe-area-inset-bottom,0px)}
+body:before{content:"";position:fixed;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#C42424,#550202);z-index:20}
+a{color:inherit;text-decoration:none}
+.top{display:flex;align-items:center;gap:8px;margin:0 0 22px}
+.logo{display:block;width:150px;height:auto;margin:0 auto 0 0}
+:root.light .logo{filter:invert(1) hue-rotate(180deg)}
+.theme{appearance:none;display:inline-flex;align-items:center;justify-content:center;flex:none;width:30px;height:30px;padding:0;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text2);cursor:pointer}
+.theme svg{width:15px;height:15px}
+.i-moon{display:none}:root.light .i-sun{display:none}:root.light .i-moon{display:block}
+@media (max-width:760px){.logo{width:120px}}
+.wrap{max-width:1100px;margin:0 auto;padding:8px 16px 40px}
+h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--text);letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 4px;font-weight:700}
+.sub{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:62ch}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;vertical-align:middle}
+.seg button{font:inherit;border:0;border-radius:0;font-size:12px;padding:6px 11px;background:var(--bg);color:var(--muted);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--accent);color:var(--onaccent);font-weight:700}
+.seg.big{margin:0 0 16px}.seg.big button{font-size:14px;font-weight:600;padding:8px 16px}
+.ctl{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:0 0 12px}
+.ctl .gap{width:10px}
+/* headline + stats */
+.hl{font-size:19px;color:var(--text);margin:0 0 4px;font-weight:500;max-width:70ch}.hl span{font-weight:300}
+.hls{font-size:13px;color:var(--muted);margin:0 0 16px}
+.stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:0 0 16px;padding:0 0 14px;border-bottom:1px solid var(--line)}
+.stats span{display:block;color:var(--muted);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+.stats b{color:var(--text);font-size:22px;font-variant-numeric:tabular-nums;font-weight:700}
+.stats small{display:block;font-size:12px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.ri{color:var(--down)!important}.fa{color:var(--up)!important}
+/* charts */
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart text{font-family:inherit;font-size:11px;fill:var(--muted);font-variant-numeric:tabular-nums}
+.chart .gl{stroke:var(--grid);stroke-width:1}
+.chart .zl{stroke:var(--muted);stroke-width:1;stroke-dasharray:2 3}
+.tip{position:absolute;pointer-events:none;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--text2);white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.25);font-variant-numeric:tabular-nums;z-index:5}
+.tip b{color:var(--text)}.tip td{padding:1px 0 1px 10px;text-align:right}.tip td:first-child{padding-left:0;text-align:left}
+.key{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+.key i{display:inline-block;width:20px;height:0;border-top:2px solid var(--text);vertical-align:middle;margin-right:6px}
+/* table */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:14px -18px 0;padding:0 18px}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+td{color:var(--text)}
+.bar{display:inline-block;width:90px;height:10px;position:relative;vertical-align:middle;margin-left:8px}
+.bar:before{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--line)}
+.bar i{position:absolute;top:0;bottom:0;border-radius:2px}
+.srcbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 18px;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:12px 16px;margin:14px 0;font-size:13px;color:var(--text)}
+.srcbox span{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.n{color:var(--muted);font-size:12px;margin-top:8px;max-width:90ch}
+.foot{margin-top:26px;font-size:12px;color:var(--dim);border-top:1px solid var(--line);padding-top:14px}
+@media (max-width:760px){.card{padding:16px}.tw{margin:14px -16px 0;padding:0 16px}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.stats .x{display:none}.stats b{font-size:19px}.hl{font-size:17px}th,td{padding:7px 6px}.bar{width:44px;margin-left:4px}.hide-m{display:none}.seg.big button{padding:8px 12px;font-size:13px}}
+</style>
+<script src="../nav.js" defer></script>
+<link rel="icon" type="image/png" sizes="32x32" href="../brand/logo/icon-32.png">
+<link rel="stylesheet" href="../brand/brand.css">
+</head>
+<body>
+<div class="wrap">
+<div class="top"><img class="logo" alt="Alpha Pulse" src="../brand/logo/bar-paper.svg"><button class="theme" id="theme" type="button" aria-label="Switch light/dark"><svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg><svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1z"/></svg></button></div>
+<h1>Yield Curves</h1>
+<p class="sub">Government bond yields from short to long maturities for the US, Germany and the UK. See how each curve has moved over the past week and month, and track the key spreads over time.</p>
+<div class="seg big" id="cty"></div>
+
+<div class="card">
+ <p class="hl" id="hl"></p>
+ <p class="hls" id="hls"></p>
+ <div class="stats" id="stats"></div>
+ <div class="ctl">Compare with <div class="seg" id="cmp"><button data-k="1w">1 week ago</button><button data-k="1m">1 month ago</button><button data-k="both" class="on">Both</button></div></div>
+ <div class="chart" id="cv"></div>
+ <div class="key" id="cvkey"></div>
+ <div class="tw"><table id="tbl"></table></div>
+</div>
+
+<div class="card">
+ <h2>Spreads over time</h2>
+ <p class="hls" style="margin-bottom:12px">Long yield minus short yield, in basis points. Below zero the curve is inverted: short bonds pay more than long ones.</p>
+ <div class="ctl"><div class="seg" id="spr"><button data-k="2,10" class="on">2s10s</button><button data-k="5,30">5s30s</button><button data-k="2,30">2s30s</button></div><span class="gap"></span><div class="seg" id="rng"><button data-k="66">3M</button><button data-k="130">6M</button><button data-k="261" class="on">1Y</button><button data-k="9999">Since 2024</button></div></div>
+ <div class="chart" id="sp"></div>
+ <div class="key" id="spkey"></div>
+</div>
+
+<div class="srcbox" id="stamp"></div>
+<p class="n" id="note"></p>
+<div class="foot">Sketch for review. Real data downloaded from the US Treasury, Bundesbank and Bank of England on 25 Nov 2026; nothing on this page updates yet.</div>
+</div>
+<script>
+var $=function(i){return document.getElementById(i)},D,C="us",CMP="both",SP=[2,10],RNG=261;
+var META={
+ us:{label:"US",flag:"US Treasuries",src:"US Treasury daily par yield curve",freq:"Weekdays, after the US close (around 22:30 London)",lag:"Same day",
+  note:"US yields are the Treasury's par yield curve: the yield a newly issued bond at each maturity would pay, read off the Treasury's own fitted curve. They sit within a few basis points of screen quotes for the benchmark notes."},
+ de:{label:"Germany",flag:"German Bunds",src:"Bundesbank yield curve for Federal securities (Svensson method)",freq:"Weekdays, around 13:00 London (the Bundesbank posts the day's curve at about 12:30)",lag:"Same day",
+  note:"German yields are zero-coupon yields fitted by the Bundesbank across all listed Federal bonds. They can differ by a few basis points from the quoted yield on a single benchmark Bund. The Bundesbank curve starts at 1 year."},
+ uk:{label:"UK",flag:"UK Gilts",src:"Bank of England fitted nominal gilt curve",freq:"Weekdays, around 13:30 London. The Bank publishes each day's curve the next working day",lag:"One working day behind",
+  note:"UK yields are zero-coupon yields from the Bank of England's fitted gilt curve. The Bank publishes each day's curve the next working day, so the UK line is one day behind the US and Germany."}};
+function lbl(m){return m<1?Math.round(m*12)+"m":m+"y"}
+function ldn(iso,o){return new Date(iso).toLocaleString("en-GB",Object.assign({timeZone:"Europe/London"},o))}
+function fd(s,o){return new Date(s+"T12:00:00Z").toLocaleDateString("en-GB",Object.assign({timeZone:"UTC"},o||{day:"numeric",month:"short"}))}
+function sg(x,d){d=d||0;if(Math.abs(x)<Math.pow(10,-d)/2)x=0;return(x>0?"+":x<0?"−":"")+Math.abs(x).toFixed(d)}
+function cl(bp){return bp>0.5?"ri":bp<-0.5?"fa":""}
+/* index of the last date on or before (latest - n days) */
+function back(S,days){var t=new Date(S.dates[S.dates.length-1]+"T12:00:00Z")-days*864e5,i=S.dates.length-1;while(i>0&&new Date(S.dates[i]+"T12:00:00Z")>t)i--;return i}
+function val(S,i,m){var k=S.mats.indexOf(m);return k<0?null:S.y[i][k]}
+function spr(S,i,a,b){var x=val(S,i,a),y=val(S,i,b);return x==null||y==null?null:(y-x)*100}
+
+function draw(){
+ var S=D[C],M=META[C],L=S.dates.length-1,iD=L-1,iW=back(S,7),iM=back(S,30);
+ /* headline: what happened to the curve over the past month */
+ var s0=spr(S,L,2,10),s1=spr(S,iM,2,10),d2=(val(S,L,2)-val(S,iM,2))*100,d10=(val(S,L,10)-val(S,iM,10))*100,ch=s0-s1;
+ var shape=Math.abs(ch)<3?"has barely changed shape":(ch>0?"has steepened ":"has flattened ")+Math.abs(ch).toFixed(0)+"bp";
+ var lvl=d2>0&&d10>0?"Yields are higher":d2<0&&d10<0?"Yields are lower":"Short and long yields went opposite ways";
+ $("hl").innerHTML=M.flag+" curve "+shape+" in a month. <span>"+lvl+": 2y "+sg(d2)+"bp, 10y "+sg(d10)+"bp.</span>";
+ $("hls").textContent="2s10s at "+sg(s0)+"bp, against "+sg(s1)+"bp on "+fd(S.dates[iM])+". Curve as of "+fd(S.dates[L],{weekday:"short",day:"numeric",month:"short"})+".";
+ /* stats */
+ var st=[["2y yield",2],["10y yield",10],["30y yield",30]].map(function(a){var v=val(S,L,a[1]),c=(v-val(S,iD,a[1]))*100;
+  return '<div><span>'+a[0]+'</span><b>'+v.toFixed(2)+'%</b><small class="'+cl(c)+'">'+sg(c)+'bp on day</small></div>'});
+ [["2s10s",2,10],["5s30s",5,30]].forEach(function(a){var v=spr(S,L,a[1],a[2]),c=v-spr(S,iD,a[1],a[2]);
+  st.push('<div class="x"><span>'+a[0]+'</span><b>'+sg(v)+'bp</b><small>'+sg(c)+'bp on day</small></div>')});
+ $("stats").innerHTML=st.join("");
+ curve(S,L,iW,iM);table(S,L,iD,iW,iM);spread();
+ var ages=[["us","US"],["de","Germany"],["uk","UK"]].map(function(a){return a[1]+" "+fd(D[a[0]].dates[D[a[0]].dates.length-1])}).join(" · ");
+ $("stamp").innerHTML='<div><span>Source</span>'+M.src+'</div><div><span>Updates</span>'+M.freq+'</div><div><span>Curve as of</span><b>'+fd(S.dates[L],{weekday:"short",day:"numeric",month:"short"})+'</b></div><div><span>Last refreshed</span><b>'+ldn(D.generated,{weekday:"short",day:"numeric",month:"short"}).replace(",","")+', '+ldn(D.generated,{hour:"2-digit",minute:"2-digit"})+' London</b></div>';
+ $("note").innerHTML=M.note+" Spreads chart: latest dates "+ages+".";
+}
+
+function svgEl(w,h,inner){return '<svg viewBox="0 0 '+w+' '+h+'" role="img">'+inner+'</svg>'}
+function ticks(lo,hi,n){var st=[.05,.1,.2,.25,.5,1,2,5,10,20,25,50,100],r=(hi-lo)/n,s=st.find(function(x){return x>=r})||100,o=[];for(var v=Math.ceil(lo/s-1e-9)*s;v<=hi+1e-9;v+=s)o.push(+v.toFixed(4));return o}
+
+function curve(S,L,iW,iM){
+ var el=$("cv"),W=Math.max(320,el.clientWidth),mob=W<560,H=mob?240:300,pl=mob?36:44,pr=mob?40:56,pt=14,pb=26;
+ var lines=[{i:L,name:"Latest",d:fd(S.dates[L]),st:"var(--text)",w:2.5,dash:""}];
+ if(CMP!="1m")lines.push({i:iW,name:"1 week ago",d:fd(S.dates[iW]),st:"var(--text2)",w:1.5,dash:"6 4"});
+ if(CMP!="1w")lines.push({i:iM,name:"1 month ago",d:fd(S.dates[iM]),st:"var(--muted)",w:1.5,dash:"1.5 3.5"});
+ var all=[];lines.forEach(function(l){S.y[l.i].forEach(function(v){if(v!=null)all.push(v)})});
+ var lo=Math.min.apply(0,all),hi=Math.max.apply(0,all),pad=(hi-lo)*.12||.1;lo-=pad;hi+=pad;
+ var n=S.mats.length,x=function(k){return pl+(W-pl-pr)*k/(n-1)},y=function(v){return pt+(H-pt-pb)*(hi-v)/(hi-lo)};
+ var g='';ticks(lo,hi,mob?4:5).forEach(function(t){g+='<line class="gl" x1="'+pl+'" x2="'+(W-pr+8)+'" y1="'+y(t)+'" y2="'+y(t)+'"/><text x="'+(pl-8)+'" y="'+(y(t)+4)+'" text-anchor="end">'+t.toFixed(2)+'%</text>'});
+ S.mats.forEach(function(m,k){g+='<text x="'+x(k)+'" y="'+(H-6)+'" text-anchor="middle">'+lbl(m)+'</text>'});
+ lines.slice().reverse().forEach(function(l){var d='';S.y[l.i].forEach(function(v,k){if(v!=null)d+=(d?"L":"M")+x(k).toFixed(1)+","+y(v).toFixed(1)});
+  g+='<path d="'+d+'" fill="none" stroke="'+l.st+'" stroke-width="'+l.w+'" stroke-dasharray="'+l.dash+'" stroke-linejoin="round" stroke-linecap="round"/>'});
+ S.y[L].forEach(function(v,k){if(v!=null)g+='<circle cx="'+x(k)+'" cy="'+y(v)+'" r="3.5" fill="var(--text)" stroke="var(--card)" stroke-width="2"/>'});
+ /* direct label at the long end */
+ var lv=S.y[L][n-1];g+='<text x="'+(x(n-1)+8)+'" y="'+(y(lv)+4)+'" style="fill:var(--text);font-weight:700">'+lv.toFixed(2)+'%</text>';
+ g+='<line id="cvx" x1="0" x2="0" y1="'+pt+'" y2="'+(H-pb)+'" stroke="var(--muted)" stroke-width="1" visibility="hidden"/>';
+ g+='<rect x="'+pl+'" y="0" width="'+(W-pl-pr)+'" height="'+H+'" fill="transparent" id="cvhit"/>';
+ el.innerHTML=svgEl(W,H,g)+'<div class="tip" id="cvtip" hidden></div>';
+ $("cvkey").innerHTML=lines.map(function(l){return '<span><i style="border-top:'+l.w+'px '+(l.dash?(l.dash[0]=="1"?"dotted":"dashed"):"solid")+' '+l.st+'"></i>'+l.name+' ('+l.d+')</span>'}).join("");
+ var hit=$("cvhit"),tip=$("cvtip"),vx=$("cvx"),svg=el.querySelector("svg");
+ function mv(e){var r=svg.getBoundingClientRect(),px=(e.touches?e.touches[0].clientX:e.clientX)-r.left,sx=px*W/r.width,k=Math.max(0,Math.min(n-1,Math.round((sx-pl)/(W-pl-pr)*(n-1))));
+  vx.setAttribute("x1",x(k));vx.setAttribute("x2",x(k));vx.setAttribute("visibility","visible");
+  var h='<b>'+lbl(S.mats[k])+'</b><table>';lines.forEach(function(l,j){var v=S.y[l.i][k];h+='<tr><td>'+l.name+'</td><td>'+(v==null?"–":v.toFixed(2)+"%")+'</td><td class="'+(j?cl((S.y[L][k]-v)*100):"")+'">'+(j&&v!=null?sg((S.y[L][k]-v)*100)+"bp":"")+'</td></tr>'});
+  tip.innerHTML=h+'</table>';tip.hidden=false;var tx=x(k)*r.width/W;tip.style.left=Math.min(r.width-tip.offsetWidth,Math.max(0,tx-tip.offsetWidth/2))+"px";tip.style.top="-8px"}
+ hit.onmousemove=mv;hit.ontouchstart=mv;hit.ontouchmove=mv;hit.onmouseleave=function(){tip.hidden=true;vx.setAttribute("visibility","hidden")};
+}
+
+function table(S,L,iD,iW,iM){
+ var mx=0,rows=S.mats.map(function(m,k){var v=S.y[L][k],c=[iD,iW,iM].map(function(i){var p=S.y[i][k];return v==null||p==null?null:(v-p)*100});c.forEach(function(z){if(z!=null)mx=Math.max(mx,Math.abs(z))});return[m,v,c]});
+ mx=Math.max(mx,5);
+ var h='<tr><th>Maturity</th><th>Yield</th><th>On day</th><th>1 week</th><th>1 month</th><th class="hide-m" style="text-align:left;padding-left:18px">1 month change</th></tr>';
+ rows.forEach(function(r){var c=r[2],w=c[2]==null?0:Math.abs(c[2])/mx*45;
+  h+='<tr><td>'+lbl(r[0])+'</td><td>'+(r[1]==null?"–":r[1].toFixed(2)+"%")+'</td>'+c.map(function(z){return '<td class="'+(z==null?"":cl(z))+'">'+(z==null?"–":sg(z)+"bp")+'</td>'}).join("")+
+   '<td class="hide-m" style="text-align:left;padding-left:18px"><span class="bar" style="width:120px"><i style="'+(c[2]>=0?'left:50%':'right:50%')+';width:'+w+'%;background:var(--'+(c[2]>=0?"down":"up")+')"></i></span></td></tr>'});
+ $("tbl").innerHTML=h;
+}
+
+var COL={us:"var(--text)",de:"var(--text2)",uk:"var(--muted)"};
+function spread(){
+ var el=$("sp"),W=Math.max(320,el.clientWidth),mob=W<560,H=mob?230:280,pl=mob?40:48,pr=mob?66:92,pt=12,pb=26;
+ var last=Object.keys(D).filter(function(k){return D[k].dates}).map(function(k){return D[k].dates[D[k].dates.length-1]}).sort().pop();
+ var t1=new Date(last+"T12:00:00Z").getTime(),t0=RNG>3000?new Date("2024-01-02T12:00:00Z").getTime():t1-RNG*1.4*864e5;
+ var ser=["us","de","uk"].map(function(c){var S=D[c],p=[];S.dates.forEach(function(d,i){var t=new Date(d+"T12:00:00Z").getTime();if(t>=t0){var v=spr(S,i,SP[0],SP[1]);if(v!=null)p.push([t,v,d])}});return{c:c,p:p}});
+ var all=[0];ser.forEach(function(s){s.p.forEach(function(q){all.push(q[1])})});
+ var lo=Math.min.apply(0,all),hi=Math.max.apply(0,all),pad=(hi-lo)*.08;lo-=pad;hi+=pad;
+ var x=function(t){return pl+(W-pl-pr)*(t-t0)/(t1-t0)},y=function(v){return pt+(H-pt-pb)*(hi-v)/(hi-lo)};
+ var g='';ticks(lo,hi,mob?4:5).forEach(function(t){g+='<line class="'+(t==0?"zl":"gl")+'" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+y(t)+'" y2="'+y(t)+'"/><text x="'+(pl-8)+'" y="'+(y(t)+4)+'" text-anchor="end">'+sg(t)+'</text>'});
+ if(lo<0)g+='<text x="'+(pl+6)+'" y="'+(y(0)+14)+'" style="font-size:10px">Inverted below 0</text>';
+ /* month ticks */
+ var d=new Date(t0),mstep=RNG<=66?1:RNG<=130?(mob?2:1):RNG<=261?(mob?3:2):(mob?6:4);d.setUTCDate(1);d.setUTCMonth(d.getUTCMonth()+1);var cnt=0;
+ while(d.getTime()<=t1){if(d.getUTCMonth()%mstep==0){var xx=x(d.getTime());if(xx<W-pr-10)g+='<text x="'+xx+'" y="'+(H-6)+'" text-anchor="middle">'+d.toLocaleDateString("en-GB",{month:"short",timeZone:"UTC"}).replace("Sept","Sep")+(d.getUTCMonth()==0||cnt==0?" "+String(d.getUTCFullYear()).slice(2):"")+'</text>';cnt++}d.setUTCMonth(d.getUTCMonth()+1)}
+ var ends=[];
+ ser.slice().sort(function(a,b){return a.c==C?1:b.c==C?-1:0}).forEach(function(s){var dd='';s.p.forEach(function(q){dd+=(dd?"L":"M")+x(q[0]).toFixed(1)+","+y(q[1]).toFixed(1)});
+  var on=s.c==C;g+='<path d="'+dd+'" fill="none" stroke="'+COL[s.c]+'" stroke-width="'+(on?2.5:1.5)+'" stroke-opacity="'+(on?1:.75)+'" stroke-dasharray="'+(s.c=="de"?"5 3":"")+'" stroke-linejoin="round"/>';
+  var q=s.p[s.p.length-1];ends.push({c:s.c,y:y(q[1]),v:q[1],x:x(q[0])})});
+ /* end labels, nudged apart */
+ ends.sort(function(a,b){return a.y-b.y});for(var i=1;i<ends.length;i++)if(ends[i].y-ends[i-1].y<15)ends[i].y=ends[i-1].y+15;
+ ends.forEach(function(e){g+='<circle cx="'+e.x+'" cy="'+y(e.v)+'" r="3" fill="'+COL[e.c]+'"/><text x="'+(W-pr+8)+'" y="'+(e.y+4)+'" style="fill:var(--text);font-weight:'+(e.c==C?700:400)+'">'+META[e.c].label+' '+sg(e.v)+'</text>'});
+ g+='<line id="spx" y1="'+pt+'" y2="'+(H-pb)+'" stroke="var(--muted)" stroke-width="1" visibility="hidden"/><rect x="'+pl+'" y="0" width="'+(W-pl-pr)+'" height="'+H+'" fill="transparent" id="sphit"/>';
+ el.innerHTML=svgEl(W,H,g)+'<div class="tip" id="sptip" hidden></div>';
+ var nm=["2s10s","5s30s","2s30s"][SP[1]==10?0:SP[0]==5?1:2];
+ $("spkey").innerHTML=["us","de","uk"].map(function(c){return '<span><i style="border-top:'+(c==C?3:2)+'px '+(c=="de"?"dashed":"solid")+' '+COL[c]+'"></i>'+META[c].flag+' '+nm+'</span>'}).join("");
+ var svg=el.querySelector("svg"),tip=$("sptip"),vx=$("spx");
+ function mv(e){var r=svg.getBoundingClientRect(),sx=((e.touches?e.touches[0].clientX:e.clientX)-r.left)*W/r.width,t=t0+(sx-pl)/(W-pl-pr)*(t1-t0),h='',dl='';
+  ser.forEach(function(s){var b=null;s.p.forEach(function(q){if(q[0]<=t+432e5)b=q});if(b){if(!dl)dl=b[2];h+='<tr><td>'+META[s.c].label+'</td><td>'+sg(b[1])+'bp</td></tr>'}});
+  if(!dl)return;vx.setAttribute("x1",sx);vx.setAttribute("x2",sx);vx.setAttribute("visibility","visible");
+  tip.innerHTML='<b>'+fd(dl,{day:"numeric",month:"short",year:"numeric"})+'</b><table>'+h+'</table>';tip.hidden=false;var tx=sx*r.width/W;tip.style.left=Math.min(r.width-tip.offsetWidth,Math.max(0,tx+12))+"px";tip.style.top="0px"}
+ var hit=$("sphit");hit.onmousemove=mv;hit.ontouchstart=mv;hit.ontouchmove=mv;hit.onmouseleave=function(){tip.hidden=true;vx.setAttribute("visibility","hidden")};
+}
+
+function segs(id,fn){document.querySelectorAll("#"+id+" button").forEach(function(b){b.onclick=function(){document.querySelectorAll("#"+id+" button").forEach(function(x){x.className=x===b?"on":""});fn(b.getAttribute("data-k"));draw()}})}
+$("cty").innerHTML=["us","de","uk"].map(function(k){return '<button data-k="'+k+'"'+(k==C?' class="on"':'')+'>'+META[k].flag+'</button>'}).join("");
+segs("cty",function(k){C=k;history.replaceState(null,"","#"+k)});segs("cmp",function(k){CMP=k});segs("spr",function(k){SP=k.split(",").map(Number)});segs("rng",function(k){RNG=+k});
+$("theme").onclick=function(){var l=document.documentElement.classList.toggle("light");try{localStorage.setItem("ict-theme",l?"light":"dark")}catch(e){}};
+var h0=location.hash.slice(1);if(META[h0]){C=h0;document.querySelectorAll("#cty button").forEach(function(b){b.className=b.getAttribute("data-k")==C?"on":""})}
+var rt;window.addEventListener("resize",function(){clearTimeout(rt);rt=setTimeout(function(){if(D)draw()},150)});
+fetch("data.json?"+Date.now()).then(function(r){return r.json()}).then(function(j){D=j;draw()});
+</script>
+</body>
+</html>
