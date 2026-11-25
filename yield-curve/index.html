@@ -63,6 +63,23 @@ td{color:var(--text)}
 .srcbox span{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
 .dwarn{border:1px solid var(--line);border-left:3px solid var(--pink);border-radius:10px;padding:10px 14px;font-size:13px;margin:0 0 14px;background:var(--card);color:var(--text2)}.dwarn b{color:var(--text)}
 .srcbox .old{color:var(--pinkt)}
+.ex{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:0 0 18px}
+.ex summary{list-style:none;cursor:pointer;padding:14px 18px;font-size:15px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:10px}
+.ex summary::-webkit-details-marker{display:none}
+.ex summary:after{content:"+";margin-left:auto;font-size:20px;line-height:1;color:var(--muted)}
+.ex[open] summary:after{content:"−"}
+.ex summary small{font-weight:400;font-size:13px;color:var(--muted)}
+.exb{padding:0 18px 18px;border-top:1px solid var(--line)}
+.exg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 32px}
+.exb h3{font-size:15px;color:var(--text);margin:18px 0 4px;font-weight:500}
+.exb p{margin:0 0 8px;font-size:14px;max-width:62ch}
+.shapes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0 4px}
+.shapes div{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg)}
+.shapes b{display:block;color:var(--text);font-size:13px;font-weight:500}
+.shapes span{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.shapes svg{display:block;width:100%;height:56px;margin-top:6px}
+.how{font-size:12px;color:var(--muted);margin:6px 0 0}
+@media (max-width:760px){.exg{grid-template-columns:1fr}.shapes{grid-template-columns:1fr}.shapes div{display:grid;grid-template-columns:1fr 110px;gap:0 10px;align-items:center}.shapes svg{grid-row:1/3;grid-column:2;margin:0}}
 .n{color:var(--muted);font-size:12px;margin-top:8px;max-width:90ch}
 .foot{margin-top:26px;font-size:12px;color:var(--dim);border-top:1px solid var(--line);padding-top:14px}
 @media (max-width:760px){.card{padding:16px}.tw{margin:14px -16px 0;padding:0 16px}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.stats .x{display:none}.stats b{font-size:19px}.hl{font-size:17px}th,td{padding:7px 6px}.bar{width:44px;margin-left:4px}.hide-m{display:none}.seg.big button{padding:8px 12px;font-size:13px}}
@@ -76,6 +93,43 @@ td{color:var(--text)}
 <div class="top"><img class="logo" alt="Alpha Pulse" src="../brand/logo/bar-paper.svg"><button class="theme" id="theme" type="button" aria-label="Switch light/dark"><svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg><svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1z"/></svg></button></div>
 <h1>Yield Curves</h1>
 <p class="sub">Government bond yields from short to long maturities for the US, Germany and the UK. See how each curve has moved over the past week and month, and track the key spreads over time.</p>
+<details class="ex" id="ex">
+<summary>New to yield curves? Start here <small>2 min read</small></summary>
+<div class="exb">
+<div class="exg">
+<div>
+<h3>What is a yield curve?</h3>
+<p>Governments borrow by selling bonds. Some are paid back in a few months, others in 30 years. The yield is the yearly return you get for lending to the government for that long.</p>
+<p>Line those yields up from the shortest loan to the longest and you get the yield curve. Each country has its own: Treasuries for the US, Bunds for Germany, Gilts for the UK.</p>
+</div>
+<div>
+<h3>Short end and long end</h3>
+<p><b style="color:var(--text);font-weight:500">The short end</b> (up to about 2 years) follows what traders expect the central bank to do with interest rates over the next couple of years.</p>
+<p><b style="color:var(--text);font-weight:500">The long end</b> (10 to 30 years) also reflects expected growth and inflation, and how much the government needs to borrow.</p>
+</div>
+</div>
+<h3>What the shape tells you</h3>
+<div class="shapes">
+<div><b>Upward sloping</b><span>Long bonds pay more than short ones. This is how the curve looks most of the time: lenders want extra for tying money up for longer.</span><svg viewBox="0 0 120 56" aria-hidden="true"><line x1="4" y1="50" x2="116" y2="50" stroke="var(--line)"/><path d="M8 44 C 30 30, 60 18, 112 12" fill="none" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><text x="4" y="55" font-size="0"></text></svg></div>
+<div><b>Flat</b><span>Short and long bonds pay about the same. Markets are unsure whether rates will go up or down from here.</span><svg viewBox="0 0 120 56" aria-hidden="true"><line x1="4" y1="50" x2="116" y2="50" stroke="var(--line)"/><path d="M8 28 C 40 26, 80 30, 112 28" fill="none" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><text x="4" y="55" font-size="0"></text></svg></div>
+<div><b>Inverted</b><span>Short bonds pay more than long ones. Markets expect rate cuts, often because they expect the economy to slow.</span><svg viewBox="0 0 120 56" aria-hidden="true"><line x1="4" y1="50" x2="116" y2="50" stroke="var(--line)"/><path d="M8 12 C 30 26, 60 36, 112 42" fill="none" stroke="var(--text)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><text x="4" y="55" font-size="0"></text></svg></div>
+</div>
+<div class="exg">
+<div>
+<h3>Steepening and flattening</h3>
+<p>Traders watch the gap between a long and a short yield. The most common one is <b style="color:var(--text);font-weight:500">2s10s</b>: the 10-year yield minus the 2-year yield, in basis points (100bp = 1%).</p>
+<p>If the gap widens, the curve is <b style="color:var(--text);font-weight:500">steepening</b>. If it narrows, it is <b style="color:var(--text);font-weight:500">flattening</b>. Below zero, the curve is inverted.</p>
+</div>
+<div>
+<h3>Why traders care</h3>
+<p>Bond yields feed into almost everything: mortgage and loan rates, company borrowing costs and share valuations. Currencies react too. When one country's yields rise against another's, its currency often gains.</p>
+<p>An inverted US curve has come before most US recessions since the 1970s. It is a warning sign, not a timer: the US curve inverted in 2022 and stayed that way for about two years.</p>
+</div>
+</div>
+<h3>One thing that trips people up</h3>
+<p>Bond prices and yields move in opposite directions. When people sell bonds the price falls and the yield rises. So "yields up" means bonds are falling. On this page, rising yields are red and falling yields are green.</p>
+</div>
+</details>
 <div class="seg big" id="cty"></div>
 <div class="dwarn" id="dwarn" hidden></div>
 
@@ -86,12 +140,13 @@ td{color:var(--text)}
  <div class="ctl">Compare with <div class="seg" id="cmp"><button data-k="1w">1 week ago</button><button data-k="1m">1 month ago</button><button data-k="both" class="on">Both</button></div></div>
  <div class="chart" id="cv"></div>
  <div class="key" id="cvkey"></div>
+ <p class="how">How to read it: maturities run from short (left) to long (right). Compare the solid line with the dashed ones to see which part of the curve moved.</p>
  <div class="tw"><table id="tbl"></table></div>
 </div>
 
 <div class="card">
  <h2>Spreads over time</h2>
- <p class="hls" style="margin-bottom:12px">Long yield minus short yield, in basis points. Below zero the curve is inverted: short bonds pay more than long ones.</p>
+ <p class="hls" style="margin-bottom:12px">The gap between a long and a short yield, in basis points. A rising line means the curve is steepening, a falling line means it is flattening. Below zero the curve is inverted: short bonds pay more than long ones.</p>
  <div class="ctl"><div class="seg" id="spr"><button data-k="2,10" class="on">2s10s</button><button data-k="5,30">5s30s</button><button data-k="2,30">2s30s</button></div><span class="gap"></span><div class="seg" id="rng"><button data-k="66">3M</button><button data-k="130">6M</button><button data-k="261" class="on">1Y</button><button data-k="9999">Since 2024</button></div></div>
  <div class="chart" id="sp"></div>
  <div class="key" id="spkey"></div>
