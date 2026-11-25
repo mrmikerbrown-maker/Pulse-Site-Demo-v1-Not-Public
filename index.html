@@ -260,9 +260,12 @@ Promise.all([CA,CAL.catch(function(){return[]})]).then(function(a){
  var s=by.spx;if(s){var v=s.mv[0],x=ratio(s);used.spx=1;
   parts.push("Stocks "+(Math.abs(v)<0.15?"flat":word(v>0?"up":"dn",(x>=1.5?"sharply ":"")+(v>0?"higher":"lower"))))}
  var y=by.us10;if(y){var b=y.mv[0];used.us10=1;
-  parts.push("yields "+(Math.abs(b)<2?"steady":word(b>0?"dn":"up",(Math.abs(b)>=8?"sharply ":"")+(b>0?"higher":"lower"))))}
+  parts.push("Treasury yields "+(Math.abs(b)<2?"steady":word(b>0?"dn":"up",(Math.abs(b)>=8?"sharply ":"")+(b>0?"higher":"lower"))))}
  var u=by.dxy;if(u&&Math.abs(u.mv[0])>=0.25){used.dxy=1;parts.push("the dollar "+(u.mv[0]>0?"firmer":"softer"))}
- var st=d.rows.filter(function(r){return !used[r.id]&&r.mv&&ratio(r)>=1.5}).sort(function(a,b){return ratio(b)-ratio(a)})[0];
+ /* The standout move only comes from the markets most visitors trade or follow. Other bond yields (e.g. Japan) and
+    smaller markets stay on the Cross-Asset page, so the line never mixes a JGB move into a story about US data. */
+ var STAND={gold:1,silver:1,brent:1,wti:1,btc:1,eurusd:1,gbpusd:1,usdjpy:1,ndx:1,dji:1,ukx:1,dax:1};
+ var st=d.rows.filter(function(r){return STAND[r.id]&&!used[r.id]&&r.mv&&ratio(r)>=1.5}).sort(function(a,b){return ratio(b)-ratio(a)})[0];
  if(st){var sv=st.mv[0];parts.push(esc(nameOf(st))+" "+word(good(st,sv)?"up":"dn",(sv>0?"up ":"down ")+mvTxt(st,sv).replace(/^[+−]/,"")))}
  if(parts.length>3)parts.splice(2,parts.length-3);
  var txt=cap(parts.join(", ")),nx=E.filter(function(e){return Date.parse(e.t)>Date.now()})[0];
