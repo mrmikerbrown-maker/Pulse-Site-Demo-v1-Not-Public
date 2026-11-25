@@ -1,0 +1,508 @@
+{
+ "global": {
+  "status": 200,
+  "n": 34,
+  "rows": {
+   "TVC:US01M": {
+    "description": "United States 1 Month Government Bonds",
+    "close": 99.66142358,
+    "change_abs": -0.0017108400000012125,
+    "Perf.W": -0.011517172315909414,
+    "Perf.1M": -0.009457218465779885,
+    "Perf.3M": -0.03263672128473727,
+    "Perf.Y": -0.013601708124839247,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:US03M": {
+    "description": "United States 3 Month Government Bonds",
+    "close": 98.95254,
+    "change_abs": -0.003864000000007195,
+    "Perf.W": -0.0025620211935455973,
+    "Perf.1M": -0.0322325895946708,
+    "Perf.3M": -0.12306778076970011,
+    "Perf.Y": -0.10926196487009211,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:US06M": {
+    "description": "United States 6 Month Government Bonds",
+    "close": 97.8325655,
+    "change_abs": 0.0014165000000048167,
+    "Perf.W": -0.012803912339256136,
+    "Perf.1M": -0.07907875265212606,
+    "Perf.3M": -0.27494007071476284,
+    "Perf.Y": -0.3386106320776115,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:US01Y": {
+    "description": "United States 1 Year Government Bonds Yield",
+    "close": 4.561,
+    "change_abs": -0.016000000000000014,
+    "Perf.W": -1.2129088152479977,
+    "Perf.1M": 3.096745027124764,
+    "Perf.3M": 13.176178660049619,
+    "Perf.Y": 25.543593299313702,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:US02Y": {
+    "description": "United States 2 Year Government Bonds Yield",
+    "close": 4.615,
+    "change_abs": -0.07200000000000006,
+    "Perf.W": -4.372150849564846,
+    "Perf.1M": -1.5571672354948702,
+    "Perf.3M": 9.541894137194403,
+    "Perf.Y": 32.348723831373675,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:US03Y": {
+    "description": "United States 3 Year Government Bonds Yield",
+    "close": 4.614,
+    "change_abs": -0.08000000000000007,
+    "Perf.W": -5.373256767842503,
+    "Perf.1M": -2.944888514934785,
+    "Perf.3M": 8.00561797752808,
+    "Perf.Y": 32.244196044711956,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:US05Y": {
+    "description": "United States 5 Year Government Bonds Yield",
+    "close": 4.646,
+    "change_abs": -0.08900000000000041,
+    "Perf.W": -5.8561296859169145,
+    "Perf.1M": -3.3693843594009967,
+    "Perf.3M": 6.315789473684206,
+    "Perf.Y": 29.127292940522516,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:US07Y": {
+    "description": "United States 7 Year Government Bonds Yield",
+    "close": 4.729,
+    "change_abs": -0.08399999999999963,
+    "Perf.W": -5.684084563222978,
+    "Perf.1M": -3.2726528942524062,
+    "Perf.3M": 5.3698752228163915,
+    "Perf.Y": 24.940554821664463,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:US10Y": {
+    "description": "United States 10 Year Government Bonds Yield",
+    "close": 4.852,
+    "change_abs": -0.07599999999999962,
+    "Perf.W": -5.25288029681703,
+    "Perf.1M": -2.7655310621242464,
+    "Perf.3M": 4.411448246180333,
+    "Perf.Y": 20.426904939190877,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:US20Y": {
+    "description": "United States 20 Year Government Bonds Yield",
+    "close": 5.299,
+    "change_abs": -0.06199999999999939,
+    "Perf.W": -4.003623188405783,
+    "Perf.1M": -1.1749347258485587,
+    "Perf.3M": 2.634127445283752,
+    "Perf.Y": 14.301121656600523,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:US30Y": {
+    "description": "United States 30 Year Government Bonds Yield",
+    "close": 5.262,
+    "change_abs": -0.05600000000000005,
+    "Perf.W": -3.7673738112655526,
+    "Perf.1M": -0.9971777986829882,
+    "Perf.3M": 1.8385910586413732,
+    "Perf.Y": 12.556149732620316,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:DE03M": {
+    "description": "Germany 3 Month Government Bonds",
+    "close": 99.659,
+    "change_abs": -0.0030000000000001137,
+    "Perf.W": 0.04316575650498551,
+    "Perf.1M": 0.19806559288974956,
+    "Perf.3M": 0.18094271152706282,
+    "Perf.Y": -0.09823872008981722,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:DE06M": {
+    "description": "Germany 6 Month Government Bonds",
+    "close": 98.926,
+    "change_abs": 0.010000000000005116,
+    "Perf.W": 0.05158027812895265,
+    "Perf.1M": 0.17721339530738642,
+    "Perf.3M": 0.11233112381723849,
+    "Perf.Y": -0.33749408126050895,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:DE01Y": {
+    "description": "Germany 1 Year Government Bonds Yield",
+    "close": 3.011,
+    "change_abs": 0.01100000000000012,
+    "Perf.W": -0.3969566655640096,
+    "Perf.1M": 3.364229316855486,
+    "Perf.3M": 14.438827866671737,
+    "Perf.Y": 57.306305835640785,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:DE02Y": {
+    "description": "Germany 2 Year Government Bonds Yield",
+    "close": 3.0209,
+    "change_abs": -0.03949999999999987,
+    "Perf.W": -3.4856230031948803,
+    "Perf.1M": -0.13553719008263704,
+    "Perf.3M": 6.561077992169033,
+    "Perf.Y": 49.80164633541606,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:DE03Y": {
+    "description": "Germany 3 Year Government Bonds Yield",
+    "close": 2.9873,
+    "change_abs": -0.07180000000000009,
+    "Perf.W": -3.830924250716293,
+    "Perf.1M": -2.3311318904073874,
+    "Perf.3M": 5.483757062146893,
+    "Perf.Y": 45.80730183522061,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:DE05Y": {
+    "description": "Germany 5 Year Government Bonds Yield",
+    "close": 3.0327,
+    "change_abs": -0.07249999999999979,
+    "Perf.W": -4.228510073896283,
+    "Perf.1M": -3.628968190918042,
+    "Perf.3M": 3.19167035285312,
+    "Perf.Y": 32.96650298141003,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:DE07Y": {
+    "description": "Germany 7 Year Government Bonds Yield",
+    "close": 3.1052,
+    "change_abs": -0.06620000000000026,
+    "Perf.W": -5.00489476260402,
+    "Perf.1M": -3.798252679843851,
+    "Perf.3M": 1.2389149713093313,
+    "Perf.Y": 27.759720222176515,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:DE10Y": {
+    "description": "Germany 10 Year Government Bonds Yield",
+    "close": 3.2166,
+    "change_abs": -0.0642999999999998,
+    "Perf.W": -4.73002991440334,
+    "Perf.1M": -3.9189915765577323,
+    "Perf.3M": -0.5872172085548178,
+    "Perf.Y": 19.398663697104684,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:DE15Y": {
+    "description": "Germany 15 Year Government Bonds Yield",
+    "close": 3.4747,
+    "change_abs": -0.05420000000000025,
+    "Perf.W": -4.048269958302275,
+    "Perf.1M": -2.8843735151904797,
+    "Perf.3M": -1.2027295990901339,
+    "Perf.Y": 12.65034851677744,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:DE20Y": {
+    "description": "Germany 20 Year Government Bonds Yield",
+    "close": 3.5911,
+    "change_abs": -0.05339999999999989,
+    "Perf.W": -3.2283273599396405,
+    "Perf.1M": -2.378622301962701,
+    "Perf.3M": -1.8878749795093208,
+    "Perf.Y": 11.59069015878934,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:DE30Y": {
+    "description": "Germany 30 Year Government Bonds Yield",
+    "close": 3.6126,
+    "change_abs": -0.04400000000000004,
+    "Perf.W": -3.712785522002185,
+    "Perf.1M": -2.089600780551269,
+    "Perf.3M": -3.393501805054152,
+    "Perf.Y": 8.43113125431461,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:GB01M": {
+    "description": "United Kingdom 1 Month Government Bonds",
+    "close": 99.717,
+    "change_abs": 0.009000000000000341,
+    "Perf.W": -0.0030084235860410287,
+    "Perf.1M": -0.06514200958088405,
+    "Perf.3M": -0.032080522110493816,
+    "Perf.Y": 0.0050144415917797785,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:GB03M": {
+    "description": "United Kingdom 3 Month Government Bonds",
+    "close": 98.955,
+    "change_abs": 0.010000000000005116,
+    "Perf.W": -0.007073422121627496,
+    "Perf.1M": -0.09893693275317152,
+    "Perf.3M": -0.11406306779181931,
+    "Perf.Y": -0.14833202155355651,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:GB06M": {
+    "description": "United Kingdom 6 Month Government Bonds",
+    "close": 97.811,
+    "change_abs": 0.0030000000000001137,
+    "Perf.W": -0.010222753805410807,
+    "Perf.1M": -0.15821815731987315,
+    "Perf.3M": -0.24171834203654818,
+    "Perf.Y": -0.37076648841353715,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:GB01Y": {
+    "description": "United Kingdom 1 Year Government Bonds Yield",
+    "close": 4.5682,
+    "change_abs": -0.009100000000000108,
+    "Perf.W": -0.8055935552515513,
+    "Perf.1M": 0.1095722300140229,
+    "Perf.3M": 11.814955329825,
+    "Perf.Y": 20.46940928270043,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:GB02Y": {
+    "description": "United Kingdom 2 Year Government Bonds Yield",
+    "close": 4.8002,
+    "change_abs": -0.06729999999999947,
+    "Perf.W": -3.5620291310899,
+    "Perf.1M": -2.1465701763326823,
+    "Perf.3M": 10.698060558540707,
+    "Perf.Y": 26.35430376414847,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:GB03Y": {
+    "description": "United Kingdom 3 Year Government Bonds Yield",
+    "close": 4.8044,
+    "change_abs": -0.07430000000000003,
+    "Perf.W": -4.071241738713734,
+    "Perf.1M": -2.9668975824530848,
+    "Perf.3M": 8.019875441239293,
+    "Perf.Y": 25.934469200524255,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:GB05Y": {
+    "description": "United Kingdom 5 Year Government Bonds Yield",
+    "close": 4.8015,
+    "change_abs": -0.07240000000000002,
+    "Perf.W": -4.28013237111759,
+    "Perf.1M": -3.5727196047716627,
+    "Perf.3M": 5.515877376112503,
+    "Perf.Y": 20.640703517587937,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:GB07Y": {
+    "description": "United Kingdom 7 Year Government Bonds Yield",
+    "close": 4.9572,
+    "change_abs": -0.06989999999999963,
+    "Perf.W": -4.308547602501726,
+    "Perf.1M": -4.015799868334427,
+    "Perf.3M": 4.694924919216892,
+    "Perf.Y": 19.941930800871045,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:GB10Y": {
+    "description": "United Kingdom 10 Year Government Bonds Yield",
+    "close": 5.1315,
+    "change_abs": -0.062100000000000044,
+    "Perf.W": -3.823446724768058,
+    "Perf.1M": -4.098452567840316,
+    "Perf.3M": 2.4783320685385695,
+    "Perf.Y": 12.805012090569345,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:GB15Y": {
+    "description": "United Kingdom 15 Year Government Bonds Yield",
+    "close": 5.3915,
+    "change_abs": -0.06950000000000056,
+    "Perf.W": -3.6750518116201,
+    "Perf.1M": -3.619949946371122,
+    "Perf.3M": -0.6632888070013906,
+    "Perf.Y": 8.546406281457623,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:GB20Y": {
+    "description": "United Kingdom 20 Year Government Bonds Yield",
+    "close": 5.5614,
+    "change_abs": -0.05229999999999979,
+    "Perf.W": -3.2177227085254834,
+    "Perf.1M": -2.994889326891218,
+    "Perf.3M": -2.0276578877829645,
+    "Perf.Y": 6.194386098911587,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "TVC:GB30Y": {
+    "description": "United Kingdom 30 Year Government Bonds Yield",
+    "close": 5.6089,
+    "change_abs": -0.04190000000000005,
+    "Perf.W": -3.575787790747652,
+    "Perf.1M": -2.4046910615788737,
+    "Perf.3M": -2.304396293457811,
+    "Perf.Y": 4.429342766710105,
+    "update_mode": "streaming",
+    "type": "bond"
+   }
+  }
+ },
+ "bond": {
+  "status": 200,
+  "n": 10,
+  "rows": {
+   "BONDSCOM:AT0000A2CN04": {
+    "description": "Oberbank AG 0.125% 28-JAN-2030 RegS",
+    "close": 101.3021,
+    "change_abs": -0.24970000000000425,
+    "Perf.W": null,
+    "Perf.1M": null,
+    "Perf.3M": null,
+    "Perf.Y": null,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "BONDSCOM:AT0000A3J2F7": {
+    "description": "Oberbank AG 2.875% 20-FEB-2035 RegS",
+    "close": 93.425,
+    "change_abs": 0.3499999999999943,
+    "Perf.W": null,
+    "Perf.1M": null,
+    "Perf.3M": null,
+    "Perf.Y": null,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "BONDSCOM:AT000B126826": {
+    "description": "Oberbank AG 1.375% 06-JUN-2033",
+    "close": 113.4173,
+    "change_abs": -0.6524000000000001,
+    "Perf.W": null,
+    "Perf.1M": null,
+    "Perf.3M": null,
+    "Perf.Y": null,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "BONDSCOM:AU000KFWHAG0": {
+    "description": "KfW 3.2% 15-MAR-2028 RegS",
+    "close": 97.289,
+    "change_abs": -0.001999999999995339,
+    "Perf.W": null,
+    "Perf.1M": null,
+    "Perf.3M": null,
+    "Perf.Y": null,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "BONDSCOM:AU3CB0237527": {
+    "description": "KommuneKredit 2.9% 27-NOV-2026",
+    "close": 99.615,
+    "change_abs": 0.01099999999999568,
+    "Perf.W": null,
+    "Perf.1M": null,
+    "Perf.3M": null,
+    "Perf.Y": null,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "BONDSCOM:AU3CB0239796": {
+    "description": "Landwirtschaftliche Rentenbank 2.6% 23-MAR-2027",
+    "close": 97.88,
+    "change_abs": -0.632000000000005,
+    "Perf.W": null,
+    "Perf.1M": null,
+    "Perf.3M": null,
+    "Perf.Y": null,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "BONDSCOM:AU3CB0241974": {
+    "description": "Nederlandse Waterschapsbank N.V. 3.5% 20-JUL-2027",
+    "close": 98.602,
+    "change_abs": -0.022999999999996135,
+    "Perf.W": null,
+    "Perf.1M": null,
+    "Perf.3M": null,
+    "Perf.Y": null,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "BONDSCOM:AU3CB0242121": {
+    "description": "African Development Bank 3.3% 27-JUL-2027",
+    "close": 98.1,
+    "change_abs": 3.3299999999999983,
+    "Perf.W": null,
+    "Perf.1M": null,
+    "Perf.3M": null,
+    "Perf.Y": null,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "BONDSCOM:AU3CB0243806": {
+    "description": "International Finance Corp. 3.2% 18-OCT-2027 RegS",
+    "close": 98.018,
+    "change_abs": 0.04099999999999682,
+    "Perf.W": null,
+    "Perf.1M": null,
+    "Perf.3M": null,
+    "Perf.Y": null,
+    "update_mode": "streaming",
+    "type": "bond"
+   },
+   "BONDSCOM:AU3CB0245884": {
+    "description": "European Investment Bank 3.3% 03-FEB-2028",
+    "close": 97.48,
+    "change_abs": 0,
+    "Perf.W": null,
+    "Perf.1M": null,
+    "Perf.3M": null,
+    "Perf.Y": null,
+    "update_mode": "streaming",
+    "type": "bond"
+   }
+  }
+ },
+ "cfd": {
+  "status": 200,
+  "n": 0,
+  "rows": {}
+ },
+ "america": {
+  "status": 200,
+  "n": 0,
+  "rows": {}
+ }
+}
