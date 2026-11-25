@@ -6,7 +6,7 @@
    and its ticker for each feed (one column per feed, named after the module in feeds/).
 2. The feed gives today's price and changes.
 3. Once a day the "typical move" for each market is worked out from a year of daily closes:
-   the standard deviation of its daily changes over the last 252 trading days. Saved in typical.json.
+   the standard deviation of its daily changes over the last LOOKBACK trading days (about 3 years). Saved in typical.json.
 4. data.json gets one row per market with its move for Today / 1 week / 1 month / YTD, in the market's own unit.
 The page divides each move by the typical move (scaled by the square root of the days in the period).
 """
@@ -16,6 +16,7 @@ from zoneinfo import ZoneInfo
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 FEED = os.environ.get("CROSS_ASSET_FEED", "tradingview")
+LOOKBACK = 756          # trading days used for the typical move: about 3 years
 LDN = ZoneInfo("Europe/London")
 # Continuous futures (tickers ending "!", e.g. ES1!) jump when the front contract rolls. Moves shown are the
 # front-month price against the front-month price then (how futures moves are quoted), but the typical move is
@@ -59,7 +60,7 @@ def refresh_typical(feed, markets, today):
         old = json.load(open(path))
     except Exception:
         old = {"date": "", "sd": {}}
-    if old.get("date") == today and len(old.get("sd", {})) >= len(markets):
+    if old.get("date") == today and old.get("lookback") == LOOKBACK and len(old.get("sd", {})) >= len(markets):
         return old
     sd, ytd_days = dict(old.get("sd", {})), old.get("ytd_days", 0)
     for m in markets:
@@ -67,10 +68,10 @@ def refresh_typical(feed, markets, today):
             if m[FEED].endswith("!"):
                 ser = futures_series(feed, m[FEED])
                 bars = [(t, r) for t, _, r in ser]
-                ch = futures_changes(ser[:-1], m["unit"])[-252:]  # leave out today's unfinished bar
+                ch = futures_changes(ser[:-1], m["unit"])[-LOOKBACK:]  # leave out today's unfinished bar
             else:
-                bars = feed.history(m[FEED], 300)
-                ch = daily_changes(bars[:-1], m["unit"])[-252:]
+                bars = feed.history(m[FEED], LOOKBACK + 40)
+                ch = daily_changes(bars[:-1], m["unit"])[-LOOKBACK:]
             if len(ch) >= 120:
                 sd[m["id"]] = round(statistics.stdev(ch), 4)
             if m["id"] == "dxy":   # trades every weekday, so its bar count = trading days so far this year
@@ -79,7 +80,7 @@ def refresh_typical(feed, markets, today):
         except Exception as e:
             print("history failed for", m["id"], e)
         time.sleep(0.3)
-    new = {"date": today, "ytd_days": ytd_days, "sd": sd}
+    new = {"date": today, "lookback": LOOKBACK, "ytd_days": ytd_days, "sd": sd}
     json.dump(new, open(path, "w"), indent=0)
     return new
 
@@ -89,8 +90,8 @@ def futures_series(feed, ticker):
     Back-adjustment shifts older prices by the roll gap, so the difference between two adjusted closes is a real
     price change, but adjusted levels themselves can be far off (even below zero for oil). So a % move is
     (change in adjusted close) / (real close at the start)."""
-    adj = dict(feed.history(ticker, 300, adjusted=True))
-    raw = dict(feed.history(ticker, 300, adjusted=False))
+    adj = dict(feed.history(ticker, LOOKBACK + 40, adjusted=True))
+    raw = dict(feed.history(ticker, LOOKBACK + 40, adjusted=False))
     return [(t, adj[t], raw[t]) for t in sorted(adj) if t in raw]
 
 

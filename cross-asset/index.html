@@ -101,7 +101,7 @@ details[open]>summary:before{transform:rotate(45deg)}
 <div class="wrap">
 <div class="top"><img class="logo" alt="Alpha Pulse" src="../brand/logo/bar-paper.svg"><button class="theme" id="theme" type="button" aria-label="Switch light/dark"><svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg><svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1z"/></svg></button></div>
 <h1>Cross-Asset Moves</h1>
-<p class="sub">Stock index futures, bond yields, currencies and commodities on one screen. Each move is also shown against a typical move for that market (its standard deviation over the past year), so a 0.5% move in a currency and a 2% move in oil can be compared.</p>
+<p class="sub">Stock index futures, bond yields, currencies and commodities on one screen. Each move is also shown against a typical move for that market (its standard deviation over the past three years), so a 0.5% move in a currency and a 2% move in oil can be compared.</p>
 <p class="hl" id="hl" data-nogloss></p>
 <div class="ctl">
  <div class="seg" id="per"><button data-p="d" class="on">Today</button><button data-p="w">1 week</button><button data-p="m">1 month</button><button data-p="y">YTD</button></div>
@@ -117,8 +117,8 @@ details[open]>summary:before{transform:rotate(45deg)}
 <details class="how" id="how" data-nogloss>
  <summary><h2>How the × number is worked out</h2></summary>
  <ol>
-  <li><b>Collect a year of daily moves.</b> For each market we take its daily change over the past 12 months: % for index futures, currencies and commodities, basis points for bond yields, points for VIX futures. Futures prices are back-adjusted so a switch to the next contract month doesn't count as a move.</li>
-  <li><b>Measure the typical move.</b> We work out the standard deviation of those daily changes. That is "a typical day" for that market. Updated each night.</li>
+  <li><b>Collect three years of daily moves.</b> For each market we take its daily change over the past three years (about 756 trading days): % for index futures, currencies and commodities, basis points for bond yields, points for VIX futures. Futures prices are back-adjusted so a switch to the next contract month doesn't count as a move.</li>
+  <li><b>Measure the typical move.</b> We work out the standard deviation of those daily changes. That is "a typical day" for that market. Updated each morning. Three years keeps the yardstick steady, so it isn't mostly made of the same days being measured.</li>
   <li><b>Compare today with it.</b> Today's move ÷ the typical day = the × number.</li>
   <li><b>Longer periods.</b> For 1 week, 1 month and YTD, the typical day is scaled up by the square root of the number of trading days in the period (5, about 21, and the days so far this year).</li>
  </ol>
@@ -131,7 +131,7 @@ details[open]>summary:before{transform:rotate(45deg)}
  <div><span>Source</span>TradingView, delayed 0–15 min</div>
  <div><span>Updates</span>Every 5 min, 07:00–22:00 London, weekdays</div>
  <div><span>Last refreshed</span><b id="asof" style="font-weight:400">–</b></div>
- <div><span>Typical moves</span>Past year of daily closes, updated <b id="tdate" style="font-weight:400">–</b></div>
+ <div><span>Typical moves</span>Past 3 years of daily closes, updated <b id="tdate" style="font-weight:400">–</b></div>
 </div>
 </details>
 </div>
