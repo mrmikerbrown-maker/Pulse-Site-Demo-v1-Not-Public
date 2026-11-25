@@ -69,6 +69,10 @@ AREAS = [
      "workflows": ["ecb-pricing.yml", "boe-pricing.yml"]},
     {"id": "fed", "name": "Fed scenario planner and Fed pricing", "page": "fed-scenario-planner/",
      "extra_pages": ["cb-pricing/#fed"], "workflows": ["fed-scenario-planner.yml"]},
+    {"id": "cross-asset", "name": "Cross-Asset Moves", "page": "cross-asset/",
+     "workflows": ["cross-asset.yml"], "keep_running": "cross-asset.yml"},
+    {"id": "yield-curve", "name": "Yield Curves", "page": "yield-curve/",
+     "workflows": ["yield-curve.yml"]},
     {"id": "positioning", "name": "Speculator Positioning", "page": "cftc-positioning/",
      "workflows": ["cftc-positioning.yml"]},
     {"id": "glossary", "name": "Glossary", "page": "glossary/"},
@@ -266,6 +270,34 @@ def data_checks(area_id, problems):
         if body is None or b"IDX_SPX" not in body:
             problems.append(("sheet", "The published Google Sheet (live index numbers) isn't answering properly: %s"
                              % (err or "no IDX_SPX row")))
+    elif area_id == "cross-asset":
+        # The page reads data.json straight from the repo (raw.githubusercontent.com), not from
+        # the published site, because the job saves every 5 minutes without republishing.
+        st, body, err = http("https://raw.githubusercontent.com/%s/main/cross-asset/data.json?t=%d"
+                             % (REPO, time.time()))
+        d = None
+        if body is None:
+            problems.append(("fetch:cross-asset", "Cross-asset data could not be downloaded: " + err))
+        else:
+            try:
+                d = json.loads(body)
+            except Exception:
+                problems.append(("broken:cross-asset", "Cross-asset data is not valid JSON"))
+        if d:
+            if in_cross_asset_hours(now_utc() - timedelta(minutes=45)) and d.get("asof"):
+                age = (now_utc() - parse_ts(d["asof"])).total_seconds() / 60
+                if age > 45:
+                    problems.append(("stale:cross-asset", "Cross-asset prices last updated %s London, "
+                                     "%d minutes ago (limit 45 during 07:00-22:00 London on weekdays)"
+                                     % (london(parse_ts(d["asof"])), age)))
+            if d.get("missing"):
+                problems.append(("missing:cross-asset", "Cross-asset prices missing for: "
+                                 + ", ".join(map(str, d["missing"]))[:200]))
+    elif area_id == "yield-curve":
+        d = get_json("yield-curve/data.json", problems, "Yield curve data")
+        if d:
+            check_generated(d, "yield-curve", "Yield curve data", 30, True, problems)
+            check_problem_list(d, "yield-curve", "Yield curve data", problems)
     elif area_id == "positioning":
         # Weekly CFTC data: positions dated Tuesday, published Friday (a few days later in US
         # holiday weeks). The job runs Fri, Sat, Mon and Tue, so it never sits idle 4+ days.
@@ -396,6 +428,12 @@ def is_running(wf):
 KICKED = {}  # workflow -> time this check last started it
 
 
+def in_cross_asset_hours(t):
+    """Weekdays 07:00-22:00 London: when the cross-asset job refreshes prices."""
+    lt = t.astimezone(LONDON)
+    return lt.weekday() < 5 and 7 <= lt.hour < 22
+
+
 def job_checks(area, problems):
     for wf in area.get("workflows", []):
         try:
@@ -414,8 +452,8 @@ def job_checks(area, problems):
             if is_running(wf):
                 KICKED.pop(wf, None)
             elif wf in KICKED and (now_utc() - KICKED[wf]).total_seconds() > 1200:
-                problems.append(("notrunning:" + wf, "The calendar job is not running, and starting it "
-                                 "automatically at %s London didn't work" % london(KICKED[wf])))
+                problems.append(("notrunning:" + wf, "The %s job is not running, and starting it "
+                                 "automatically at %s London didn't work" % (area["name"], london(KICKED[wf]))))
             elif wf not in KICKED:
                 print("  %s is not running: starting it" % wf)
                 if not DRY:
@@ -534,11 +572,15 @@ def run_once(browser, seen_before, seen_now):
 
     # 2. Each part of the site.
     for a in AREAS:
+        print("  checking %s ..." % a["id"])
         probs = list(down_ids.get(a["id"], []))
         if not probs:
             for extra in a.get("extra_pages", []):
                 page_check(extra, probs)
         data_checks(a["id"], probs)
+        if a["id"] == "home" and os.environ.get("TEST_ALERT") == "1":
+            probs.append(("test", "TEST ALERT to check the emails reach you. Nothing is wrong; "
+                                  "this closes itself on the next check."))
         job_checks(a, probs)
         if not probs:
             # Only open a browser when the page itself is up. A browser complaint must show up on

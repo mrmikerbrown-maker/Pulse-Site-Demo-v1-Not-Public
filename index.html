@@ -53,6 +53,7 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
 .t.pos:hover,.t.neg:hover,.t.evt:hover{border-color:var(--accent)}
 .t .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .t .n{font-size:26px;font-weight:700;color:var(--text);margin:6px 0 2px;font-variant-numeric:tabular-nums;line-height:1.15}
+.t .n.up{color:var(--up)}.t .n.dn{color:var(--down)}
 .t .s{font-size:13px;color:var(--text2)}
 .t .from{margin-top:auto;padding-top:10px;font-size:12px;color:var(--dim)}
 .hot{display:inline-block;font-size:12px;font-weight:700;padding:2px 7px;border-radius:99px;background:#C42424;color:#F5F1E8}
@@ -68,6 +69,8 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
 .bars{display:flex;gap:8px;align-items:flex-end;height:58px;margin-top:10px}
 .bars span{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;font-size:10px;color:var(--muted);text-align:center;gap:3px;font-variant-numeric:tabular-nums}
 .bars i{flex:none;display:block;border-radius:3px 3px 0 0;background:rgba(var(--accrgb),.55);min-height:2px}
+.bars i.ti{background:var(--down)}.bars i.ea{background:var(--up)}
+.ch.ti{background:rgba(var(--dnrgb),.14);color:var(--down)}.ch.ea{background:rgba(var(--uprgb),.14);color:var(--up)}
 .bars em{font-style:normal;color:var(--text2);font-weight:600}
 
 /* ---------- Summary line ---------- */
@@ -98,6 +101,17 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
 .sech{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px}
 .sech h2{margin:0;font-size:20px;color:var(--text);font-weight:600}
 .sech p{margin:0;font-size:13.5px;color:var(--muted)}
+.sech .tg{display:none}
+/* Phones: each section folds away behind its heading; tap the heading to open it. */
+@media (max-width:520px){
+ .sech{cursor:pointer;align-items:center;-webkit-tap-highlight-color:transparent}
+ .sech p{flex:1 1 100%;order:3}
+ .sech .tg{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font-size:12.5px;color:var(--muted)}
+ .sech .tg svg{width:12px;height:12px;transition:transform .15s}
+ .sec.shut .sech .tg svg{transform:rotate(-90deg)}
+ .sec.shut .g3{display:none}
+ .sec.shut .sech{margin-bottom:0}
+}
 .g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .c{background:var(--card);border:1px solid var(--line);border-top-width:2px;border-radius:12px;padding:14px 15px;display:flex;flex-direction:column;min-width:0;transition:border-color .15s}
 .c:hover{border-color:var(--accent)}
@@ -155,7 +169,7 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
   <a class="go" href="calendar/?tour=1">Start the tour →</a>
  </div>
 
- <section class="sec"><div class="sech"><h2>Markets</h2><p>What moved, by how much, and who drove it</p></div>
+ <section class="sec"><div class="sech" role="button" tabindex="0" aria-expanded="true"><h2>Markets</h2><span class="tg">6 tools<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3"/></svg></span><p>What moved, by how much, and who drove it</p></div>
   <div class="g3">
    <a class="c" href="cross-asset/"><h3>Cross-Asset Moves</h3><p>Stocks, yields, FX and commodities against a typical day</p><div class="lv" id="c-ca"><span class="wait">Loading…</span></div></a>
    <a class="c" href="index-contribution-site/"><h3>Index Contribution</h3><p>Which stocks moved the S&amp;P 500, Nasdaq 100 and Dow</p><div class="lv" id="c-index"><span class="wait">Loading…</span></div></a>
@@ -165,14 +179,14 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
    <a class="c" href="clock/"><h3>Market Clock</h3><p>When markets open, close and move most</p><div class="lv" id="c-clock"></div></a>
   </div></section>
 
- <section class="sec"><div class="sech"><h2>Macro</h2><p>What the data says, and what is coming next</p></div>
+ <section class="sec"><div class="sech" role="button" tabindex="0" aria-expanded="true"><h2>Macro</h2><span class="tg">3 tools<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3"/></svg></span><p>What the data says, and what is coming next</p></div>
   <div class="g3">
    <a class="c" href="calendar/"><h3>Economic Calendar</h3><p>This week's key releases, with forecasts, in London time</p><div class="lv" id="c-cal"><span class="wait">Loading…</span></div></a>
    <a class="c" href="surprises/"><h3>Data Surprises</h3><p>How the big US releases landed against forecasts</p><div class="lv" id="c-surp"><span class="wait">Loading…</span></div></a>
    <a class="c" href="economy-thermometer/"><h3>Economy Thermometer</h3><p>Is each G10 economy running hot or cold?</p><div class="lv" id="c-therm"><span class="wait">Loading…</span></div></a>
   </div></section>
 
- <section class="sec"><div class="sech"><h2>Central Banks</h2><p>Where rates are, and where markets think they're going</p></div>
+ <section class="sec"><div class="sech" role="button" tabindex="0" aria-expanded="true"><h2>Central Banks</h2><span class="tg">3 tools<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3"/></svg></span><p>Where rates are, and where markets think they're going</p></div>
   <div class="g3">
    <a class="c" href="central-banks/"><h3>Central Banks Overview</h3><p>Every G10 policy rate, last move and next meeting</p><div class="lv" id="c-cb"><span class="wait">Loading…</span></div></a>
    <a class="c" href="cb-pricing/#fed"><h3>Central Bank Pricing</h3><p>Tightening or easing priced, meeting by meeting</p><div class="lv" id="c-fedp"><span class="wait">Loading…</span></div></a>
@@ -204,6 +218,21 @@ function tile(id,html,cls){var t=$(id),w=t.querySelector(".wait,.tb");var d=docu
  if(!off)$("new").hidden=false;
  $("new-x").onclick=function(){$("new").hidden=true;try{localStorage.setItem(K,"1")}catch(e){}};
  $("new-back").onclick=function(){$("new").hidden=false;try{localStorage.removeItem(K)}catch(e){}$("new").scrollIntoView({behavior:"smooth",block:"center"})};
+})();
+
+/* ---------- Collapsible sections on phones ----------
+   On a phone each section starts folded, so the page is three headings long; tapping a heading opens it.
+   On wider screens the headings do nothing and everything stays open. */
+(function(){
+ var mq=matchMedia("(max-width:520px)"),S=[].slice.call(document.querySelectorAll(".sec"));
+ function set(sec,shut){sec.classList.toggle("shut",shut);sec.querySelector(".sech").setAttribute("aria-expanded",!shut)}
+ S.forEach(function(sec){
+  var h=sec.querySelector(".sech");set(sec,mq.matches);
+  function tog(){if(mq.matches)set(sec,!sec.classList.contains("shut"))}
+  h.addEventListener("click",tog);
+  h.addEventListener("keydown",function(e){if(e.key==="Enter"||e.key===" "){e.preventDefault();tog()}});
+ });
+ if(mq.addEventListener)mq.addEventListener("change",function(){S.forEach(function(sec){set(sec,mq.matches)})});
 })();
 
 /* ---------- Ticker play / pause button ----------
@@ -345,7 +374,7 @@ Promise.all([CA,CAL.catch(function(){return[]})]).then(function(a){
 })();
 
 /* ---------- Fed pricing tile: tightening or easing priced for the next meeting, and the path over three meetings ----------
-   Neutral colours on purpose: tightening and easing are neither good nor bad, so they don't get green or red. */
+   Tightening (hikes) shows red, easing (cuts) green, as Mike chose on 25 Nov 2026. */
 var md=function(s,o){return new Date(s+"T12:00:00Z").toLocaleDateString("en-GB",Object.assign({timeZone:"UTC"},o)).replace("Sept","Sep")};
 var FED=json("fed-scenario-planner/data.json");
 FED.then(function(d){
@@ -354,9 +383,9 @@ FED.then(function(d){
  var nb=(P.rates[i]-(i?P.rates[i-1]:P.effr))*100,k=Math.abs(Math.round(nb));
  var cum=[0,1,2].map(function(j){var m=i+j;return m<P.rates.length?{m:P.meetings[m],bp:(P.rates[m]-P.effr)*100}:null}).filter(Boolean);
  var mx=Math.max.apply(0,cum.map(function(c){return Math.abs(c.bp)}))||1;
- tile("t-fed",'<div class="n">'+k+'bp</div><div class="s">of '+(nb<0?"easing":"tightening")+" priced for "+esc(md(P.meetings[i],{day:"numeric",month:"short"}))+"</div>"+
-  '<div class="bars">'+cum.map(function(c){return '<span><em>'+fx(Math.round(c.bp),0)+'</em><i style="height:'+Math.max(3,Math.abs(c.bp)/mx*30).toFixed(0)+'px"></i>'+esc(md(c.m,{month:"short"}))+"</span>"}).join("")+"</div>"+
-  '<div class="nx">Total priced by each meeting, in bp</div>');
+ tile("t-fed",'<div class="n '+(nb<0?"up":nb>0?"dn":"")+'">'+k+'bp</div><div class="s">of '+(nb<0?"easing":"tightening")+" priced for "+esc(md(P.meetings[i],{day:"numeric",month:"short"}))+"</div>"+
+  '<div class="bars">'+cum.map(function(c){return '<span><em>'+Math.abs(Math.round(c.bp))+'</em><i class="'+(c.bp<0?"ea":"ti")+'" style="height:'+Math.max(3,Math.abs(c.bp)/mx*30).toFixed(0)+'px"></i>'+esc(md(c.m,{month:"short"}))+"</span>"}).join("")+"</div>"+
+  '<div class="nx">'+(nb<0?"Easing":"Tightening")+' priced by each meeting (bp)</div>',nb<0?"pos":"neg");
 }).catch(function(){tile("t-fed",'<p class="wait">Open Central Bank Pricing for the latest.</p>')});
 
 /* ---------- Central Bank Pricing card: next meeting for the Fed, ECB and BoE ---------- */
@@ -367,7 +396,7 @@ FED.then(function(d){
   var P=d.path;if(!P||!P.rates||!P.rates.length)throw 0;
   var nx=0;while(nx<P.rates.length-1&&new Date(P.meetings[nx]+b[2])<Date.now())nx++;
   var nb=(P.rates[nx]-(nx?P.rates[nx-1]:P.effr))*100;
-  return b[0]+' <span class="ch nu">'+Math.abs(Math.round(nb))+"bp "+(nb<0?"easing":"tightening")+"</span>"}).catch(function(){return ""})})).then(function(x){
+  return b[0]+' <span class="ch '+(nb<0?"ea":"ti")+'">'+Math.abs(Math.round(nb))+"bp "+(nb<0?"easing":"tightening")+"</span>"}).catch(function(){return ""})})).then(function(x){
   x=x.filter(Boolean);if(!x.length){fail("c-fedp");return}
   $("c-fedp").innerHTML=x.join("<br>")+'<br><span class="mu">Priced for each bank\'s next meeting</span>';
  });
