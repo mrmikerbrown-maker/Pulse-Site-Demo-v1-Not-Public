@@ -1,13 +1,14 @@
 id,group,name,sub,unit,session,tradingview
-spx,Stocks,S&P 500,US,pct,us,SP:SPX
-ndx,Stocks,Nasdaq 100,US,pct,us,NASDAQ:NDX
-dji,Stocks,Dow Jones,US,pct,us,DJ:DJI
-ukx,Stocks,FTSE 100,UK,pct,uk,TVC:UKX
-dax,Stocks,DAX,Germany,pct,eu,XETR:DAX
-cac,Stocks,CAC 40,France,pct,eu,EURONEXT:PX1
-nky,Stocks,Nikkei 225,Japan,pct,jp,TVC:NI225
-hsi,Stocks,Hang Seng,Hong Kong,pct,hk,HSI:HSI
-vix,Stocks,VIX,US stock volatility,pt,us,CBOE:VIX
+spx,Index futures,S&P 500,E-mini · CME,pct,,CME_MINI:ES1!
+ndx,Index futures,Nasdaq 100,E-mini · CME,pct,,CME_MINI:NQ1!
+dji,Index futures,Dow Jones,E-mini · CBOT,pct,,CBOT_MINI:YM1!
+ukx,Index futures,FTSE 100,ICE Futures Europe,pct,,ICEEUR:Z1!
+dax,Index futures,DAX,Eurex,pct,,EUREX:FDAX1!
+sx5e,Index futures,Euro Stoxx 50,Eurex,pct,,EUREX:FESX1!
+cac,Index futures,CAC 40,Euronext,pct,,EURONEXT:FCE1!
+nky,Index futures,Nikkei 225,Osaka Exchange,pct,,OSE:NK2251!
+hsi,Index futures,Hang Seng,HKEX,pct,,HKEX:HSI1!
+vix,Index futures,VIX,Cboe · stock volatility,pt,,CBOE:VX1!
 us2,Bond yields,US 2-year,Treasury,bp,,TVC:US02Y
 us10,Bond yields,US 10-year,Treasury,bp,,TVC:US10Y
 us30,Bond yields,US 30-year,Treasury,bp,,TVC:US30Y
