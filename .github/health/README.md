@@ -14,6 +14,9 @@ The job **Site health: check pages and data** (`.github/workflows/site-health.ym
 | Central banks overview | yes | yes | refreshed within 36 hours, not demo data |
 | Central bank pricing (ECB, BoE) | yes, including the #ecb and #boe tabs | both jobs | ECB within 36 weekday hours and 2 market days; BoE within 30 weekday hours and 3 UK market days (the Bank publishes late); no source failures |
 | Fed planner and Fed pricing | yes, including cb-pricing #fed | yes | within 36 weekday hours and 2 US market days; no source failures |
+| Cross-Asset Moves | yes | yes, and the job is restarted if it stops | prices at most 45 minutes old on weekdays 07:00-22:00 London (read from the repo copy the page uses); no missing prices |
+| Yield Curves | yes | yes | refreshed within 30 weekday hours; no source failures |
+| Speculator Positioning | yes | yes | refreshed within 100 hours; positions dated at most 11 US market days ago |
 | Whole site | nav.js and glossary.js | none | none |
 
 "Page loads" means two things. First, the page answers. Second, in a real (headless) browser it has no JavaScript error and doesn't show its own "could not load" message. A browser problem has to show up on two checks in a row before it alerts, so a page caught halfway through an update doesn't send an email.
