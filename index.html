@@ -80,13 +80,19 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
 .story b{font-weight:700}.story b.up{color:var(--up)}.story b.dn{color:var(--down)}
 
 /* ---------- First-visit strip ---------- */
-.new{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px;padding:10px 12px 10px 16px;border:1px dashed var(--line);border-radius:12px;font-size:14px}
+.new{margin-top:12px;padding:14px 16px;border:1px dashed var(--line);border-radius:12px;font-size:14px}
 .new[hidden]{display:none}
-.new b{color:var(--text);font-weight:600}
-.new a{display:inline-flex;align-items:center;gap:7px;color:var(--text);padding:5px 10px;border:1px solid var(--line);border-radius:99px;background:var(--card);font-size:13.5px}
-.new a:hover{border-color:var(--accent)}
-.new a span{width:18px;height:18px;border-radius:99px;background:var(--text);color:var(--bg);font-size:10.5px;font-weight:700;display:grid;place-items:center}
-.new .x{order:9;margin-left:auto;color:var(--muted);font-size:13px;border:0;background:none;padding:5px 6px;cursor:pointer;font-family:inherit}
+.new .nh{display:flex;align-items:baseline;gap:4px 12px;flex-wrap:wrap}
+.new .nh b{color:var(--text);font-weight:600;font-size:15px}
+.new .nh span{color:var(--muted);font-size:13.5px;flex:1 1 320px}
+.new .ns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.new .ns a{display:grid;grid-template-columns:22px 1fr;gap:3px 9px;align-items:start;color:var(--text);padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);text-decoration:none}
+.new .ns a:hover{border-color:var(--accent)}
+.new .ns span{grid-row:span 2;width:22px;height:22px;border-radius:99px;background:var(--text);color:var(--bg);font-size:11.5px;font-weight:700;display:grid;place-items:center}
+.new .ns b{font-weight:600;font-size:14px}
+.new .ns em{font-style:normal;color:var(--muted);font-size:13px;line-height:1.4}
+.new .go{display:inline-flex;align-items:center;font-weight:600;font-size:13.5px;padding:7px 14px;border-radius:99px;background:var(--text);color:var(--bg);text-decoration:none}
+.new .x{margin-left:auto;color:var(--muted);font-size:13px;border:0;background:none;padding:2px 4px;cursor:pointer;font-family:inherit}
 .new .x:hover{color:var(--text)}
 
 /* ---------- Sections of tool cards ---------- */
@@ -125,7 +131,7 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
 .foot a{text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .foot a:hover{color:var(--text)}
 @media (max-width:900px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:760px){.g3{grid-template-columns:repeat(2,minmax(0,1fr))}.new{gap:8px}.new .x{order:0}.new b{flex:1 1 60%}}
+@media (max-width:760px){.g3{grid-template-columns:repeat(2,minmax(0,1fr))}.new .ns{grid-template-columns:1fr}.new .nh span{order:3}}
 @media (max-width:520px){.g3{grid-template-columns:1fr}.t{min-height:0;padding:12px}.t .n{font-size:22px}.tiles{gap:10px}}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="brand/logo/icon-32.png">
@@ -153,8 +159,15 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
 
  <div class="story" id="story"><span class="mu">Loading today's summary…</span></div>
 
- <div class="new" id="new" hidden><b>New to markets? Start with these three, in order:</b><button class="x" type="button" id="new-x">Got it ✕</button>
-  <a href="calendar/"><span>1</span>Economic Calendar</a><a href="cross-asset/"><span>2</span>Cross-Asset Moves</a><a href="cb-pricing/"><span>3</span>Central Bank Pricing</a></div>
+ <div class="new" id="new" hidden>
+  <div class="nh"><b>New to markets? Take the 3-step tour.</b><span>Three tools that cover most of what moves markets each day. Each one opens with a short guide to using it, then a Next button to the next.</span><button class="x" type="button" id="new-x" title="Hide this for good. The footer link brings it back.">Got it ✕</button></div>
+  <div class="ns">
+   <a href="calendar/?tour=1"><span>1</span><b>Economic Calendar</b><em>What's due this week, when, and what economists expect. Big numbers are when markets move most.</em></a>
+   <a href="cross-asset/?tour=2"><span>2</span><b>Cross-Asset Moves</b><em>Stocks, bonds, currencies and commodities on one screen, and whether today's moves are normal or unusual.</em></a>
+   <a href="cb-pricing/?tour=3"><span>3</span><b>Central Bank Pricing</b><em>What traders expect from the Fed, ECB and Bank of England at each meeting. Rates drive almost everything else.</em></a>
+  </div>
+  <a class="go" href="calendar/?tour=1">Start the tour →</a>
+ </div>
 
  <section class="sec"><div class="sech" role="button" tabindex="0" aria-expanded="true"><h2>Markets</h2><span class="tg">6 tools<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3"/></svg></span><p>What moved, by how much, and who drove it</p></div>
   <div class="g3">
@@ -196,14 +209,15 @@ var fail=function(id,msg){$(id).innerHTML='<span class="wait">'+(msg||"Open the 
 function tile(id,html,cls){var t=$(id),w=t.querySelector(".wait,.tb");var d=document.createElement("div");d.className="tb";d.innerHTML=html;
  if(w)t.replaceChild(d,w);if(cls)t.classList.add(cls)}
 
-/* ---------- First-visit "New to markets?" strip ----------
-   Shown on a visitor's first visit only. "Got it" hides it; the footer link brings it back. */
+/* ---------- "New to markets?" strip ----------
+   Shown until the visitor presses "Got it" (remembered in this browser); the footer link brings it back.
+   The tour itself is tour.js, loaded by nav.js on pages opened with ?tour=. */
 (function(){
- var K="ap-home-seen",seen=false;
- try{seen=!!localStorage.getItem(K);localStorage.setItem(K,"1")}catch(e){}
- if(!seen)$("new").hidden=false;
+ var K="ap-home-new-off",off=false;
+ try{off=localStorage.getItem(K)==="1"}catch(e){}
+ if(!off)$("new").hidden=false;
  $("new-x").onclick=function(){$("new").hidden=true;try{localStorage.setItem(K,"1")}catch(e){}};
- $("new-back").onclick=function(){$("new").hidden=false;$("new").scrollIntoView({behavior:"smooth",block:"center"})};
+ $("new-back").onclick=function(){$("new").hidden=false;try{localStorage.removeItem(K)}catch(e){}$("new").scrollIntoView({behavior:"smooth",block:"center"})};
 })();
 
 /* ---------- Collapsible sections on phones ----------
