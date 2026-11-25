@@ -20,7 +20,7 @@ job started saving them (implied-log.csv, one row per stock per run, kept for go
 If a source fails, the last good numbers are kept, the problem is listed in data.json "problems" and the job still
 finishes green."""
 import csv
-import math, json, os, sys, time, datetime as dt
+import math, json, os, re, sys, time, datetime as dt
 from zoneinfo import ZoneInfo
 import requests
 
@@ -37,15 +37,17 @@ HIST_REFRESH_DAYS = 6  # re-download a stock's past moves at least this often
 HIST_YEARS = 3.1
 MAX_ARCHIVE_CALLS = 450  # Nasdaq calendar days read per run: the ~3-year backfill spreads over the first runs so none runs long
 WORKERS = 3              # downloads at once
-HIST_VERSION = 3         # bump to force every stock's past moves to be recomputed
+HIST_VERSION = 4         # bump to force every stock's past moves to be recomputed (4: adds the 10 days after each report)
+PATH_DAYS = 10           # trading days after each report kept for "what happened next"
 ARCH = os.path.join(HERE, "calendar-archive.json")
 SURP = os.path.join(HERE, "surprises.json")  # EPS and revenue against forecasts, per report, kept between runs
 # US market holidays (NYSE), so index options expiries either side of one count as one session apart
 HOLIDAYS = {"2026-11-26", "2026-12-25", "2027-01-01", "2027-01-18", "2027-02-15", "2027-03-26", "2027-05-31",
             "2027-06-18", "2027-07-05", "2027-09-06", "2027-11-25", "2027-12-24", "2028-01-17", "2028-02-21"}
-# Index options used for each index's implied move per session: SPX has options expiring every weekday;
-# NDX options don't, so QQQ (the Nasdaq 100 ETF), which does, stands in for the Nasdaq 100.
-IDX_OPT = {"SPX": ("_SPX", "SPXW"), "NDX": ("QQQ", "QQQ")}
+# Options used for each index's implied move per session. Cboe's free feed has refused GitHub's servers since
+# 20 Nov 2026, so options come from Nasdaq's option chain, which doesn't carry index options: SPY (the S&P 500
+# ETF) and QQQ (the Nasdaq 100 ETF) stand in. Both have options expiring every weekday.
+IDX_OPT = {"SPX": "SPY", "NDX": "QQQ"}
 BROWSER = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36"
 NASDAQ_H = {"Origin": "https://www.nasdaq.com", "Referer": "https://www.nasdaq.com/", "Accept": "application/json, text/plain, */*"}
 TV_H = {"Origin": "https://www.tradingview.com", "Referer": "https://www.tradingview.com/", "Content-Type": "application/json"}
@@ -264,13 +266,41 @@ def nasdaq_calendar(uni, start, end):
 
 
 # ---------- options ----------
-def cboe_chain(sym):
-    for s in [sym, sym.replace(".", ""), sym.replace(".", "/")]:
-        try:
-            return s, fetch("https://cdn.cboe.com/api/global/delayed_quotes/options/%s.json" % s, tries=2).json()["data"]
-        except Exception as e:
-            last = e
-    raise last
+MONTHS = {m: i for i, m in enumerate(["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"], 1)}
+
+
+def nasdaq_chain(sym, start, end):
+    """Option chain from Nasdaq for expiries start..end, strikes near the money.
+    Returns (last share price, {expiry date: {strike: {"C": {"bid","ask"}, "P": {"bid","ask"}}}})."""
+    s = sym.replace(".", "%5E")
+    ac = "etf" if sym in ("SPY", "QQQ") else "stocks"
+    url = ("https://api.nasdaq.com/api/quote/%s/option-chain?assetclass=%s&limit=3000&fromdate=%s&todate=%s&money=at&type=all"
+           % (s, ac, iso(start), iso(end)))
+    j = fetch(url, headers=NASDAQ_H, tries=3, timeout=40).json()
+    data = j.get("data") or {}
+    rows = ((data.get("table") or {}).get("rows")) or []
+    price = None
+    m = re.search(r"\$([\d,.]+)", data.get("lastTrade") or "")
+    if m:
+        price = money(m.group(1))
+    by, year = {}, None
+    for r in rows:
+        g = r.get("expirygroup") or ""
+        if g:  # header row such as "November 27, 2026"
+            ym = re.search(r"(\d{4})", g)
+            year = int(ym.group(1)) if ym else year
+            continue
+        if not r.get("expiryDate") or r.get("strike") in (None, "", "--") or not year:
+            continue
+        mon, day = r["expiryDate"].split()
+        exp = dt.date(year, MONTHS[mon[:3].lower()], int(day))
+        k = money(r["strike"])
+        q = by.setdefault(exp, {}).setdefault(k, {})
+        q["C"] = {"bid": money(r.get("c_Bid")), "ask": money(r.get("c_Ask"))}
+        q["P"] = {"bid": money(r.get("p_Bid")), "ask": money(r.get("p_Ask"))}
+    if not by:
+        raise ValueError("Nasdaq returned no options")
+    return price, by
 
 
 def tdays(a, b):
@@ -344,24 +374,15 @@ def index_days(sess):
     the square root of time, so (move to expiry)^2 minus (move to the expiry before)^2 leaves that one session's
     share. A busy day (CPI, payrolls, the Fed, Nvidia results) shows up as a bigger number than the days around it."""
     out = {}
-    for ix, (sym, root) in IDX_OPT.items():
+    for ix, sym in IDX_OPT.items():
         try:
-            d = fetch("https://cdn.cboe.com/api/global/delayed_quotes/options/%s.json" % sym, tries=2, timeout=90).json()["data"]
-            price = d.get("current_price") or d.get("close")
-            by = {}
-            for o in d["options"]:
-                code = o["option"]
-                if code[:-15] != root:
-                    continue
-                tail = code[-15:]
-                exp = dt.date(2000 + int(tail[:2]), int(tail[2:4]), int(tail[4:6]))
-                if exp <= sess or (exp - sess).days > 21:
-                    continue
-                by.setdefault(exp, {}).setdefault(int(tail[7:]) / 1000.0, {})[tail[6]] = o
+            price, by = nasdaq_chain(sym, sess + dt.timedelta(days=1), sess + dt.timedelta(days=21))
             prev_var, prev_exp, n = 0.0, sess, 0
             for exp in sorted(by):
+                if exp <= sess:
+                    continue
                 try:
-                    fwd = forward(by[exp], price)
+                    fwd = forward(by[exp], price or median_strike(by[exp]))
                     st, spread, _ = atm_straddle(by[exp], fwd)
                 except ValueError as e:
                     print("  %s %s: %s" % (ix, exp, e))
@@ -376,47 +397,83 @@ def index_days(sess):
             if not n:
                 note("%s options gave no per-day implied moves" % ix)
         except Exception as e:
-            note("%s index options failed: %s" % (ix, e))
+            note("%s index options (%s) failed: %s" % (ix, sym, e))
     return out
 
 
-def implied_move(sym, report_date, when):
-    """ATM straddle for the first expiry on/after the day the report hits the price."""
-    root, d = cboe_chain(sym)
-    price = d.get("current_price") or d.get("close")
-    if not price:
-        raise ValueError("no share price")
+def median_strike(chain):
+    ks = sorted(chain)
+    return ks[len(ks) // 2]
+
+
+def implied_move(sym, report_date, when, sess):
+    """How big a move the options price for the results.
+    raw:  the at-the-money straddle on the first expiry on/after the day the results hit the price, as % of the
+          share price. If that expiry is a few days after the results, it also covers those ordinary days.
+    earn: raw with the ordinary days taken out. A normal day's size comes from the expiry before the results
+          (or, if there isn't one, from the gap between the first and second expiries after them). Moves over
+          separate days add up as squares, so earn^2 = raw^2 - (ordinary days x normal day^2)."""
     rd = dt.date.fromisoformat(report_date)
     first = rd if when == "bmo" else rd + dt.timedelta(days=1)  # after the close (or time unknown): next day's move
-    root_std = root.replace("/", "").replace(".", "")
-    by = {}
-    for o in d["options"]:
-        code = o["option"]
-        r, tail = code[:-15], code[-15:]
-        if r != root_std:
-            continue  # skips adjusted contracts left over from splits or deals
-        exp = dt.date(2000 + int(tail[:2]), int(tail[2:4]), int(tail[4:6]))
-        if exp < first:
+    while first.weekday() >= 5 or iso(first) in HOLIDAYS:
+        first += dt.timedelta(days=1)
+    price, by = nasdaq_chain(sym, sess + dt.timedelta(days=1), first + dt.timedelta(days=21))
+    exps = sorted(e for e in by if e > sess)
+    pts = {}
+    for e in exps:
+        try:
+            f = forward(by[e], price or median_strike(by[e]))
+            st, spread, strikes = atm_straddle(by[e], f)
+            pts[e] = {"f": f, "st": st, "spread": spread, "strikes": [p[0] for p in strikes],
+                      "var": (st / f * 100) ** 2, "n": sessions_between(sess, e)}
+        except ValueError:
             continue
-        k = int(tail[7:]) / 1000.0
-        by.setdefault(exp, {}).setdefault(k, {})[tail[6]] = o
-    if not by:
-        raise ValueError("no expiry after %s" % first)
-    exp = min(by)
-    straddle, spread, pts = atm_straddle(by[exp], price)
+    after = [e for e in exps if e >= first and e in pts]
+    if not after:
+        raise ValueError("no usable expiry on or after %s" % first)
+    e1 = after[0]
+    p1 = pts[e1]
+    raw = math.sqrt(p1["var"])
+    other = p1["n"] - 1  # ordinary sessions the straddle also covers (before and after the results day)
+    before = [e for e in exps if e < first and e in pts and pts[e]["n"] >= 1]
+    normal, method, e0 = None, None, None
+    if other <= 0:
+        method = "only"  # the expiry covers just the results day
+    elif before:
+        e0 = before[-1]
+        normal = pts[e0]["var"] / pts[e0]["n"]
+        method = "before"
+    elif len(after) > 1:
+        e2 = after[1]
+        dn = pts[e2]["n"] - p1["n"]
+        if dn > 0 and pts[e2]["var"] > p1["var"]:
+            normal = (pts[e2]["var"] - p1["var"]) / dn
+            method = "after"
+            e0 = e2
+    earn = raw
+    if method in ("before", "after") and normal is not None:
+        rest = p1["var"] - normal * other
+        earn = math.sqrt(rest) if rest > 0.25 * p1["var"] else None  # if almost nothing is left, don't trust it
+    elif method is None:
+        earn = None
+    headline = earn if earn is not None else raw
     return {
-        "move": round(straddle / price * 100, 2),
-        "straddle": round(straddle, 2),
-        "price": round(price, 2),
-        "expiry": iso(exp),
-        "days_after": (exp - first).days,  # extra days beyond the report day the expiry also covers
-        # trading days the straddle covers from the last close; the page only shows moves covering 5 or fewer,
-        # because further out the straddle is mostly ordinary day-to-day movement rather than the results
-        "tdays": tdays(session_today(), exp),
-        "strikes": [p[0] for p in pts],
-        "wide": spread > 0.25,  # bid/ask spread over 25% of the mid: treat with care
-        "iv30": d.get("iv30"),
-        "asof": (d.get("last_trade_time") or d.get("timestamp") or "")[:19],
+        "move": round(headline, 2),                # what the page shows: the results-only move when it could be worked out
+        "raw": round(raw, 2),                      # straddle to the expiry, as % of the share price
+        "earn": round(earn, 2) if earn is not None else None,
+        "normal_day": round(math.sqrt(normal), 2) if normal else None,
+        "other_days": max(other, 0),
+        "method": method or "raw",
+        "ref_expiry": iso(e0) if e0 else None,     # the expiry used to size a normal day
+        "straddle": round(p1["st"], 2),
+        "price": round(p1["f"], 2),
+        "expiry": iso(e1),
+        "days_after": (e1 - first).days,
+        # trading days the straddle covers from the last close; the page only shows moves covering 5 or fewer
+        "tdays": p1["n"],
+        "strikes": p1["strikes"],
+        "wide": p1["spread"] > 0.25,  # bid/ask spread over 25% of the mid: treat with care
+        "src": "Nasdaq",
     }
 
 
@@ -530,7 +587,7 @@ def nasdaq_eps_history(syms, surp, today):
                 got = fut.result()
                 cur = surp.setdefault(s, {})
                 for d, rec in got.items():
-                    if not any(abs((dt.date.fromisoformat(d) - dt.date.fromisoformat(k)).days) <= 3 and v.get("src") == "TradingView" for k, v in cur.items()):
+                    if not any(abs((dt.date.fromisoformat(d) - dt.date.fromisoformat(k)).days) <= 3 and v.get("src") == "TradingView" for k, v in cur.items() if not k.startswith("_")):
                         cur[d] = {k: v for k, v in rec.items() if v is not None}
                 cur["_nasdaq"] = iso(today)
             except Exception as e:
@@ -601,7 +658,8 @@ def read_log():
         return list(csv.DictReader(f))
 
 
-LOG_COLS = ["run_utc", "session", "symbol", "report_date", "time", "price", "expiry", "days_after", "straddle", "move_pct", "iv30"]
+LOG_COLS = ["run_utc", "session", "symbol", "report_date", "time", "price", "expiry", "days_after", "straddle", "move_pct", "iv30",
+            "raw_pct", "earn_pct", "normal_day_pct", "method", "source"]
 
 
 def main():
@@ -654,11 +712,13 @@ def main():
                 u["implied"] = pu["implied"]
             continue
         try:
-            u["implied"] = implied_move(s, u["date"], u["time"])
+            u["implied"] = implied_move(s, u["date"], u["time"], sess)
             im = u["implied"]
             log_rows.append([run_utc, iso(sess), s, u["date"], u["time"], im["price"], im["expiry"], im["days_after"],
-                             im["straddle"], im["move"], im["iv30"]])
-            print("  %-6s %s %s implied ±%.2f%% (exp %s)" % (s, u["date"], u["time"], im["move"], im["expiry"]))
+                             im["straddle"], im["move"], "", im["raw"], im["earn"] if im["earn"] is not None else "",
+                             im["normal_day"] if im["normal_day"] is not None else "", im["method"], im["src"]])
+            print("  %-6s %s %s results-only ±%s%% (to %s expiry ±%.2f%%, normal day ±%s%%, %s)" % (
+                s, u["date"], u["time"], im["earn"], im["expiry"], im["raw"], im["normal_day"], im["method"]))
         except Exception as e:
             opt_fail += 1
             print("  %-6s options failed: %s" % (s, e))
@@ -668,13 +728,13 @@ def main():
             time.sleep(0.5)
         time.sleep(0.3)
     if opt_fail:
-        note("Cboe options failed for %d stock(s); last good implied move kept where there was one" % opt_fail)
-    new_log = not os.path.exists(LOG)
-    with open(LOG, "a", newline="") as f:
-        w = csv.writer(f)
-        if new_log:
-            w.writerow(LOG_COLS)
-        w.writerows(log_rows)
+        note("Options (Nasdaq) failed for %d stock(s); last good implied move kept where there was one" % opt_fail)
+    old_rows = read_log()
+    with open(LOG, "w", newline="") as f:  # rewritten each run so older rows pick up any new columns
+        w = csv.DictWriter(f, fieldnames=LOG_COLS, extrasaction="ignore")
+        w.writeheader()
+        w.writerows(old_rows)
+        w.writerows([dict(zip(LOG_COLS, r)) for r in log_rows])
     log = read_log()
 
     # Past moves: refresh stocks reporting soon or recently, and any not refreshed for a while.
@@ -709,6 +769,10 @@ def main():
                 when = habit
             am = actual_move(closes, days, d, when)
             if am:
+                # What happened next: % from the last close before the results, on the reaction day (index 0) and
+                # each of the next PATH_DAYS trading days.
+                i0, base = days.index(am["to"]), closes[am["from"]]
+                am["path"] = [round((closes[days[k]] / base - 1) * 100, 2) for k in range(i0, min(i0 + PATH_DAYS + 1, len(days)))]
                 moves.append({"date": d, "time": when, **am, **({} if stated else {"time_assumed": 1})})
         return {"v": HIST_VERSION, "refreshed": iso(today_ny), "moves": moves[-HIST_N:], "last_close": closes[days[-1]], "last_date": days[-1]}
 
@@ -749,6 +813,9 @@ def main():
                 c = max(cands, key=lambda r: r["run_utc"])
                 m["implied"] = float(c["move_pct"])
                 m["implied_expiry"] = c["expiry"]
+                m["implied_kind"] = "results" if c.get("earn_pct") else "to_expiry"
+                if c.get("raw_pct"):
+                    m["implied_raw"] = float(c["raw_pct"])
 
     # Recent results: reports in the last RECENT_DAYS with an actual move.
     recent = []
