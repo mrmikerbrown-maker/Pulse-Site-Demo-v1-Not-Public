@@ -32,7 +32,6 @@ MARKETS = [
  ("124603","Dow","E-mini Dow ($5)","Equities","Long = betting the Dow rises"),
  ("239742","Russell 2000","E-mini Russell 2000","Equities","Long = betting the Russell 2000 rises"),
  ("1170E1","VIX","VIX futures","Equities","Long = betting volatility rises"),
- ("133741","Bitcoin","CME bitcoin","Equities","Long = betting bitcoin rises"),
  ("067651","WTI crude","WTI crude oil","Commodities","Long = betting oil rises"),
  ("06765T","Brent","Brent crude (NYMEX)","Commodities","Long = betting Brent rises"),
  ("023651","Nat gas","US natural gas","Commodities","Long = betting gas rises"),
