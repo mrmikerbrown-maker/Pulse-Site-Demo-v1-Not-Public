@@ -1,18 +1,20 @@
 name: "Cross-Asset Moves: update prices"
 # Weekdays 07:00-22:00 London, prices are fetched every 5 minutes.
-# GitHub fires scheduled jobs late or skips them, so each hourly run keeps going (up to 5h50m) and refreshes
-# every 5 minutes itself; the next hourly run takes over from it. Outside the window a run just stops.
+# GitHub fires hourly schedules only a few times a day in practice, so each run keeps going for 5h50m
+# (refreshing every 5 minutes inside the window, idling outside it) and then starts the next run itself.
+# The hourly schedule is only a backup in case that chain ever breaks.
 # Saves skip the website rebuild (NO_PAGES): the page reads the newest data.json straight from the repo.
 on:
   schedule:
-    - cron: "3 * * * 1-5"
+    - cron: "3 * * * *"
   workflow_dispatch:
 permissions:
   contents: write
   pages: write
+  actions: write
 concurrency:
   group: cross-asset
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -25,19 +27,18 @@ jobs:
           NO_PAGES: "1"
         run: |
           end=$(( $(date +%s) + 350*60 ))
-          first=1
           while :; do
             h=$(TZ=Europe/London date +%-H); wd=$(TZ=Europe/London date +%u)
-            if [ "$wd" -le 5 ] && [ "$h" -ge 7 ] && [ "$h" -lt 22 ] || [ "$first" = 1 -a "${GITHUB_EVENT_NAME}" != "schedule" ]; then
+            if [ "$wd" -le 5 ] && [ "$h" -ge 7 ] && [ "$h" -lt 22 ]; then
               git pull -q --rebase --autostash origin "${GITHUB_REF_NAME}" || true
               python3 cross-asset/build.py || echo "update failed, will try again"
               bash .github/save.sh "Update cross-asset prices" cross-asset/data.json cross-asset/typical.json || true
-            else
-              echo "Outside 07:00-22:00 London on a weekday; stopping"; break
             fi
-            first=0
             [ $(( $(date +%s) + 300 )) -lt "$end" ] || break
-            # a run started by hand or by a push just does one update
-            [ "${GITHUB_EVENT_NAME}" = "schedule" ] || break
             sleep 300
           done
+      - name: Start the next run
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run cross-asset.yml --ref "${GITHUB_REF_NAME}"
