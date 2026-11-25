@@ -61,6 +61,8 @@ td{color:var(--text)}
 .bar i{position:absolute;top:0;bottom:0;border-radius:2px}
 .srcbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 18px;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:12px 16px;margin:14px 0;font-size:13px;color:var(--text)}
 .srcbox span{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.dwarn{border:1px solid var(--line);border-left:3px solid var(--pink);border-radius:10px;padding:10px 14px;font-size:13px;margin:0 0 14px;background:var(--card);color:var(--text2)}.dwarn b{color:var(--text)}
+.srcbox .old{color:var(--pinkt)}
 .n{color:var(--muted);font-size:12px;margin-top:8px;max-width:90ch}
 .foot{margin-top:26px;font-size:12px;color:var(--dim);border-top:1px solid var(--line);padding-top:14px}
 @media (max-width:760px){.card{padding:16px}.tw{margin:14px -16px 0;padding:0 16px}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.stats .x{display:none}.stats b{font-size:19px}.hl{font-size:17px}th,td{padding:7px 6px}.bar{width:44px;margin-left:4px}.hide-m{display:none}.seg.big button{padding:8px 12px;font-size:13px}}
@@ -75,6 +77,7 @@ td{color:var(--text)}
 <h1>Yield Curves</h1>
 <p class="sub">Government bond yields from short to long maturities for the US, Germany and the UK. See how each curve has moved over the past week and month, and track the key spreads over time.</p>
 <div class="seg big" id="cty"></div>
+<div class="dwarn" id="dwarn" hidden></div>
 
 <div class="card">
  <p class="hl" id="hl"></p>
@@ -96,45 +99,45 @@ td{color:var(--text)}
 
 <div class="srcbox" id="stamp"></div>
 <p class="n" id="note"></p>
-<div class="foot">Sketch for review. Real data downloaded from the US Treasury, Bundesbank and Bank of England on 25 Nov 2026; nothing on this page updates yet.</div>
+<div class="foot">Data: benchmark government bond yields from TradingView; spread history from the US Treasury, the Bundesbank and the Bank of England. Updated each weekday.</div>
 </div>
 <script>
 var $=function(i){return document.getElementById(i)},D,C="us",CMP="both",SP=[2,10],RNG=261;
 var META={
- us:{label:"US",flag:"US Treasuries",src:"US Treasury daily par yield curve",freq:"Weekdays, after the US close (around 22:30 London)",lag:"Same day",
-  note:"US yields are the Treasury's par yield curve: the yield a newly issued bond at each maturity would pay, read off the Treasury's own fitted curve. They sit within a few basis points of screen quotes for the benchmark notes."},
- de:{label:"Germany",flag:"German Bunds",src:"Bundesbank yield curve for Federal securities (Svensson method)",freq:"Weekdays, around 13:00 London (the Bundesbank posts the day's curve at about 12:30)",lag:"Same day",
-  note:"German yields are zero-coupon yields fitted by the Bundesbank across all listed Federal bonds. They can differ by a few basis points from the quoted yield on a single benchmark Bund. The Bundesbank curve starts at 1 year."},
- uk:{label:"UK",flag:"UK Gilts",src:"Bank of England fitted nominal gilt curve",freq:"Weekdays, around 13:30 London. The Bank publishes each day's curve the next working day",lag:"One working day behind",
-  note:"UK yields are zero-coupon yields from the Bank of England's fitted gilt curve. The Bank publishes each day's curve the next working day, so the UK line is one day behind the US and Germany."}};
+ us:{label:"US",flag:"US Treasuries",hist:"US Treasury daily par yield curve (same day)"},
+ de:{label:"Germany",flag:"German Bunds",hist:"Bundesbank yield curve for Federal securities (same day, around 12:30 London)"},
+ uk:{label:"UK",flag:"UK Gilts",hist:"Bank of England fitted gilt curve (published the next working day)"}};
 function lbl(m){return m<1?Math.round(m*12)+"m":m+"y"}
 function ldn(iso,o){return new Date(iso).toLocaleString("en-GB",Object.assign({timeZone:"Europe/London"},o))}
 function fd(s,o){return new Date(s+"T12:00:00Z").toLocaleDateString("en-GB",Object.assign({timeZone:"UTC"},o||{day:"numeric",month:"short"}))}
 function sg(x,d){d=d||0;if(Math.abs(x)<Math.pow(10,-d)/2)x=0;return(x>0?"+":x<0?"−":"")+Math.abs(x).toFixed(d)}
 function cl(bp){return bp>0.5?"ri":bp<-0.5?"fa":""}
-/* index of the last date on or before (latest - n days) */
-function back(S,days){var t=new Date(S.dates[S.dates.length-1]+"T12:00:00Z")-days*864e5,i=S.dates.length-1;while(i>0&&new Date(S.dates[i]+"T12:00:00Z")>t)i--;return i}
 function val(S,i,m){var k=S.mats.indexOf(m);return k<0?null:S.y[i][k]}
 function spr(S,i,a,b){var x=val(S,i,a),y=val(S,i,b);return x==null||y==null?null:(y-x)*100}
 
+/* TradingView curve -> the shape the chart code uses: rows 0..3 = 1 month ago, 1 week ago, previous close, latest */
+function cv(c){var K=D[c].curve;return{mats:K.mats,y:[K.m1,K.w1,K.d1,K.now]}}
 function draw(){
- var S=D[C],M=META[C],L=S.dates.length-1,iD=L-1,iW=back(S,7),iM=back(S,30);
- /* headline: what happened to the curve over the past month */
+ var S=cv(C),H=D[C].hist,M=META[C],L=3,iD=2,iW=1,iM=0;
  var s0=spr(S,L,2,10),s1=spr(S,iM,2,10),d2=(val(S,L,2)-val(S,iM,2))*100,d10=(val(S,L,10)-val(S,iM,10))*100,ch=s0-s1;
  var shape=Math.abs(ch)<3?"has barely changed shape":(ch>0?"has steepened ":"has flattened ")+Math.abs(ch).toFixed(0)+"bp";
  var lvl=d2>0&&d10>0?"Yields are higher":d2<0&&d10<0?"Yields are lower":"Short and long yields went opposite ways";
  $("hl").innerHTML=M.flag+" curve "+shape+" in a month. <span>"+lvl+": 2y "+sg(d2)+"bp, 10y "+sg(d10)+"bp.</span>";
- $("hls").textContent="2s10s at "+sg(s0)+"bp, against "+sg(s1)+"bp on "+fd(S.dates[iM])+". Curve as of "+fd(S.dates[L],{weekday:"short",day:"numeric",month:"short"})+".";
- /* stats */
+ var at=D.curve_asof?ldn(D.curve_asof,{weekday:"short",day:"numeric",month:"short"}).replace(",","")+", "+ldn(D.curve_asof,{hour:"2-digit",minute:"2-digit"})+" London":"–";
+ $("hls").textContent="2s10s at "+sg(s0)+"bp, against "+sg(s1)+"bp a month ago. Yields as of "+at+".";
  var st=[["2y yield",2],["10y yield",10],["30y yield",30]].map(function(a){var v=val(S,L,a[1]),c=(v-val(S,iD,a[1]))*100;
   return '<div><span>'+a[0]+'</span><b>'+v.toFixed(2)+'%</b><small class="'+cl(c)+'">'+sg(c)+'bp on day</small></div>'});
  [["2s10s",2,10],["5s30s",5,30]].forEach(function(a){var v=spr(S,L,a[1],a[2]),c=v-spr(S,iD,a[1],a[2]);
   st.push('<div class="x"><span>'+a[0]+'</span><b>'+sg(v)+'bp</b><small>'+sg(c)+'bp on day</small></div>')});
  $("stats").innerHTML=st.join("");
  curve(S,L,iW,iM);table(S,L,iD,iW,iM);spread();
- var ages=[["us","US"],["de","Germany"],["uk","UK"]].map(function(a){return a[1]+" "+fd(D[a[0]].dates[D[a[0]].dates.length-1])}).join(" · ");
- $("stamp").innerHTML='<div><span>Source</span>'+M.src+'</div><div><span>Updates</span>'+M.freq+'</div><div><span>Curve as of</span><b>'+fd(S.dates[L],{weekday:"short",day:"numeric",month:"short"})+'</b></div><div><span>Last refreshed</span><b>'+ldn(D.generated,{weekday:"short",day:"numeric",month:"short"}).replace(",","")+', '+ldn(D.generated,{hour:"2-digit",minute:"2-digit"})+' London</b></div>';
- $("note").innerHTML=M.note+" Spreads chart: latest dates "+ages+".";
+ var old=D.curve_asof&&Date.now()-new Date(D.curve_asof)>4*864e5,hl=H.dates[H.dates.length-1];
+ $("stamp").innerHTML='<div><span>Source</span>Yields: TradingView (benchmark government bonds). Spreads chart: '+M.hist+'</div><div><span>Updates</span>Weekdays, around 16:45 and 22:15 UK time</div><div><span>Yields as of</span><b'+(old?' class="old"':'')+'>'+at+'</b></div><div><span>Last refreshed</span><b>'+ldn(D.generated,{weekday:"short",day:"numeric",month:"short"}).replace(",","")+', '+ldn(D.generated,{hour:"2-digit",minute:"2-digit"})+' London</b></div>';
+ var w=[];if(D.problems&&D.problems.indexOf("curve")>=0)w.push("The latest yields could not be fetched, so the curve is from "+at+".");
+ ["us","de","uk"].forEach(function(c){if(D.problems&&D.problems.indexOf("hist-"+c)>=0)w.push("The "+META[c].label+" spread history could not be updated.")});
+ if(old)w.push("The yields haven't refreshed since "+at+".");
+ $("dwarn").hidden=!w.length;$("dwarn").innerHTML="<b>Data warning.</b> "+w.join(" ");
+ $("note").innerHTML="Yields are the quoted benchmark bonds, as on a trading screen. TradingView doesn't give history, so the spreads chart uses the official curves, which are fitted across all bonds and can sit a few basis points away from the benchmarks. Latest dates in the spreads chart: "+["us","de","uk"].map(function(c){return META[c].label+" "+fd(D[c].hist.dates[D[c].hist.dates.length-1])}).join(" · ")+". The UK curve runs a working day behind.";
 }
 
 function svgEl(w,h,inner){return '<svg viewBox="0 0 '+w+' '+h+'" role="img">'+inner+'</svg>'}
@@ -142,9 +145,9 @@ function ticks(lo,hi,n){var st=[.05,.1,.2,.25,.5,1,2,5,10,20,25,50,100],r=(hi-lo
 
 function curve(S,L,iW,iM){
  var el=$("cv"),W=Math.max(320,el.clientWidth),mob=W<560,H=mob?240:300,pl=mob?36:44,pr=mob?40:56,pt=14,pb=26;
- var lines=[{i:L,name:"Latest",d:fd(S.dates[L]),st:"var(--text)",w:2.5,dash:""}];
- if(CMP!="1m")lines.push({i:iW,name:"1 week ago",d:fd(S.dates[iW]),st:"var(--text2)",w:1.5,dash:"6 4"});
- if(CMP!="1w")lines.push({i:iM,name:"1 month ago",d:fd(S.dates[iM]),st:"var(--muted)",w:1.5,dash:"1.5 3.5"});
+ var lines=[{i:L,name:"Latest",d:"",st:"var(--text)",w:2.5,dash:""}];
+ if(CMP!="1m")lines.push({i:iW,name:"1 week ago",d:"",st:"var(--text2)",w:1.5,dash:"6 4"});
+ if(CMP!="1w")lines.push({i:iM,name:"1 month ago",d:"",st:"var(--muted)",w:1.5,dash:"1.5 3.5"});
  var all=[];lines.forEach(function(l){S.y[l.i].forEach(function(v){if(v!=null)all.push(v)})});
  var lo=Math.min.apply(0,all),hi=Math.max.apply(0,all),pad=(hi-lo)*.12||.1;lo-=pad;hi+=pad;
  var n=S.mats.length,x=function(k){return pl+(W-pl-pr)*k/(n-1)},y=function(v){return pt+(H-pt-pb)*(hi-v)/(hi-lo)};
@@ -158,7 +161,7 @@ function curve(S,L,iW,iM){
  g+='<line id="cvx" x1="0" x2="0" y1="'+pt+'" y2="'+(H-pb)+'" stroke="var(--muted)" stroke-width="1" visibility="hidden"/>';
  g+='<rect x="'+pl+'" y="0" width="'+(W-pl-pr)+'" height="'+H+'" fill="transparent" id="cvhit"/>';
  el.innerHTML=svgEl(W,H,g)+'<div class="tip" id="cvtip" hidden></div>';
- $("cvkey").innerHTML=lines.map(function(l){return '<span><i style="border-top:'+l.w+'px '+(l.dash?(l.dash[0]=="1"?"dotted":"dashed"):"solid")+' '+l.st+'"></i>'+l.name+' ('+l.d+')</span>'}).join("");
+ $("cvkey").innerHTML=lines.map(function(l){return '<span><i style="border-top:'+l.w+'px '+(l.dash?(l.dash[0]=="1"?"dotted":"dashed"):"solid")+' '+l.st+'"></i>'+l.name+'</span>'}).join("");
  var hit=$("cvhit"),tip=$("cvtip"),vx=$("cvx"),svg=el.querySelector("svg");
  function mv(e){var r=svg.getBoundingClientRect(),px=(e.touches?e.touches[0].clientX:e.clientX)-r.left,sx=px*W/r.width,k=Math.max(0,Math.min(n-1,Math.round((sx-pl)/(W-pl-pr)*(n-1))));
   vx.setAttribute("x1",x(k));vx.setAttribute("x2",x(k));vx.setAttribute("visibility","visible");
@@ -180,9 +183,9 @@ function table(S,L,iD,iW,iM){
 var COL={us:"var(--text)",de:"var(--text2)",uk:"var(--muted)"};
 function spread(){
  var el=$("sp"),W=Math.max(320,el.clientWidth),mob=W<560,H=mob?230:280,pl=mob?40:48,pr=mob?66:92,pt=12,pb=26;
- var last=Object.keys(D).filter(function(k){return D[k].dates}).map(function(k){return D[k].dates[D[k].dates.length-1]}).sort().pop();
+ var last=["us","de","uk"].map(function(k){return D[k].hist.dates[D[k].hist.dates.length-1]}).sort().pop();
  var t1=new Date(last+"T12:00:00Z").getTime(),t0=RNG>3000?new Date("2024-01-02T12:00:00Z").getTime():t1-RNG*1.4*864e5;
- var ser=["us","de","uk"].map(function(c){var S=D[c],p=[];S.dates.forEach(function(d,i){var t=new Date(d+"T12:00:00Z").getTime();if(t>=t0){var v=spr(S,i,SP[0],SP[1]);if(v!=null)p.push([t,v,d])}});return{c:c,p:p}});
+ var ser=["us","de","uk"].map(function(c){var S=D[c].hist,p=[];S.dates.forEach(function(d,i){var t=new Date(d+"T12:00:00Z").getTime();if(t>=t0){var v=spr(S,i,SP[0],SP[1]);if(v!=null)p.push([t,v,d])}});return{c:c,p:p}});
  var all=[0];ser.forEach(function(s){s.p.forEach(function(q){all.push(q[1])})});
  var lo=Math.min.apply(0,all),hi=Math.max.apply(0,all),pad=(hi-lo)*.08;lo-=pad;hi+=pad;
  var x=function(t){return pl+(W-pl-pr)*(t-t0)/(t1-t0)},y=function(v){return pt+(H-pt-pb)*(hi-v)/(hi-lo)};
@@ -216,7 +219,7 @@ segs("cty",function(k){C=k;history.replaceState(null,"","#"+k)});segs("cmp",func
 $("theme").onclick=function(){var l=document.documentElement.classList.toggle("light");try{localStorage.setItem("ict-theme",l?"light":"dark")}catch(e){}};
 var h0=location.hash.slice(1);if(META[h0]){C=h0;document.querySelectorAll("#cty button").forEach(function(b){b.className=b.getAttribute("data-k")==C?"on":""})}
 var rt;window.addEventListener("resize",function(){clearTimeout(rt);rt=setTimeout(function(){if(D)draw()},150)});
-fetch("data.json?"+Date.now()).then(function(r){return r.json()}).then(function(j){D=j;draw()});
+fetch("data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){D=j;draw()}).catch(function(){$("dwarn").hidden=false;$("dwarn").innerHTML="<b>The yields could not load.</b> Try again in a minute."});
 </script>
 </body>
 </html>
