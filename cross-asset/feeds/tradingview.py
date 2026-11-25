@@ -4,6 +4,7 @@ Every feed module gives build.py the same two functions, so a different feed can
   quotes(tickers)       -> {ticker: {"price", "chg_abs", "chg_pct", "perf_w", "perf_m", "perf_ytd", "mode"}}
                            chg_* = since the previous daily close; perf_* = % change over 1 week / 1 month / year to date.
   history(ticker, n)    -> [(unix_seconds, close), ...] daily closes, oldest first, about n bars.
+                           resolution="15" gives 15-minute bars instead (used for the homepage 48-hour charts).
                            Futures ("ES1!" = front month) come back-adjusted (roll gaps taken out by shifting
                            older prices), unless adjusted=False, which gives the real traded prices.
 The ticker for each market comes from that feed's column in markets.csv (column name = module name).
@@ -36,7 +37,7 @@ def _m(f, p):
     return "~m~%d~m~%s" % (len(s), s)
 
 
-def history(ticker, n=300, adjusted=True):
+def history(ticker, n=300, adjusted=True, resolution="1D"):
     from websocket import create_connection
     ws = create_connection("wss://data.tradingview.com/socket.io/websocket",
                            header=["Origin: https://www.tradingview.com"], timeout=20)
@@ -44,7 +45,7 @@ def history(ticker, n=300, adjusted=True):
     for m in [_m("set_auth_token", ["unauthorized_user_token"]), _m("chart_create_session", [cs, ""]),
               _m("resolve_symbol", [cs, "sym1", "=" + json.dumps(dict({"symbol": ticker, "adjustment": "splits"},
                                                                         **({"backadjustment": "default"} if adjusted and ticker.endswith("!") else {})))]),
-              _m("create_series", [cs, "s1", "s1", "sym1", "1D", n, ""])]:
+              _m("create_series", [cs, "s1", "s1", "sym1", resolution, n, ""])]:
         ws.send(m)
     buf, t0 = "", time.time()
     try:

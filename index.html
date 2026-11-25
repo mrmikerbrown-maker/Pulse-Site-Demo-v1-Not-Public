@@ -64,6 +64,17 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
 .gg s{position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--text2)}
 .gg i{position:absolute;top:0;bottom:0;border-radius:99px}
 .ggl{display:flex;justify-content:space-between;font-size:10px;color:var(--dim)}
+/* 48-hour mini chart on the S&P 500 and Gold tiles: dashed line = yesterday's close, day names underneath */
+.spk{margin-top:12px}.spkp{position:relative}
+.spk svg{display:block;width:100%;height:58px;overflow:visible}
+.spk .ln{fill:none;stroke-width:1.6;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.spk .ref{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.spk .day{stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke}
+.spk .dot{position:absolute;right:-3px;width:7px;height:7px;margin-top:-3.5px;border-radius:50%}
+.spkd{position:relative;height:13px;font-size:10px;color:var(--dim)}
+.spkd span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.spkk{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px;font-size:10px;color:var(--dim);margin-top:2px}
+.spkk span,.spkk i{font-style:normal;white-space:nowrap}.spkk i:before{content:"";display:inline-block;width:12px;border-top:1px dashed var(--muted);vertical-align:middle;margin-right:4px}
 .nx{font-size:12px;color:var(--muted);margin-top:10px}
 .nx b{color:var(--text2);font-weight:500}
 .bars{display:flex;gap:8px;align-items:flex-end;height:58px;margin-top:10px}
@@ -247,14 +258,17 @@ function tile(id,html,cls){var t=$(id),w=t.querySelector(".wait,.tb");var d=docu
 /* ---------- Cross-asset data: one file feeds the ticker, the biggest-mover tile, the summary and the Cross-Asset card ----------
    Same rule as cross-asset/index.html: try the copy on raw.githubusercontent.com first (the job saves every 5 minutes
    without rebuilding the site), fall back to the site copy, and keep whichever is newer. */
-var CA=(function(){
+function newest(f,ok){
  var urls=[],m=location.hostname.match(/^([^.]+)\.github\.io$/),seg=location.pathname.split("/")[1];
- if(m&&seg)urls.push("https://raw.githubusercontent.com/"+m[1]+"/"+seg+"/main/cross-asset/data.json");
- urls.push("cross-asset/data.json");
+ if(m&&seg)urls.push("https://raw.githubusercontent.com/"+m[1]+"/"+seg+"/main/"+f);
+ urls.push(f);
  return Promise.all(urls.map(function(u){return json(u).catch(function(){return null})})).then(function(res){
-  res=res.filter(function(d){return d&&d.rows&&d.rows.length}).sort(function(a,b){return a.asof<b.asof?1:-1});
+  res=res.filter(function(d){return d&&ok(d)}).sort(function(a,b){return a.asof<b.asof?1:-1});
   if(!res.length)throw 0;return res[0]});
-})();
+}
+var CA=newest("cross-asset/data.json",function(d){return d.rows&&d.rows.length});
+/* Last 48 hours of trading in 15-minute steps for the S&P 500 and Gold tiles (cross-asset/intraday.py, same 5-minute job). */
+var ID=newest("cross-asset/intraday.json",function(d){return d.series});
 /* Units: "pct" = % move, "bp" = yield move in basis points, "pt" = points (VIX).
    Colours follow the Cross-Asset page: a rising yield shows red (bond prices fall), a falling yield green. */
 function mvTxt(r,v){var a=Math.abs(v),s=v>0?"+":v<0?"−":"";return r.u==="bp"?s+a.toFixed(1)+"bp":r.u==="pt"?s+a.toFixed(2)+" pts":s+a.toFixed(2)+"%"}
@@ -268,6 +282,26 @@ function gauge(r,v){/* bar runs from −2.5 to +2.5 typical days */
  var x=r.sd?v/r.sd:0,w=Math.min(Math.abs(x),2.5)/2.5*50,col=good(r,v)?"var(--up)":"var(--down)";
  return '<div class="gg"><u style="left:30%"></u><u style="left:70%"></u><i style="'+(x>=0?"left:50%":"right:50%")+";width:"+w.toFixed(1)+"%;background:"+col+'"></i><s></s></div><div class="ggl"><span>Bigger fall</span><span>Typical day</span><span>Bigger rise</span></div>'}
 
+/* Mini chart: one point per 15 minutes of trading (weekends and the daily break are skipped, so the line has no flat gaps).
+   Dashed line = yesterday's close, worked out from today's price and % move, so above it = up on the day.
+   Thin upright lines split the days (London time). */
+function spark(id,pts,r){
+ var el=$(id);if(!el||!pts||pts.length<20)return;
+ var v=r.mv[0],ref=r.p/(1+v/100),cs=pts.map(function(x){return x[1]});
+ cs[cs.length-1]=r.p;/* end exactly on the price shown above */
+ var lo=Math.min.apply(null,cs.concat(ref)),hi=Math.max.apply(null,cs.concat(ref)),pad=(hi-lo)*.08||1;lo-=pad;hi+=pad;
+ var W=300,H=58,n=cs.length,X=function(i){return i/(n-1)*W},Y=function(c){return H-(c-lo)/(hi-lo)*H};
+ var col=v>=0?"var(--up)":"var(--down)",d="",days="",lab="",seg=0,prev=dayKey(pts[0][0]*1000);
+ cs.forEach(function(c,i){d+=(i?"L":"M")+X(i).toFixed(1)+" "+Y(c).toFixed(1)});
+ function name(i,j){var mid=(i+j)/2/(n-1)*100;if(j-i>n*.12)lab+='<span style="left:'+mid.toFixed(1)+'%">'+lon(pts[i][0]*1000,{weekday:"short"})+"</span>"}
+ for(var i=1;i<n;i++){var k=dayKey(pts[i][0]*1000);if(k!==prev){days+='<line class="day" x1="'+X(i).toFixed(1)+'" x2="'+X(i).toFixed(1)+'" y1="0" y2="'+H+'"/>';name(seg,i);seg=i;prev=k}}
+ name(seg,n-1);
+ el.innerHTML='<div class="spkp"><svg viewBox="0 0 '+W+" "+H+'" preserveAspectRatio="none" aria-hidden="true">'+days+
+  '<line class="ref" x1="0" x2="'+W+'" y1="'+Y(ref).toFixed(1)+'" y2="'+Y(ref).toFixed(1)+'"/><path class="ln" d="'+d+'" style="stroke:'+col+'"/></svg>'+
+  '<span class="dot" style="top:'+(Y(r.p)/H*100).toFixed(1)+"%;background:"+col+'"></span></div><div class="spkd">'+lab+'</div><div class="spkk"><span>Past 48 hours</span><i>Yesterday\'s close</i></div>';
+ el.setAttribute("role","img");el.setAttribute("aria-label",r.n+" over the last 48 hours of trading, now "+mvTxt(r,v)+" on the day");
+}
+
 CA.then(function(d){
  var R=d.rows.filter(function(r){return r.mv&&r.mv[0]!=null});
  /* Ticker: every instrument on the Cross-Asset page, looping slowly. The list is drawn twice so the loop is seamless. */
@@ -280,13 +314,15 @@ CA.then(function(d){
     US cash market opens at 14:30 London. During the cash session the tile adds the stock driving the cash index most. */
  var sp=R.filter(function(r){return r.id==="spx"})[0];
  if(sp){var sv=sp.mv[0];
-  tile("t-spx",'<div class="n '+(sv>=0?"up":"dn")+'">'+mvTxt(sp,sv)+'</div><div class="s">At '+sp.p.toLocaleString("en-GB",{maximumFractionDigits:0})+' · <b class="'+(sv>=0?"up":"dn")+'">'+chg(sp.p,sv,0)+" pts</b></div>"+'<div class="nx" id="spx-drv"></div>',sv>=0?"pos":"neg")}
+  tile("t-spx",'<div class="n '+(sv>=0?"up":"dn")+'">'+mvTxt(sp,sv)+'</div><div class="s">At '+sp.p.toLocaleString("en-GB",{maximumFractionDigits:0})+' · <b class="'+(sv>=0?"up":"dn")+'">'+chg(sp.p,sv,0)+" pts</b></div>"+'<div class="spk" id="spk-spx"></div><div class="nx" id="spx-drv"></div>',sv>=0?"pos":"neg")}
  else tile("t-spx",'<p class="wait">Open Cross-Asset Moves for S&amp;P 500 futures.</p>');
  /* Gold today: the move and the price. (Mike, 25 Nov: no typical-day comparison on the homepage tiles.) */
  var g=R.filter(function(r){return r.id==="gold"})[0];
  if(g){var gv=g.mv[0];
-  tile("t-gold",'<div class="n '+(gv>=0?"up":"dn")+'">'+mvTxt(g,gv)+'</div><div class="s">$'+g.p.toLocaleString("en-GB",{maximumFractionDigits:0})+" an ounce · "+'<b class="'+(gv>=0?"up":"dn")+'">'+chg(g.p,gv,0).replace(/^([+−])/,"$1$")+"</b></div>",gv>=0?"pos":"neg")}
+  tile("t-gold",'<div class="n '+(gv>=0?"up":"dn")+'">'+mvTxt(g,gv)+'</div><div class="s">$'+g.p.toLocaleString("en-GB",{maximumFractionDigits:0})+" an ounce · "+'<b class="'+(gv>=0?"up":"dn")+'">'+chg(g.p,gv,0).replace(/^([+−])/,"$1$")+"</b></div>"+'<div class="spk" id="spk-gold"></div>',gv>=0?"pos":"neg")}
  else tile("t-gold",'<p class="wait">Open Cross-Asset Moves for gold.</p>');
+
+ ID.then(function(x){if(sp)spark("spk-spx",x.series.spx,sp);if(g)spark("spk-gold",x.series.gold,g)}).catch(function(){});
 
  /* Cross-Asset card: how many markets moved 1.5× their typical day or more. */
  var un=R.filter(function(r){return ratio(r)>=1.5}).sort(function(a,b){return ratio(b)-ratio(a)});

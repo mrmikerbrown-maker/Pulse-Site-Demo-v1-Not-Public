@@ -32,7 +32,8 @@ jobs:
             if [ "$wd" -le 5 ] && [ "$h" -ge 7 ] && [ "$h" -lt 22 ]; then
               git pull -q --rebase --autostash origin "${GITHUB_REF_NAME}" || true
               python3 cross-asset/build.py || echo "update failed, will try again"
-              bash .github/save.sh "Update cross-asset prices" cross-asset/data.json cross-asset/typical.json || true
+              python3 cross-asset/intraday.py || echo "homepage charts failed, will try again"
+              bash .github/save.sh "Update cross-asset prices" cross-asset/data.json cross-asset/typical.json cross-asset/intraday.json || true
             fi
             [ $(( $(date +%s) + 300 )) -lt "$end" ] || break
             sleep 300
