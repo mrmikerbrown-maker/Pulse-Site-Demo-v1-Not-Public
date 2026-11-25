@@ -12,18 +12,20 @@ var HUB=ME?new URL(".",ME).pathname:"/Pulse-Site-Demo-v1-Not-Public/";
 var NAME="Alpha Pulse";
 var TOOLS=[
  ["Home",HUB],
- ["This week",HUB+"calendar/"],
  ["Markets",[
   ["Cross-Asset Moves",HUB+"cross-asset/","Today's moves in stocks, yields, FX and commodities, against a typical day"],
   ["Index Contribution",HUB+"index-contribution-site/","Which stocks moved the S&amp;P 500, Nasdaq 100 and Dow"],
-  ["Market Clock",HUB+"clock/","When markets open, close and move most"],
   ["Earnings Moves",HUB+"earnings-moves/","Move options price for big US companies' results, against past moves"],
   ["Yield Curves",HUB+"yield-curve/","US, German and UK government bond curves and spreads"],
-  ["Speculator Positioning",HUB+"cftc-positioning/","Where speculators are most long or short, from weekly CFTC data"]
+  ["Speculator Positioning",HUB+"cftc-positioning/","Where speculators are most long or short, from weekly CFTC data"],
+  ["Market Clock",HUB+"clock/","When markets open, close and move most"]
  ]],
  ["Economy",[
+  ["Economic calendar",HUB+"calendar/","This week's key releases and central bank decisions, with forecasts, in London time"],
   ["Data Surprises",HUB+"surprises/","How releases landed against expectations"],
-  ["Economy Thermometer",HUB+"economy-thermometer/","Is each G10 economy hot or cold?"],
+  ["Economy Thermometer",HUB+"economy-thermometer/","Is each G10 economy hot or cold?"]
+ ]],
+ ["Central banks",[
   ["Central banks overview",HUB+"central-banks/","Every G10 policy rate, last move and next meeting"],
   ["Central bank pricing",HUB+"cb-pricing/","Tightening or easing priced for each Fed, ECB and BoE meeting"],
   ["Fed scenario planner",HUB+"fed-scenario-planner/","Pick the next Fed outcome and see how markets reacted before"]
