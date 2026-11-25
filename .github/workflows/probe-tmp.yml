@@ -1,0 +1,33 @@
+name: probe-tmp
+on:
+  push:
+    branches: [claude/project-thread-jjc09i]
+    paths: [.github/workflows/probe-tmp.yml]
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - run: |
+          pip install -q requests
+          python3 - <<'P' || true
+          import requests
+          def t(name, url, h=None):
+              try:
+                  r = requests.get(url, headers=h or {}, timeout=40)
+                  print(name, r.status_code, r.url, len(r.content), r.text[:300].replace("\n", " "))
+                  return r
+              except Exception as e:
+                  print(name, "ERR", e)
+          # Is Cboe's delayed-quotes feed still refusing GitHub's servers? (same request the job makes)
+          t("cboe", "https://cdn.cboe.com/api/global/delayed_quotes/options/AAPL.json", {"User-Agent": "Mozilla/5.0"})
+          # Alternative: Nasdaq's option chain (same API the job already uses for the calendar and prices)
+          N = {"User-Agent": "Mozilla/5.0", "Origin": "https://www.nasdaq.com", "Referer": "https://www.nasdaq.com/", "Accept": "application/json"}
+          for name, url in [
+              ("nasdaq-aapl", "https://api.nasdaq.com/api/quote/AAPL/option-chain?assetclass=stocks&limit=60&fromdate=2026-11-27&todate=2026-12-05&money=at&type=all"),
+              ("nasdaq-spx", "https://api.nasdaq.com/api/quote/SPX/option-chain?assetclass=index&limit=40&fromdate=2026-11-25&todate=2026-11-28&money=at&type=all"),
+              ("nasdaq-qqq", "https://api.nasdaq.com/api/quote/QQQ/option-chain?assetclass=etf&limit=40&fromdate=2026-11-25&todate=2026-11-28&money=at&type=all")]:
+              r = t(name, url, N)
+              if r is not None and r.ok:
+                  print(r.text[:3000])
+          P
