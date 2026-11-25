@@ -70,7 +70,7 @@ AREAS = [
     {"id": "fed", "name": "Fed scenario planner and Fed pricing", "page": "fed-scenario-planner/",
      "extra_pages": ["cb-pricing/#fed"], "workflows": ["fed-scenario-planner.yml"]},
     {"id": "cross-asset", "name": "Cross-Asset Moves", "page": "cross-asset/",
-     "workflows": ["cross-asset.yml"], "kick_if_idle": "cross-asset.yml"},
+     "workflows": ["cross-asset.yml"]},
     {"id": "yield-curve", "name": "Yield Curves", "page": "yield-curve/",
      "workflows": ["yield-curve.yml"]},
     {"id": "positioning", "name": "Speculator Positioning", "page": "cftc-positioning/",
@@ -444,18 +444,6 @@ def job_checks(area, problems):
         if r and r["conclusion"] != "success":
             problems.append(("job:" + wf, "The job \"%s\" failed on its last run (%s London). Log: %s" % (
                 r["name"], london(parse_ts(r["created_at"])), r["html_url"])))
-    wf = area.get("kick_if_idle")
-    if wf and in_cross_asset_hours(now_utc()):
-        # The cross-asset job also loses hours to GitHub skipping its hourly start. A run started
-        # by hand does one update and stops, so starting one on each check keeps the prices at
-        # most ~15 minutes old until the next scheduled run takes over. Staleness alerts as above.
-        try:
-            if not is_running(wf):
-                print("  %s is not running: starting one update" % wf)
-                if not DRY:
-                    api("POST", "/actions/workflows/%s/dispatches" % wf, {"ref": "main"})
-        except Exception as e:
-            print("  (could not check/start %s: %s)" % (wf, e))
     wf = area.get("keep_running")
     if wf:
         # GitHub skips many of the calendar's hourly starts, leaving it switched off for hours.
