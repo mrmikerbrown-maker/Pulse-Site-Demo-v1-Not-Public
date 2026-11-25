@@ -25,4 +25,4 @@ rows = rows[-320:]
 import datetime
 out["V2X"] = {"t": [int(datetime.datetime.strptime(a, "%d.%m.%Y").replace(tzinfo=datetime.timezone.utc).timestamp()) for a, _, _ in rows], "c": [round(float(v), 3) for _, _, v in rows]}
 print("V2X last", rows[-3:])
-print("DATAJSON " + json.dumps(out, separators=(",", ":")))
+open("vol-probe/data.json","w").write(json.dumps(out, separators=(",", ":")))
