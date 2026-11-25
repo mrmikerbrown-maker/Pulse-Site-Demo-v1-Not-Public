@@ -132,7 +132,7 @@ function draw(){
  $("stats").innerHTML=st.join("");
  curve(S,L,iW,iM);table(S,L,iD,iW,iM);spread();
  var old=D.curve_asof&&Date.now()-new Date(D.curve_asof)>4*864e5,hl=H.dates[H.dates.length-1];
- $("stamp").innerHTML='<div><span>Source</span>Yields: TradingView (benchmark government bonds). Spreads chart: '+M.hist+'</div><div><span>Updates</span>Weekdays, around 16:45 and 22:15 UK time</div><div><span>Yields as of</span><b'+(old?' class="old"':'')+'>'+at+'</b></div><div><span>Last refreshed</span><b>'+ldn(D.generated,{weekday:"short",day:"numeric",month:"short"}).replace(",","")+', '+ldn(D.generated,{hour:"2-digit",minute:"2-digit"})+' London</b></div>';
+ $("stamp").innerHTML='<div><span>Source</span>Yields: TradingView (benchmark government bonds). Spreads chart: '+M.hist+'</div><div><span>Updates</span>Weekdays, around 16:45 and 22:15 London (an hour later in summer)</div><div><span>Yields as of</span><b'+(old?' class="old"':'')+'>'+at+'</b></div><div><span>Last refreshed</span><b>'+ldn(D.generated,{weekday:"short",day:"numeric",month:"short"}).replace(",","")+', '+ldn(D.generated,{hour:"2-digit",minute:"2-digit"})+' London</b></div>';
  var w=[];if(D.problems&&D.problems.indexOf("curve")>=0)w.push("The latest yields could not be fetched, so the curve is from "+at+".");
  ["us","de","uk"].forEach(function(c){if(D.problems&&D.problems.indexOf("hist-"+c)>=0)w.push("The "+META[c].label+" spread history could not be updated.")});
  if(old)w.push("The yields haven't refreshed since "+at+".");
