@@ -4,83 +4,111 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Alpha Pulse · market tools</title>
-<meta name="description" content="Free tools for reading the macro picture and the market's moves: economy thermometer, index contribution, data surprises and market clock.">
+<meta name="description" content="What's moving markets today: live prices, the day's biggest move, the next big release and central bank pricing, plus every Alpha Pulse tool.">
 <script>try{var t=localStorage.getItem("ict-theme");if(t?t==="light":matchMedia("(prefers-color-scheme: light)").matches)document.documentElement.classList.add("light")}catch(e){}</script>
 <script src="nav.js" defer></script>
 <style>
 :root{--bg:#050505;--card:#100F0E;--line:#26231F;--text:#F5F1E8;--text2:#CFC9BC;--muted:#8F897E;--dim:#625D55;--accent:#F5F1E8;--pink:#C42424;--up:#B8F23C;--down:#FF5A4D;color-scheme:dark}
 :root.light{--bg:#F5F1E8;--card:#FBF9F3;--line:#E0D9CA;--text:#050505;--text2:#38342E;--muted:#6B655A;--dim:#A29B8E;--accent:#050505;--pink:#C42424;--up:#467300;--down:#B8322A;color-scheme:light}
+/* r,g,b of the up / down colours, for see-through tints */
+:root{--uprgb:184,242,60;--dnrgb:255,90,77}
+:root.light{--uprgb:70,115,0;--dnrgb:184,50,42}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text2);font-family:"AP Display",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
 body:before{content:"";position:fixed;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#C42424,#550202);z-index:20}
 a{color:inherit;text-decoration:none}
-.hd{border-bottom:1px solid var(--line)}
-.top{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:18px;padding:14px max(16px,env(safe-area-inset-left,0px)) 12px}
-.brand{display:flex;align-items:center;gap:12px;flex:none;margin-right:auto}
-.logo{display:block;width:120px;height:auto}
-:root.light .logo{filter:invert(1) hue-rotate(180deg)}
-.name{font-weight:800;font-size:15px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);border-left:1px solid var(--line);padding-left:12px}
-.links{display:flex;gap:2px}
-.links a{font-size:14px;color:var(--text2);padding:7px 10px;border-radius:8px;white-space:nowrap}
-.links a:hover{background:var(--card);color:var(--text)}
-.links a[aria-current]{color:var(--text);background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
+.wrap{max-width:1100px;margin:0 auto;padding:8px max(16px,env(safe-area-inset-left,0px)) 40px}
+h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--text);letter-spacing:-.01em;font-weight:700;text-wrap:balance}
+.sub{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:62ch}
+.up{color:var(--up)}.dn{color:var(--down)}.mu{color:var(--muted)}
+.wait{font-size:13px;color:var(--dim);margin:0}
 .theme{appearance:none;display:inline-flex;align-items:center;justify-content:center;flex:none;width:30px;height:30px;padding:0;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text2);cursor:pointer}
 .theme svg{width:16px;height:16px}
 .i-moon{display:none}:root.light .i-sun{display:none}:root.light .i-moon{display:block}
-.top .nq-m{margin-left:0}
-@media (min-width:1001px){.top .nq-m{display:none}}
-@media (max-width:1000px){.links{display:none}}
-.wrap{max-width:1100px;margin:0 auto;padding:8px max(16px,env(safe-area-inset-left,0px)) 40px}
-h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--text);letter-spacing:-.01em;text-wrap:balance}
-.sub{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:62ch}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;min-height:230px;transition:border-color .15s;min-width:0}
-.card:hover{border-color:var(--accent)}
-.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.lbl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
-.card h2{margin:0;font-size:20px;color:var(--text)}
-.card p.d{margin:4px 0 14px;font-size:14px;color:var(--muted)}
-.live{margin-top:auto;border-top:1px solid var(--line);padding-top:12px;min-height:118px}
-.big{font-size:22px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
-.small{font-size:13px;color:var(--text2)}
-.asof{font-size:12px;color:var(--dim);margin-top:6px}
-.wait{font-size:13px;color:var(--dim)}
-.go{margin-top:12px;font-size:14px;font-weight:700;color:var(--accent)}
-.up{color:var(--up)}.dn{color:var(--down)}.pk{color:var(--pinkt)}.ac{color:var(--accent)}.mu{color:var(--muted)}
-.pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
-.pl{font-size:11px;font-weight:800;letter-spacing:.04em;padding:3px 7px;border-radius:6px;border:1px solid var(--dim);color:var(--text2)}
-.pl.warm{background:rgba(196,36,36,.14);border-color:var(--pinkt);color:var(--pinkt)}
-.pl.hot{background:var(--pink);border-color:var(--pink);color:var(--onpink)}
-.pl.cool{background:rgba(var(--accrgb),.12);border-color:var(--accent);color:var(--accent)}
-.pl.cold{background:var(--accent);border-color:var(--accent);color:var(--onaccent)}
-:root.light .pl.hot,:root.light .pl.cold{color:#F5F1E8}
-.mb{display:grid;grid-template-columns:48px 1fr 70px;gap:6px;align-items:center;font-size:12px;margin-top:5px;font-variant-numeric:tabular-nums}
-.mb b{color:var(--text);font-weight:700}
-.mb span.t{height:8px;border-radius:3px;background:var(--up);min-width:2px}
-.mb span.t.n{background:var(--down)}
-.mb em{font-style:normal;text-align:right;color:var(--text2)}
-.sp{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;padding:5px 0;border-bottom:1px dashed var(--line)}
-.sp:last-of-type{border-bottom:0}
-.tag{flex:none;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:99px;color:var(--muted)}
-.tag.hi{background:rgba(196,36,36,.14);color:var(--pinkt)}
-.tag.lo{background:rgba(var(--accrgb),.12);color:var(--accent)}
-.sess{display:grid;grid-template-columns:70px 1fr;gap:6px 8px;align-items:center;font-size:12px;margin-top:8px}
-.track{position:relative;height:10px;border-radius:99px;background:var(--line)}
-.track i{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--dim)}
-.track i.on{background:var(--accent)}
-.now{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--pink)}
-.hrs{display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin:4px 0 0 78px}
-h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:28px 0 10px;font-weight:600}
-.soon{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.sn{border:1px dashed var(--line);border-radius:12px;padding:12px 14px;min-width:0}
-.sn b{display:block;color:var(--text);font-size:14px}
-.sn span{font-size:12.5px;color:var(--muted)}
-.foot{margin-top:26px;font-size:12px;color:var(--dim);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
-@media (max-width:760px){
- .logo{width:96px}.name{font-size:13px;padding-left:10px}.top{gap:8px}
- .grid{grid-template-columns:1fr}.card{min-height:0}
- .soon{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
+
+/* ---------- Price ticker ---------- */
+.tk{display:flex;align-items:stretch;gap:8px;margin:0 0 14px;min-height:36px}
+.tk-l{flex:none;display:flex;flex-direction:column;justify-content:center;padding:0 10px 0 2px;font-size:11px;line-height:1.2;color:var(--muted);border-right:1px solid var(--line)}
+.tk-l b{font-size:13px;color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+.tk-v{flex:1;min-width:0;overflow:hidden;position:relative;-webkit-mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,transparent,#000 24px,#000 calc(100% - 40px),transparent);cursor:pointer}
+.tk-t{display:flex;gap:8px;width:max-content;animation:tick var(--dur,150s) linear infinite}
+.tk-v:hover .tk-t,.tk-v.paused .tk-t{animation-play-state:paused}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.tc{flex:none;display:flex;gap:8px;align-items:baseline;padding:7px 11px;border-radius:9px;font-size:13px;border:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+.tc i{font-style:normal;color:var(--text2)}.tc b{font-weight:700;color:var(--text2)}
+.tc.u{background:rgba(var(--uprgb),.10);border-color:rgba(var(--uprgb),.28)}.tc.u b{color:var(--up)}
+.tc.d{background:rgba(var(--dnrgb),.10);border-color:rgba(var(--dnrgb),.28)}.tc.d b{color:var(--down)}
+@media (prefers-reduced-motion:reduce){.tk-v{overflow-x:auto;-webkit-mask-image:none;mask-image:none}.tk-t{animation:none}}
+
+/* ---------- Four tiles ---------- */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.t{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 15px;min-width:0;min-height:200px;transition:border-color .15s}
+.t:hover{border-color:var(--accent)}
+.t.pos{background:linear-gradient(180deg,rgba(var(--uprgb),.13),var(--card) 70%);border-color:rgba(var(--uprgb),.35)}
+.t.neg{background:linear-gradient(180deg,rgba(var(--dnrgb),.12),var(--card) 70%);border-color:rgba(var(--dnrgb),.32)}
+.t.evt{background:linear-gradient(180deg,rgba(196,36,36,.16),var(--card) 70%);border-color:rgba(196,36,36,.4)}
+.t.pos:hover,.t.neg:hover,.t.evt:hover{border-color:var(--accent)}
+.t .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.t .n{font-size:26px;font-weight:700;color:var(--text);margin:6px 0 2px;font-variant-numeric:tabular-nums;line-height:1.15}
+.t .s{font-size:13px;color:var(--text2)}
+.t .from{margin-top:auto;padding-top:10px;font-size:12px;color:var(--dim)}
+.hot{display:inline-block;font-size:12px;font-weight:700;padding:2px 7px;border-radius:99px;background:#C42424;color:#F5F1E8}
+.cd{font-size:12px;font-weight:700;padding:3px 8px;border-radius:99px;background:#C42424;color:#F5F1E8;vertical-align:middle;margin-left:4px;white-space:nowrap}
+/* move against a typical day: centre line, faint marks at one typical day either side */
+.gg{position:relative;height:10px;border-radius:99px;background:var(--line);margin:16px 0 4px}
+.gg u{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--dim)}
+.gg s{position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--text2)}
+.gg i{position:absolute;top:0;bottom:0;border-radius:99px}
+.ggl{display:flex;justify-content:space-between;font-size:10px;color:var(--dim)}
+.nx{font-size:12px;color:var(--muted);margin-top:10px}
+.nx b{color:var(--text2);font-weight:500}
+.bars{display:flex;gap:8px;align-items:flex-end;height:58px;margin-top:10px}
+.bars span{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;font-size:10px;color:var(--muted);text-align:center;gap:3px;font-variant-numeric:tabular-nums}
+.bars i{flex:none;display:block;border-radius:3px 3px 0 0;background:rgba(var(--accrgb),.55);min-height:2px}
+.bars em{font-style:normal;color:var(--text2);font-weight:600}
+
+/* ---------- Summary line ---------- */
+.story{margin-top:12px;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--pink);border-radius:12px;padding:14px 16px;font-size:15.5px;color:var(--text);min-height:68px}
+.story small{display:block;color:var(--muted);font-size:12.5px;margin-top:4px}
+.story b{font-weight:700}.story b.up{color:var(--up)}.story b.dn{color:var(--down)}
+
+/* ---------- First-visit strip ---------- */
+.new{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px;padding:10px 12px 10px 16px;border:1px dashed var(--line);border-radius:12px;font-size:14px}
+.new[hidden]{display:none}
+.new b{color:var(--text);font-weight:600}
+.new a{display:inline-flex;align-items:center;gap:7px;color:var(--text);padding:5px 10px;border:1px solid var(--line);border-radius:99px;background:var(--card);font-size:13.5px}
+.new a:hover{border-color:var(--accent)}
+.new a span{width:18px;height:18px;border-radius:99px;background:var(--text);color:var(--bg);font-size:10.5px;font-weight:700;display:grid;place-items:center}
+.new .x{order:9;margin-left:auto;color:var(--muted);font-size:13px;border:0;background:none;padding:5px 6px;cursor:pointer;font-family:inherit}
+.new .x:hover{color:var(--text)}
+
+/* ---------- Sections of tool cards ---------- */
+.sec{margin-top:30px}
+.sec:first-of-type{margin-top:26px}
+.sech{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:12px}
+.sech h2{margin:0;font-size:20px;color:var(--text);font-weight:600}
+.sech p{margin:0;font-size:13.5px;color:var(--muted)}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.c{background:var(--card);border:1px solid var(--line);border-top-width:2px;border-radius:12px;padding:14px 15px;display:flex;flex-direction:column;min-width:0;transition:border-color .15s}
+.c:hover{border-color:var(--accent)}
+.c:focus-visible,.t:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.c h3{margin:0;font-size:16px;color:var(--text);font-weight:600}
+.c p{margin:3px 0 12px;font-size:13px;color:var(--muted)}
+.c .lv{margin-top:auto;border-top:1px solid var(--line);padding-top:10px;font-size:13.5px;color:var(--text2);line-height:1.9;min-height:47px}
+.c .lv b{color:var(--text);font-weight:700}
+.ch{display:inline-block;font-size:12.5px;font-weight:700;padding:2px 8px;border-radius:99px;margin:0 3px;font-variant-numeric:tabular-nums;line-height:1.45;white-space:nowrap}
+.ch.u{background:rgba(var(--uprgb),.14);color:var(--up)}.ch.d{background:rgba(var(--dnrgb),.14);color:var(--down)}
+.ch.nu{background:var(--line);color:var(--text)}
+.ch.hi{background:rgba(196,36,36,.18);color:var(--pinkt)}
+.ch.lo{background:rgba(var(--accrgb),.12);color:var(--accent)}
+.ch.hot{background:var(--pink);color:#F5F1E8}
+.ch.cold{background:var(--accent);color:var(--onaccent)}
+.foot{margin-top:30px;font-size:12px;color:var(--dim);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+.foot a{text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.foot a:hover{color:var(--text)}
+@media (max-width:900px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.g3{grid-template-columns:repeat(2,minmax(0,1fr))}.new{gap:8px}.new .x{order:0}.new b{flex:1 1 60%}}
+@media (max-width:520px){.g3{grid-template-columns:1fr}.t{min-height:0;padding:12px}.t .n{font-size:22px}.tiles{gap:10px}}
 </style>
 <link rel="icon" type="image/png" sizes="32x32" href="brand/logo/icon-32.png">
 <link rel="apple-touch-icon" href="brand/logo/icon-192.png">
@@ -88,84 +116,166 @@ h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute
 </head>
 <body>
 
-
 <main class="wrap">
- <h1>The macro and market picture, at a glance</h1>
- <p class="sub">Free tools for reading the economy and the market's moves. Each card shows the latest figure, so you get the gist without clicking.</p>
+ <h1>What's moving markets today</h1>
+ <p class="sub">The prices and figures worth knowing right now, then every tool, grouped. Everything updates itself; click any figure for the detail.</p>
 
- <div class="grid">
-  <a class="card" href="calendar/">
-   <div class="lbl">Calendar</div><h2>This week</h2>
-   <p class="d">The key releases and central bank decisions this week, with what's expected, in London time.</p>
-   <div class="live" id="c-cal"><p class="wait">Loading…</p></div>
-   <div class="go">Open the calendar →</div>
-  </a>
-  <a class="card" href="index-contribution-site/">
-   <div class="lbl">Equities</div><h2>Index Contribution</h2>
-   <p class="d">Which stocks and sectors are driving the S&amp;P 500, Nasdaq 100 and Dow.</p>
-   <div class="live" id="c-index"><p class="wait">Loading…</p></div>
-   <div class="go">Open the tracker →</div>
-  </a>
-  <a class="card" href="surprises/">
-   <div class="lbl">Data</div><h2>Data Surprises</h2>
-   <p class="d">How the big US releases landed against what economists expected, and how markets reacted.</p>
-   <div class="live" id="c-surp"><p class="wait">Loading…</p></div>
-   <div class="go">Open the surprises →</div>
-  </a>
-  <a class="card" href="economy-thermometer/">
-   <div class="lbl">Macro</div><h2>Economy Thermometer</h2>
-   <p class="d">Is each G10 economy running hot or cold? Prices, jobs and growth on one scale.</p>
-   <div class="live" id="c-therm"><p class="wait">Loading…</p></div>
-   <div class="go">Open the thermometer →</div>
-  </a>
-  <a class="card" href="clock/">
-   <div class="lbl">Timing</div><h2>Market Clock</h2>
-   <p class="d">When the big markets open and close, and when the busiest hours are, in London time.</p>
-   <div class="live" id="c-clock"></div>
-   <div class="go">Open the clock →</div>
-  </a>
-  <a class="card" href="central-banks/">
-   <div class="lbl">Policy</div><h2>Central banks overview</h2>
-   <p class="d">Every G10 policy rate, the last decision and the next meeting, in London time.</p>
-   <div class="live" id="c-cb"><p class="wait">Loading…</p></div>
-   <div class="go">Open the tracker →</div>
-  </a>
-  <a class="card" href="cb-pricing/#fed">
-   <div class="lbl">Fed · ECB · BoE</div><h2>Central Bank Pricing</h2>
-   <p class="d">How much tightening or easing the market prices for each Fed, ECB and BoE meeting.</p>
-   <div class="live" id="c-fedp"><p class="wait">Loading…</p></div>
-   <div class="go">Open the pricing →</div>
-  </a>
-  <a class="card" href="fed-scenario-planner/">
-   <div class="lbl">Fed</div><h2>Fed Scenario Planner</h2>
-   <p class="d">Pick the next Fed decision and message, and see how markets reacted to surprises that size on past Fed days.</p>
-   <div class="live" id="c-fed"><p class="wait">Loading…</p></div>
-   <div class="go">Open the planner →</div>
-  </a>
+ <div class="tk" aria-label="Latest prices">
+  <div class="tk-l">Prices<b id="tk-asof">…</b></div>
+  <div class="tk-v" id="tk-v" title="Hover or tap to pause"><div class="tk-t" id="tk"></div></div>
  </div>
 
+ <div class="tiles">
+  <a class="t" id="t-spx" href="index-contribution-site/"><div class="k">S&amp;P 500 today</div><p class="wait">Loading…</p><div class="from">Index Contribution →</div></a>
+  <a class="t" id="t-gold" href="cross-asset/"><div class="k">Gold today</div><p class="wait">Loading…</p><div class="from">Cross-Asset Moves →</div></a>
+  <a class="t evt" id="t-rel" href="calendar/"><div class="k">Next big release</div><p class="wait">Loading…</p><div class="from">Economic Calendar →</div></a>
+  <a class="t" id="t-fed" href="cb-pricing/#fed"><div class="k">Next Fed meeting</div><p class="wait">Loading…</p><div class="from">Central Bank Pricing →</div></a>
+ </div>
 
- <div class="foot"><span>Alpha Pulse. Each tool updates itself automatically.</span><span>For information only, not investment advice.</span></div>
+ <div class="story" id="story"><span class="mu">Loading today's summary…</span></div>
+
+ <div class="new" id="new" hidden><b>New to markets? Start with these three, in order:</b><button class="x" type="button" id="new-x">Got it ✕</button>
+  <a href="calendar/"><span>1</span>Economic Calendar</a><a href="cross-asset/"><span>2</span>Cross-Asset Moves</a><a href="cb-pricing/"><span>3</span>Central Bank Pricing</a></div>
+
+ <section class="sec"><div class="sech"><h2>Markets</h2><p>What moved, by how much, and who drove it</p></div>
+  <div class="g3">
+   <a class="c" href="cross-asset/"><h3>Cross-Asset Moves</h3><p>Stocks, yields, FX and commodities against a typical day</p><div class="lv" id="c-ca"><span class="wait">Loading…</span></div></a>
+   <a class="c" href="index-contribution-site/"><h3>Index Contribution</h3><p>Which stocks moved the S&amp;P 500, Nasdaq 100 and Dow</p><div class="lv" id="c-index"><span class="wait">Loading…</span></div></a>
+   <a class="c" href="earnings-moves/"><h3>Earnings Moves</h3><p>The move options price for big US companies' results</p><div class="lv" id="c-earn"><span class="wait">Loading…</span></div></a>
+   <a class="c" href="yield-curve/"><h3>Yield Curves</h3><p>US, German and UK government bond curves</p><div class="lv" id="c-yc"><span class="wait">Loading…</span></div></a>
+   <a class="c" href="cftc-positioning/"><h3>Speculator Positioning</h3><p>Where speculators are most long or short</p><div class="lv" id="c-cftc"><span class="wait">Loading…</span></div></a>
+   <a class="c" href="clock/"><h3>Market Clock</h3><p>When markets open, close and move most</p><div class="lv" id="c-clock"></div></a>
+  </div></section>
+
+ <section class="sec"><div class="sech"><h2>Macro</h2><p>What the data says, and what is coming next</p></div>
+  <div class="g3">
+   <a class="c" href="calendar/"><h3>Economic Calendar</h3><p>This week's key releases, with forecasts, in London time</p><div class="lv" id="c-cal"><span class="wait">Loading…</span></div></a>
+   <a class="c" href="surprises/"><h3>Data Surprises</h3><p>How the big US releases landed against forecasts</p><div class="lv" id="c-surp"><span class="wait">Loading…</span></div></a>
+   <a class="c" href="economy-thermometer/"><h3>Economy Thermometer</h3><p>Is each G10 economy running hot or cold?</p><div class="lv" id="c-therm"><span class="wait">Loading…</span></div></a>
+  </div></section>
+
+ <section class="sec"><div class="sech"><h2>Central Banks</h2><p>Where rates are, and where markets think they're going</p></div>
+  <div class="g3">
+   <a class="c" href="central-banks/"><h3>Central Banks Overview</h3><p>Every G10 policy rate, last move and next meeting</p><div class="lv" id="c-cb"><span class="wait">Loading…</span></div></a>
+   <a class="c" href="cb-pricing/#fed"><h3>Central Bank Pricing</h3><p>Tightening or easing priced, meeting by meeting</p><div class="lv" id="c-fedp"><span class="wait">Loading…</span></div></a>
+   <a class="c" href="fed-scenario-planner/"><h3>Fed Scenario Planner</h3><p>Pick the Fed outcome, see how markets reacted before</p><div class="lv" id="c-fed"><span class="wait">Loading…</span></div></a>
+  </div></section>
+
+ <div class="foot"><span>Alpha Pulse. Each tool updates itself automatically. <a id="new-back" role="button" tabindex="0">New to markets? Start here</a> · <a href="glossary/" style="text-decoration:underline">Glossary</a></span><span>For information only, not investment advice.</span></div>
 </main>
 <script>
 var $=function(i){return document.getElementById(i)};
 var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})};
 var cap=function(s){return s.charAt(0).toUpperCase()+s.slice(1)};
 var fx=function(v,d){return (v>0?"+":v<0?"−":"")+Math.abs(v).toFixed(d)};
-var fail=function(id){$(id).innerHTML='<p class="wait">Open the tool for the latest figures.</p>'};
+var lon=function(t,o){return new Date(t).toLocaleString("en-GB",Object.assign({timeZone:"Europe/London"},o))};
+var hhmm=function(t){return lon(t,{hour:"2-digit",minute:"2-digit",hour12:false})};
+var dayKey=function(t){return lon(t,{year:"numeric",month:"2-digit",day:"2-digit"})};
+var json=function(u){return fetch(u+(u.indexOf("?")<0?"?":"&")+"t="+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()})};
+var fail=function(id,msg){$(id).innerHTML='<span class="wait">'+(msg||"Open the tool for the latest figures.")+"</span>"};
+/* Replace the "Loading…" line in a tile, keeping its label and its link line. */
+function tile(id,html,cls){var t=$(id),w=t.querySelector(".wait,.tb");var d=document.createElement("div");d.className="tb";d.innerHTML=html;
+ if(w)t.replaceChild(d,w);if(cls)t.classList.add(cls)}
 
-/* Economy Thermometer: the US verdict, plus a pill for each G10 economy. */
-fetch("economy-thermometer/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
- var C=d.countries||[],us=C.filter(function(c){return c.code==="US"})[0]||C[0];if(!us)throw 0;
- var cls={hot:"pk",warm:"pk",cool:"ac",cold:"ac",normal:""}[us.verdict]||"";
- var PT={hot:"Inflation well above target",warm:"Inflation above target",normal:"Inflation on target",cool:"Inflation below target",cold:"Inflation well below target"};
- var JT={hot:"jobs market very tight",warm:"jobs market tight",normal:"jobs market normal",cool:"jobs market soft",cold:"jobs market very soft"};
- var line=us.prices&&us.jobs?PT[us.prices.state]+", "+JT[us.jobs.state]+".":"";
- var pills=C.map(function(c){return '<span class="pl '+esc(c.verdict||"")+'" title="'+esc(c.name)+": "+esc(c.verdict||"")+'">'+esc({EA:"EZ",XM:"EZ",GB:"UK"}[c.code]||c.code)+"</span>"}).join("");
- $("c-therm").innerHTML='<div class="big">'+esc(us.short||"US")+': <span class="'+cls+'">'+esc(cap(us.verdict||"–"))+'</span></div><div class="small">'+esc(line)+'</div><div class="pills">'+pills+"</div>";
-}).catch(function(){fail("c-therm")});
+/* ---------- First-visit "New to markets?" strip ----------
+   Shown on a visitor's first visit only. "Got it" hides it; the footer link brings it back. */
+(function(){
+ var K="ap-home-seen",seen=false;
+ try{seen=!!localStorage.getItem(K);localStorage.setItem(K,"1")}catch(e){}
+ if(!seen)$("new").hidden=false;
+ $("new-x").onclick=function(){$("new").hidden=true;try{localStorage.setItem(K,"1")}catch(e){}};
+ $("new-back").onclick=function(){$("new").hidden=false;$("new").scrollIntoView({behavior:"smooth",block:"center"})};
+})();
 
-/* Index Contribution: today's S&P 500 move and its three biggest contributors.
+/* ---------- Cross-asset data: one file feeds the ticker, the biggest-mover tile, the summary and the Cross-Asset card ----------
+   Same rule as cross-asset/index.html: try the copy on raw.githubusercontent.com first (the job saves every 5 minutes
+   without rebuilding the site), fall back to the site copy, and keep whichever is newer. */
+var CA=(function(){
+ var urls=[],m=location.hostname.match(/^([^.]+)\.github\.io$/),seg=location.pathname.split("/")[1];
+ if(m&&seg)urls.push("https://raw.githubusercontent.com/"+m[1]+"/"+seg+"/main/cross-asset/data.json");
+ urls.push("cross-asset/data.json");
+ return Promise.all(urls.map(function(u){return json(u).catch(function(){return null})})).then(function(res){
+  res=res.filter(function(d){return d&&d.rows&&d.rows.length}).sort(function(a,b){return a.asof<b.asof?1:-1});
+  if(!res.length)throw 0;return res[0]});
+})();
+/* Units: "pct" = % move, "bp" = yield move in basis points, "pt" = points (VIX).
+   Colours follow the Cross-Asset page: a rising yield shows red (bond prices fall), a falling yield green. */
+function mvTxt(r,v){var a=Math.abs(v),s=v>0?"+":v<0?"−":"";return r.u==="bp"?s+a.toFixed(1)+"bp":r.u==="pt"?s+a.toFixed(2)+" pts":s+a.toFixed(2)+"%"}
+function good(r,v){return r.u==="bp"?v<0:v>0}
+function dirC(r,v){return Math.abs(v)<1e-9?"":good(r,v)?"u":"d"}
+function nameOf(r){return r.g==="Bond yields"?r.n+" yield":r.n}
+function ratio(r){return r.sd?Math.abs(r.mv[0])/r.sd:0}
+function gauge(r,v){/* bar runs from −2.5 to +2.5 typical days */
+ var x=r.sd?v/r.sd:0,w=Math.min(Math.abs(x),2.5)/2.5*50,col=good(r,v)?"var(--up)":"var(--down)";
+ return '<div class="gg"><u style="left:30%"></u><u style="left:70%"></u><i style="'+(x>=0?"left:50%":"right:50%")+";width:"+w.toFixed(1)+"%;background:"+col+'"></i><s></s></div><div class="ggl"><span>Bigger fall</span><span>Typical day</span><span>Bigger rise</span></div>'}
+
+CA.then(function(d){
+ var R=d.rows.filter(function(r){return r.mv&&r.mv[0]!=null});
+ /* Ticker: every instrument on the Cross-Asset page, looping slowly. The list is drawn twice so the loop is seamless. */
+ var items=R.map(function(r){var v=r.mv[0],c=dirC(r,v);return '<span class="tc '+c+'"><i>'+esc(r.n)+"</i><b>"+(v>0?"▲ ":v<0?"▼ ":"")+mvTxt(r,v)+"</b></span>"}).join("");
+ $("tk").innerHTML=items+items;$("tk").style.setProperty("--dur",Math.round(R.length*4.5)+"s");
+ $("tk-asof").textContent=hhmm(d.asof);
+ $("tk-v").title="Prices as of "+hhmm(d.asof)+" London (refreshed every 5 minutes on weekdays). Hover or tap to pause.";
+ $("tk-v").onclick=function(){this.classList.toggle("paused")};
+
+ /* Gold today: the move, the price, and the move against gold's typical day (standard deviation of daily moves over 3 years). */
+ var g=R.filter(function(r){return r.id==="gold"})[0];
+ if(g){var gv=g.mv[0],gx=ratio(g);
+  tile("t-gold",'<div class="n '+(gv>=0?"up":"dn")+'">'+mvTxt(g,gv)+'</div><div class="s">$'+g.p.toLocaleString("en-GB",{maximumFractionDigits:0})+" an ounce · "+(gx>=1.5?'<span class="hot">'+gx.toFixed(1)+"× a typical day</span>":gx.toFixed(1)+"× a typical day")+"</div>"+gauge(g,gv),gv>=0?"pos":"neg")}
+ else tile("t-gold",'<p class="wait">Open Cross-Asset Moves for gold.</p>');
+
+ /* Cross-Asset card: how many markets moved 1.5× their typical day or more. */
+ var un=R.filter(function(r){return ratio(r)>=1.5}).sort(function(a,b){return ratio(b)-ratio(a)});
+ $("c-ca").innerHTML=un.length?'<b>'+un.length+"</b> unusual move"+(un.length>1?"s":"")+": "+un.slice(0,2).map(function(r){var v=r.mv[0];return '<span class="ch '+dirC(r,v)+'">'+esc(r.n)+" "+(v>0?"▲":"▼")+" "+mvTxt(r,v).replace(/^[+−]/,"")+"</span>"}).join(""):'No unusual moves: every market is within <b>1.5×</b> its typical day';
+}).catch(function(){$("tk").innerHTML='<span class="tc"><i>Prices unavailable right now. Open Cross-Asset Moves.</i></span>';$("tk").style.animation="none";$("tk-asof").textContent="–";
+ tile("t-gold",'<p class="wait">Open Cross-Asset Moves for gold.</p>');fail("c-ca")});
+
+/* ---------- Calendar: next-release tile and card ---------- */
+var CAL=json("calendar/data/calendar.json").then(function(d){
+ return (d.events||[]).filter(function(e){return e.imp===2&&e.t}).sort(function(a,b){return a.t<b.t?-1:1})});
+var val=function(e,v){if(v==null)return"";var n=Math.round(v*1000)/1000,u=e.unit||"";return u==="%"?n+(e.scale||"")+"%":(n<0?"−":"")+u+Math.abs(n)+(e.scale||"")};
+var whenT=function(t){var dk=dayKey(t),now=Date.now();return (dk===dayKey(now)?"Today":dk===dayKey(now+864e5)?"Tomorrow":lon(t,{weekday:"short"}))+" "+hhmm(t)};
+function countdown(t){var m=Math.round((Date.parse(t)-Date.now())/6e4);if(m<=0)return"due now";var h=Math.floor(m/60);return "in "+(h>=24?Math.floor(h/24)+"d "+(h%24)+"h":h?h+"h "+(m%60)+"m":m+"m")}
+CAL.then(function(E){
+ function draw(){
+  var up=E.filter(function(e){return Date.parse(e.t)>Date.now()-5*60e3});
+  if(!up.length){tile("t-rel",'<div class="n">No more this week</div><div class="s">The calendar rolls on to next week automatically.</div>');$("c-cal").innerHTML="Nothing key left this week";return}
+  var f=up[0],n=up[1],today=dayKey(f.t)===dayKey(Date.now());
+  tile("t-rel",'<div class="n">'+(today?"":lon(f.t,{weekday:"short"})+" ")+hhmm(f.t)+' <span class="cd">'+countdown(f.t)+'</span></div><div class="s">'+esc(f.c+" "+f.name)+(f.forecast!=null?" · exp "+esc(val(f,f.forecast)):"")+"</div>"+
+   (n?'<div class="nx">Then <b>'+esc(whenT(n.t)+" · "+n.c+" "+n.name)+"</b></div>":""));
+  var left=up.length;
+  $("c-cal").innerHTML="Next: <b>"+esc(f.c+" "+f.name)+'</b> <span class="ch nu">'+esc(whenT(f.t))+"</span><br><b>"+left+"</b> key release"+(left>1?"s":"")+" left this week";
+ }
+ draw();setInterval(draw,30000);
+ return E;
+}).catch(function(){tile("t-rel",'<p class="wait">Open the calendar for this week\'s releases.</p>');fail("c-cal")});
+
+/* ---------- One-line summary, written from the figures above ----------
+   Kept short on purpose: stocks, yields, the dollar, the standout move, and the next big release if it is today.
+   Uses the futures on the Cross-Asset page so it works around the clock. */
+Promise.all([CA,CAL.catch(function(){return[]})]).then(function(a){
+ var d=a[0],E=a[1]||[],by={};d.rows.forEach(function(r){by[r.id]=r});
+ var parts=[],used={};
+ function word(cls,txt){return '<b class="'+cls+'">'+txt+"</b>"}
+ var s=by.spx;if(s){var v=s.mv[0],x=ratio(s);used.spx=1;
+  parts.push("Stocks "+(Math.abs(v)<0.15?"flat":word(v>0?"up":"dn",(x>=1.5?"sharply ":"")+(v>0?"higher":"lower"))))}
+ var y=by.us10;if(y){var b=y.mv[0];used.us10=1;
+  parts.push("Treasury yields "+(Math.abs(b)<2?"steady":word(b>0?"dn":"up",(Math.abs(b)>=8?"sharply ":"")+(b>0?"higher":"lower"))))}
+ var u=by.dxy;if(u&&Math.abs(u.mv[0])>=0.25){used.dxy=1;parts.push("the dollar "+(u.mv[0]>0?"firmer":"softer"))}
+ /* The standout move only comes from the markets most visitors trade or follow. Other bond yields (e.g. Japan) and
+    smaller markets stay on the Cross-Asset page, so the line never mixes a JGB move into a story about US data. */
+ var STAND={gold:1,silver:1,brent:1,wti:1,btc:1,eurusd:1,gbpusd:1,usdjpy:1,ndx:1,dji:1,ukx:1,dax:1};
+ var st=d.rows.filter(function(r){return STAND[r.id]&&!used[r.id]&&r.mv&&ratio(r)>=1.5}).sort(function(a,b){return ratio(b)-ratio(a)})[0];
+ if(st){var sv=st.mv[0];parts.push(esc(nameOf(st))+" "+word(good(st,sv)?"up":"dn",(sv>0?"up ":"down ")+mvTxt(st,sv).replace(/^[+−]/,"")))}
+ if(parts.length>3)parts.splice(2,parts.length-3);
+ var txt=cap(parts.join(", ")),nx=E.filter(function(e){return Date.parse(e.t)>Date.now()})[0];
+ var CN={US:"US",GB:"UK",UK:"UK",EZ:"euro-area",EU:"euro-area",DE:"German",FR:"French",JP:"Japanese",CN:"Chinese",CA:"Canadian",AU:"Australian",NZ:"New Zealand",CH:"Swiss"};
+ if(nx&&dayKey(nx.t)===dayKey(Date.now()))txt+=" ahead of "+(CN[nx.c]||esc(nx.c))+" data at "+hhmm(nx.t);
+ var old=(Date.now()-Date.parse(d.asof))/36e5>3;
+ $("story").innerHTML=txt+'.<small>'+(old?"As of "+lon(d.asof,{weekday:"short",hour:"2-digit",minute:"2-digit",hour12:false})+" London, the last update. ":"")+"Written automatically from the prices above, every 5 minutes on weekdays.</small>";
+}).catch(function(){$("story").innerHTML='<span class="mu">Today\'s summary is unavailable right now. Open Cross-Asset Moves for the latest prices.</span>'});
+
+/* ---------- Index Contribution: S&P 500 tile and card ----------
    During the New York session it reads the live sheet, as the tracker does; otherwise the saved last-session copy. */
 (function(){
  var LIVE="https://docs.google.com/spreadsheets/d/e/2PACX-1vSE9500jiKFvBw_k0q2m8CPaZ3VbZNv0uIYCe-QSnXpbASoqvwr2RW2hocHl5NVQejXIfVe4CdhX67h/pub?gid=454467433&single=true&output=csv";
@@ -179,8 +289,8 @@ fetch("economy-thermometer/data.json?"+Date.now()).then(function(r){if(!r.ok)thr
  var p=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/New_York",weekday:"short",hour:"numeric",minute:"numeric",hourCycle:"h23"}).formatToParts(new Date()).map(function(x){return[x.type,x.value]}));
  var mins=+p.hour*60+ +p.minute,open=!/Sat|Sun/.test(p.weekday)&&mins>=570&&mins<=975;
  var src=open?get(LIVE+"&t="+Date.now()).catch(function(){return get(B+"last-session.csv?"+Date.now())}):get(B+"last-session.csv?"+Date.now());
- Promise.all([src,get(B+"spy-weights.csv?"+Date.now()).catch(function(){return null})]).then(function(a){
-  var rows=a[0],spy=a[1],ix=null,S=[];
+ Promise.all([src,get(B+"spy-weights.csv?"+Date.now()).catch(function(){return null}),CA.catch(function(){return null})]).then(function(a){
+  var rows=a[0],spy=a[1],ca=a[2],ix=null,S=[];
   rows.forEach(function(r){if(r[0]==="IDX_SPX")ix={close:num(r[3]),prev:num(r[7]),pct:num(r[8]),last:r[5]};else if(r[0]==="SPX"&&r[4])S.push({s:r[4],w:num(r[7]),p:num(r[8])})});
   if(!ix||S.length<400)throw 0;
   /* Same weights as the tracker: State Street's SPY holdings where they cover the member. */
@@ -188,16 +298,69 @@ fetch("economy-thermometer/data.json?"+Date.now()).then(function(r){if(!r.ok)thr
    if(w.size>400){var F=0,M=0;S.forEach(function(x){if(w.has(x.s))F+=w.get(x.s);else M+=x.w});
     if(F)S.forEach(function(x){if(w.has(x.s))x.w=w.get(x.s)*(100-M)/F})}}
   S.forEach(function(x){x.pts=x.w/100*x.p/100*ix.prev});
-  var top=S.slice().sort(function(a,b){return Math.abs(b.pts)-Math.abs(a.pts)}).slice(0,3),mx=Math.abs(top[0].pts)||1;
-  var pts=ix.close-ix.prev,cls=pts>=0?"up":"dn";
+  var top=S.slice().sort(function(a,b){return Math.abs(b.pts)-Math.abs(a.pts)}).slice(0,2);
+  var pts=ix.close-ix.prev,u=ix.pct>=0;
   var when=open?"Live, about 15 minutes delayed":"At the "+esc(String(ix.last||"").replace(/ \d\d:\d\d$/,"").replace(/^0/,""))+" close";
-  $("c-index").innerHTML='<div class="big">S&amp;P 500 <span class="'+cls+'">'+fx(ix.pct,2)+'%</span> <span class="small">'+fx(pts,1)+" pts</span></div>"+
-   top.map(function(x){return '<div class="mb"><b>'+esc(x.s)+'</b><span class="t'+(x.pts<0?" n":"")+'" style="width:'+(Math.abs(x.pts)/mx*100).toFixed(1)+'%"></span><em>'+fx(x.pts,1)+" pts</em></div>"}).join("")+
-   '<div class="asof">'+when+"</div>";
- }).catch(function(){fail("c-index")});
+  var sd=ca&&ca.rows.filter(function(r){return r.id==="spx"})[0];
+  var t0=top[0];
+  tile("t-spx",'<div class="n '+(u?"up":"dn")+'">'+fx(ix.pct,2)+'%</div><div class="s">'+esc(t0.s)+" "+(t0.pts>=0?"added":"took off")+' <b class="'+(t0.pts>=0?"up":"dn")+'">'+Math.abs(t0.pts).toFixed(1)+" pts</b> · "+when+"</div>"+
+   (sd&&sd.sd?gauge({u:"pct",sd:sd.sd},ix.pct):""),u?"pos":"neg");
+  $("c-index").innerHTML='S&amp;P 500 <span class="ch '+(u?"u":"d")+'">'+(u?"▲ ":"▼ ")+Math.abs(ix.pct).toFixed(2)+"%</span> "+fx(pts,1)+" pts<br>"+
+   top.map(function(x){return esc(x.s)+' <b class="'+(x.pts>=0?"up":"dn")+'">'+fx(x.pts,1)+" pts</b>"}).join(" · ");
+ }).catch(function(){tile("t-spx",'<p class="wait">Open the tracker for the latest move.</p>');fail("c-index")});
 })();
 
-/* Data Surprises: the three most recent releases on the surprises page, read straight from that page. */
+/* ---------- Fed pricing tile: tightening or easing priced for the next meeting, and the path over three meetings ----------
+   Neutral colours on purpose: tightening and easing are neither good nor bad, so they don't get green or red. */
+var md=function(s,o){return new Date(s+"T12:00:00Z").toLocaleDateString("en-GB",Object.assign({timeZone:"UTC"},o)).replace("Sept","Sep")};
+var FED=json("fed-scenario-planner/data.json");
+FED.then(function(d){
+ var P=d.path;if(!P||!P.rates||!P.rates.length)throw 0;
+ var i=0;while(i<P.rates.length-1&&new Date(P.meetings[i]+"T19:00:00Z")<Date.now())i++;
+ var nb=(P.rates[i]-(i?P.rates[i-1]:P.effr))*100,k=Math.abs(Math.round(nb));
+ var cum=[0,1,2].map(function(j){var m=i+j;return m<P.rates.length?{m:P.meetings[m],bp:(P.rates[m]-P.effr)*100}:null}).filter(Boolean);
+ var mx=Math.max.apply(0,cum.map(function(c){return Math.abs(c.bp)}))||1;
+ tile("t-fed",'<div class="n">'+k+'bp</div><div class="s">of '+(nb<0?"easing":"tightening")+" priced for "+esc(md(P.meetings[i],{day:"numeric",month:"short"}))+"</div>"+
+  '<div class="bars">'+cum.map(function(c){return '<span><em>'+fx(Math.round(c.bp),0)+'</em><i style="height:'+Math.max(3,Math.abs(c.bp)/mx*30).toFixed(0)+'px"></i>'+esc(md(c.m,{month:"short"}))+"</span>"}).join("")+"</div>"+
+  '<div class="nx">Total priced by each meeting, in bp</div>');
+}).catch(function(){tile("t-fed",'<p class="wait">Open Central Bank Pricing for the latest.</p>')});
+
+/* ---------- Central Bank Pricing card: next meeting for the Fed, ECB and BoE ---------- */
+(function(){
+ /* Same banks as cb-pricing/index.html: [name, data file, decision time UTC]. Add a line here when a bank is added there. */
+ var BK=[["Fed","fed-scenario-planner/data.json","T19:00:00Z"],["ECB","ecb-pricing/data.json","T13:15:00Z"],["BoE","boe-pricing/data.json","T12:00:00Z"]];
+ Promise.all(BK.map(function(b){return (b[0]==="Fed"?FED:json(b[1])).then(function(d){
+  var P=d.path;if(!P||!P.rates||!P.rates.length)throw 0;
+  var nx=0;while(nx<P.rates.length-1&&new Date(P.meetings[nx]+b[2])<Date.now())nx++;
+  var nb=(P.rates[nx]-(nx?P.rates[nx-1]:P.effr))*100;
+  return b[0]+' <span class="ch nu">'+Math.abs(Math.round(nb))+"bp "+(nb<0?"easing":"tightening")+"</span>"}).catch(function(){return ""})})).then(function(x){
+  x=x.filter(Boolean);if(!x.length){fail("c-fedp");return}
+  $("c-fedp").innerHTML=x.join("<br>")+'<br><span class="mu">Priced for each bank\'s next meeting</span>';
+ });
+})();
+
+/* ---------- Fed Scenario Planner card: what a hold would mean as a surprise ---------- */
+FED.then(function(d){
+ var P=d.path,m,pr;
+ if(P&&P.rates&&P.rates.length){var i=0;while(i<P.rates.length-1&&new Date(P.meetings[i]+"T20:00:00Z")<Date.now())i++;m=P.meetings[i];pr=(P.rates[i]-(i?P.rates[i-1]:P.effr))*100}
+ else if(d.pricing&&d.pricing.net_bp!=null){m=d.pricing.meeting;pr=d.pricing.net_bp}
+ if(!m)throw 0;
+ var nm=function(v){return v===0?"A hold":v>0?"A "+v+"bp hike":"A "+Math.abs(v)+"bp cut"};
+ var line=function(v){var s=v-pr,a=Math.round(Math.abs(s));return nm(v)+" = "+(a<3?'<span class="ch nu">as expected</span>':'<span class="ch nu">'+a+"bp "+(s>0?"hawkish":"dovish")+"</span> surprise")};
+ var near=Math.round(pr/25)*25,other=near===0?(pr>=0?25:-25):0;
+ $("c-fed").innerHTML="<b>"+esc(md(m,{day:"numeric",month:"short"}))+" FOMC</b><br>"+line(0)+"<br>"+(near!==0?line(near):line(other));
+}).catch(function(){fail("c-fed")});
+
+/* ---------- Economy Thermometer card ---------- */
+json("economy-thermometer/data.json").then(function(d){
+ var C=d.countries||[],us=C.filter(function(c){return c.code==="US"})[0]||C[0];if(!us)throw 0;
+ var PT={hot:"inflation well above target",warm:"inflation above target",normal:"inflation on target",cool:"inflation below target",cold:"inflation well below target"};
+ var V={hot:"hot",warm:"hi",cool:"lo",cold:"cold"};
+ var pills=C.filter(function(c){return c!==us}).map(function(c){return '<span class="ch '+(V[c.verdict]||"nu")+'" style="margin:0 2px;font-size:11px;padding:1px 6px" title="'+esc(c.name)+": "+esc(c.verdict||"")+'">'+esc({EA:"EZ",XM:"EZ",GB:"UK"}[c.code]||c.code)+"</span>"}).join("");
+ $("c-therm").innerHTML=esc(us.short||"US")+': <span class="ch '+(V[us.verdict]||"nu")+'">'+esc(cap(us.verdict||"–"))+"</span> "+(us.prices?esc(PT[us.prices.state]||""):"")+"<br>"+pills;
+}).catch(function(){fail("c-therm")});
+
+/* ---------- Data Surprises card: the latest release, read straight from the surprises page ---------- */
 fetch("surprises/?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(t){
  var i=t.indexOf("var REL=");if(i<0)throw 0;
  var s=t.slice(i+8),depth=0,end=0,q=false;
@@ -205,98 +368,72 @@ fetch("surprises/?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.text(
   if(c==='"')q=true;else if(c==="["||c==="{")depth++;else if(c==="]"||c==="}"){depth--;if(!depth){end=k+1;break}}}
  var R=JSON.parse(s.slice(0,end)),L=[];
  R.forEach(function(r){var x=r.rows&&r.rows[0];if(x&&x[1]!=null&&x[2]!=null)L.push({t:r.title.replace(/ \(.*\)/,""),date:x[0],a:x[1],e:x[2],u:r.u,d:r.d})});
- L.sort(function(a,b){return a.date<b.date?1:-1});L=L.slice(0,3);if(!L.length)throw 0;
+ L.sort(function(a,b){return a.date<b.date?1:-1});if(!L.length)throw 0;
  var unit=function(v,o){return o.u==="pct"?v.toFixed(o.d==null?1:o.d)+"%":o.u==="k"?Math.round(v)+"k":v.toFixed(1)};
- var tag=function(o){return o.a>o.e?'<span class="tag hi">Above</span>':o.a<o.e?'<span class="tag lo">Below</span>':'<span class="tag">In line</span>'};
- var day=function(s){return new Date(s+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short",timeZone:"UTC"})};
- var f=L[0],word=f.a>f.e?"above":f.a<f.e?"below":"in line with";
- $("c-surp").innerHTML='<div class="big">Latest: <span class="'+(f.a>f.e?"pk":f.a<f.e?"ac":"")+'">'+esc(f.t)+"</span></div>"+
-  '<div class="small" style="margin-bottom:4px">'+esc(unit(f.a,f)+", "+word+" the "+unit(f.e,f)+" expected")+"</div>"+
-  L.map(function(o){return '<div class="sp"><span>'+esc(day(o.date)+" · "+o.t+" "+unit(o.a,o)+" vs "+unit(o.e,o))+"</span>"+tag(o)+"</div>"}).join("");
+ var f=L[0],tag=f.a>f.e?'<span class="ch hi">▲ Above forecast</span>':f.a<f.e?'<span class="ch lo">▼ Below forecast</span>':'<span class="ch nu">In line</span>';
+ $("c-surp").innerHTML="<b>"+esc(f.t)+"</b> "+tag+"<br>"+esc(unit(f.a,f)+" vs "+unit(f.e,f)+" expected · "+new Date(f.date+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short",timeZone:"UTC"}));
 }).catch(function(){fail("c-surp")});
 
-/* This week: the next key releases (imp 2) from the calendar, in London time. */
-fetch("calendar/data/calendar.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
- var now=Date.now(),E=(d.events||[]).filter(function(e){return e.imp===2&&e.t}).sort(function(a,b){return a.t<b.t?-1:1});
- var up=E.filter(function(e){return Date.parse(e.t)>now-5*60e3}).slice(0,4);
- var lon=function(t,o){return new Date(t).toLocaleString("en-GB",Object.assign({timeZone:"Europe/London"},o))};
- var dayKey=function(t){return lon(t,{year:"numeric",month:"2-digit",day:"2-digit"})};
- var when=function(t){var dk=dayKey(t),today=dayKey(now),tom=dayKey(now+864e5);
-  return (dk===today?"Today":dk===tom?"Tomorrow":lon(t,{weekday:"short"}))+" "+lon(t,{hour:"2-digit",minute:"2-digit",hour12:false})};
- var val=function(e,v){if(v==null)return"";var n=Math.round(v*1000)/1000,u=e.unit||"";return u==="%"?n+(e.scale||"")+"%":(n<0?"−":"")+u+Math.abs(n)+(e.scale||"")};
- if(!up.length){$("c-cal").innerHTML='<div class="big">No more key releases</div><div class="small">That\'s it for this week. The calendar rolls on to next week automatically.</div>';return}
- var f=up[0];
- $("c-cal").innerHTML='<div class="big">Next: <span class="ac">'+esc(f.c+" "+f.name)+'</span></div><div class="small" style="margin-bottom:4px">'+esc(when(f.t)+" London"+(f.forecast!=null?" · expected "+val(f,f.forecast):""))+"</div>"+
-  up.slice(1).map(function(e){return '<div class="sp"><span>'+esc(when(e.t)+" · "+e.c+" "+e.name)+"</span>"+(e.forecast!=null?'<span class="tag">Exp '+esc(val(e,e.forecast))+"</span>":"")+"</div>"}).join("");
-}).catch(function(){fail("c-cal")});
-
-/* Central banks: the next three meetings, each bank's current rate and its last move. */
-fetch("central-banks/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+/* ---------- Central Banks Overview card: next meeting ---------- */
+json("central-banks/data.json").then(function(d){
  var now=Date.now(),B=(d.banks||[]).filter(function(b){return b.next&&b.next.utc&&Date.parse(b.next.utc)>now-3*36e5}).sort(function(a,b){return a.next.utc<b.next.utc?-1:1});
  if(!B.length)throw 0;
- var lon=function(t,o){return new Date(t).toLocaleString("en-GB",Object.assign({timeZone:"Europe/London"},o))};
- var day=function(t){var k=function(x){return lon(x,{year:"numeric",month:"2-digit",day:"2-digit"})};return k(t)===k(now)?"Today":k(t)===k(now+864e5)?"Tomorrow":lon(t,{weekday:"short",day:"numeric",month:"short"})};
- var when=function(b){return day(b.next.utc)+(b.next.approx?"":" "+lon(b.next.utc,{hour:"2-digit",minute:"2-digit",hour12:false}))};
+ var day=function(t){return dayKey(t)===dayKey(now)?"Today":dayKey(t)===dayKey(now+864e5)?"Tomorrow":lon(t,{weekday:"short",day:"numeric",month:"short"})};
+ var when=function(b){return day(b.next.utc)+(b.next.approx?"":" "+hhmm(b.next.utc))};
  var rate=function(b){return (b.lower!=null?b.lower.toFixed(2)+"–":"")+b.rate.toFixed(2)+"%"};
- var lastTxt=function(b){var l=b.last||{};return l.kind==="hike"?'<span class="tag hi">Last +'+l.bp+"bp</span>":l.kind==="cut"?'<span class="tag lo">Last −'+Math.abs(l.bp)+"bp</span>":l.kind==="hold"?'<span class="tag">Last held</span>':""};
- var f=B[0];
- $("c-cb").innerHTML='<div class="big">Next: <span class="ac">'+esc(f.short)+'</span> <span class="small">'+esc(when(f)+" London")+"</span></div>"+
-  '<div class="small" style="margin-bottom:4px">'+esc(f.name+" at "+rate(f))+"</div>"+
-  B.slice(0,3).map(function(b){return '<div class="sp"><span>'+esc(when(b)+" · "+b.short+" · "+rate(b))+"</span>"+lastTxt(b)+"</div>"}).join("");
+ var f=B[0],n=B[1];
+ $("c-cb").innerHTML="Next: <b>"+esc(f.short)+"</b> "+esc(when(f))+' <span class="ch nu">'+esc(rate(f))+"</span>"+(n?"<br>Then "+esc(n.short+" · "+when(n)):"");
 }).catch(function(){fail("c-cb")});
 
-/* Central Bank Pricing: bp priced for each bank's next meeting (Fed and ECB). */
-(function(){
- var md=function(s,o){return new Date(s+"T12:00:00Z").toLocaleDateString("en-GB",Object.assign({timeZone:"UTC"},o)).replace("Sept","Sep")};
- var cl=function(x){return x>0?"pk":x<0?"ac":""};
- function line(name,t){return fetch(t[0]+"?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
-  var P=d.path;if(!P||!P.rates||!P.rates.length)throw 0;
-  var e=P.effr,R=P.rates,nx=0;while(nx<R.length-1&&new Date(P.meetings[nx]+t[1])<Date.now())nx++;
-  var nb=(R[nx]-(nx?R[nx-1]:e))*100;
-  return '<div class="big">'+name+' '+esc(md(P.meetings[nx],{day:"numeric",month:"short"}))+': <span class="'+cl(nb)+'">'+Math.abs(Math.round(nb))+'bp</span> <span class="small">of '+(nb<0?"easing":"tightening")+' priced</span></div>';
- }).catch(function(){return ""})}
- /* Same banks as cb-pricing/index.html: [name, data file, decision time UTC]. Add a line here when a bank is added there. */
- var BK=[["Fed","fed-scenario-planner/data.json","T19:00:00Z"],["ECB","ecb-pricing/data.json","T13:15:00Z"],["BoE","boe-pricing/data.json","T12:00:00Z"]];
- Promise.all(BK.map(function(b){return line(b[0],[b[1],b[2]])})).then(function(x){
-  if(!x.join("")){fail("c-fedp");return}
-  $("c-fedp").innerHTML=x.join("")+'<div class="small mu">Next meeting for each central bank</div>';
- });
-})();
+/* ---------- Earnings Moves card: the next result and the move options price for it ---------- */
+json("earnings-moves/data.json").then(function(d){
+ var today=lon(Date.now(),{year:"numeric",month:"2-digit",day:"2-digit"}).split("/").reverse().join("-");
+ var U=(d.upcoming||[]).filter(function(u){return u.date>=today&&u.implied&&u.implied.move}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:(a.time==="bmo"?-1:1)});
+ if(!U.length)throw 0;
+ var when=function(u){return (u.date===today?"Today":md(u.date,{weekday:"short",day:"numeric",month:"short"}))+(u.time==="bmo"?" before the open":u.time==="amc"?" after the close":"")};
+ var f=U[0],n=U[1];
+ $("c-earn").innerHTML="Next: <b>"+esc(f.symbol)+"</b> "+esc(when(f))+'<br>Options price a <span class="ch hi">± '+f.implied.move.toFixed(1)+"%</span> move"+(n?" · then "+esc(n.symbol):"");
+}).catch(function(){fail("c-earn")});
 
-/* Fed Scenario Planner: what a hold, or the step beyond what is priced, would mean as a surprise. */
-fetch("fed-scenario-planner/data.json?"+Date.now()).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
- var P=d.path,m,pr;
- if(P&&P.rates&&P.rates.length){var i=0;while(i<P.rates.length-1&&new Date(P.meetings[i]+"T20:00:00Z")<Date.now())i++;m=P.meetings[i];pr=(P.rates[i]-(i?P.rates[i-1]:P.effr))*100}
- else if(d.pricing&&d.pricing.net_bp!=null){m=d.pricing.meeting;pr=d.pricing.net_bp}
- if(!m)throw 0;
- var dt=new Date(m+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short",timeZone:"UTC"});
- var sg=function(x){x=Math.round(x);return(x>0?"+":x<0?"−":"")+Math.abs(x)},cls=function(x){return x>0?"pk":x<0?"ac":""};
- var nm=function(v){return v===0?"A hold":v>0?"A "+v+"bp hike":"A "+Math.abs(v)+"bp cut"};
- var line=function(v){var s=v-pr,a=Math.round(Math.abs(s));return '<div class="small">'+nm(v)+" would be "+(a<3?"roughly as expected":"a "+a+'bp <span class="'+cls(s)+'">'+(s>0?"hawkish":"dovish")+"</span> surprise")+"</div>"};
- var near=Math.round(pr/25)*25,other=near===0?(pr>=0?25:-25):0;
- $("c-fed").innerHTML='<div class="big">'+esc(dt)+' FOMC: <span class="'+cls(Math.round(pr))+'">'+Math.abs(Math.round(pr))+'bp</span> <span class="small">of '+(pr<0?"easing":"tightening")+' priced</span></div>'+line(0)+(near!==0?line(near):line(other));
-}).catch(function(){fail("c-fed")});
+/* ---------- Yield Curves card: US 2s10s, the gap between the 10-year and 2-year yields ---------- */
+json("yield-curve/data.json").then(function(d){
+ var c=d.us&&d.us.curve;if(!c)throw 0;
+ var a=c.mats.indexOf(2),b=c.mats.indexOf(10);if(a<0||b<0)throw 0;
+ var now=(c.now[b]-c.now[a])*100,ch=now-(c.d1[b]-c.d1[a])*100;
+ $("c-yc").innerHTML="US 2s10s <b>"+fx(now,0)+'bp</b> <span class="ch '+(Math.abs(ch)<0.5?"nu":ch>0?"u":"d")+'">'+(ch>0?"▲ ":ch<0?"▼ ":"")+Math.abs(ch).toFixed(1)+"bp</span> on the day<br>"+
+  '<span class="mu">'+(now>0?"10-year yield above the 2-year: a normal, upward curve":"10-year yield below the 2-year: an inverted curve")+"</span>";
+}).catch(function(){fail("c-yc")});
 
-/* Market Clock: which cash markets are open now, on a 24-hour London-time strip. */
+/* ---------- Speculator Positioning card: most long and most short against each market's own 3-year range ----------
+   Same measure as cftc-positioning/index.html (speculators: non-commercial for financial futures, managed money for commodities). */
+json("cftc-positioning/data.json").then(function(d){
+ var all=(d.markets||[]).map(function(m){var s=m[m.g==="Commodities"?"mm":"nc"];if(!s)return null;
+  var net=s.filter(Boolean).map(function(x){return x[0]-x[1]});if(net.length<10)return null;
+  var n=net[net.length-1];return {m:m,net:n,pct:100*net.filter(function(x){return x<n}).length/(net.length-1)}}).filter(Boolean);
+ if(!all.length)throw 0;
+ all.sort(function(a,b){return a.pct-b.pct});
+ var lo=all.filter(function(t){return t.net<0})[0]||all[0],hi=all.slice().reverse().filter(function(t){return t.net>0})[0]||all[all.length-1];
+ $("c-cftc").innerHTML='Most long: <span class="ch u">'+esc(hi.m.s)+'</span> Most short: <span class="ch d">'+esc(lo.m.s)+"</span><br>"+
+  '<span class="mu">Against each market\'s own 3-year range · week to '+esc(md(d.asof,{day:"numeric",month:"short"}))+"</span>";
+}).catch(function(){fail("c-cftc")});
+
+/* ---------- Market Clock card: which cash markets are open now, in London time ---------- */
 (function(){
  var M=[["Tokyo","Asia/Tokyo",540,930],["London","Europe/London",480,990],["New York","America/New_York",570,960]];
  function parts(tz,d){var o=Object.fromEntries(new Intl.DateTimeFormat("en-GB",{timeZone:tz,year:"numeric",month:"numeric",day:"numeric",hour:"numeric",minute:"numeric",weekday:"short",hourCycle:"h23"}).formatToParts(d).map(function(x){return[x.type,x.value]}));
   return{y:+o.year,m:+o.month,d:+o.day,h:+o.hour,mi:+o.minute,wd:o.weekday}}
  function off(tz,d){var p=parts(tz,d);return(Date.UTC(p.y,p.m-1,p.d,p.h,p.mi)-Math.floor(d.getTime()/6e4)*6e4)/6e4}
  var hm=function(m){m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0")};
+ var dur=function(m){return Math.floor(m/60)+"h "+(m%60)+"m"};
  function draw(){var now=new Date(),L=parts("Europe/London",now),lm=L.h*60+L.mi,lo=off("Europe/London",now),wk=/Sat|Sun/.test(L.wd);
-  var rows=M.map(function(m){var sh=lo-off(m[1],now),a=m[2]+sh,b=m[3]+sh,lp=parts(m[1],now),cm=lp.h*60+lp.mi;
-   return{n:m[0],a:a,b:b,open:!/Sat|Sun/.test(lp.wd)&&cm>=m[2]&&cm<m[3]}});
+  var rows=M.map(function(m){var sh=lo-off(m[1],now),lp=parts(m[1],now),cm=lp.h*60+lp.mi;
+   return{n:m[0],a:m[2]+sh,b:m[3]+sh,open:!/Sat|Sun/.test(lp.wd)&&cm>=m[2]&&cm<m[3]}});
   var openN=rows.filter(function(r){return r.open}).map(function(r){return r.n});
   var next=null;if(!wk)rows.forEach(function(r){if(!r.open&&r.a>lm&&(!next||r.a<next.a))next=r});
-  var head=wk?'<span class="mu">Weekend: markets closed</span>':openN.length?'<span class="ac">'+openN.join(" &amp; ")+" open</span>":'<span class="mu">Main markets closed</span>';
   var closing=rows.filter(function(r){return r.open}).sort(function(a,b){return a.b-b.b})[0];
-  var sub=closing&&(!next||closing.b<next.a)?closing.n+" closes in "+Math.floor((closing.b-lm)/60)+"h "+((closing.b-lm)%60)+"m ("+hm(closing.b)+")":next?next.n+" opens in "+Math.floor((next.a-lm)/60)+"h "+((next.a-lm)%60)+"m ("+hm(next.a)+")":wk?"Tokyo opens Monday at "+hm(rows[0].a<0?rows[0].a+1440:rows[0].a)+" London time":"All three have closed for the day";
-  var seg=function(a,b,on){var s="",cl=on?"i on":"i";function piece(x,y){x=Math.max(0,x);y=Math.min(1440,y);if(y>x)s+='<'+cl.split(" ")[0]+(on?' class="on"':"")+' style="left:'+(x/14.4).toFixed(2)+"%;width:"+((y-x)/14.4).toFixed(2)+'%"></i>'}
-   piece(a,b);piece(a+1440,b+1440);piece(a-1440,b-1440);return s};
-  $("c-clock").innerHTML='<div class="big">'+hm(lm)+' <span class="small">London</span> · '+head+'</div><div class="small">'+esc(sub)+"</div>"+
-   '<div class="sess">'+rows.map(function(r){return"<span>"+r.n+'</span><div class="track">'+seg(r.a,r.b,r.open)+'<span class="now" style="left:'+(lm/14.4).toFixed(2)+'%"></span></div>'}).join("")+"</div>"+
-   '<div class="hrs"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>';
+  var chip=wk?'<span class="ch nu">Weekend: closed</span>':openN.length?'<span class="ch u">● '+openN.join(" &amp; ")+" open</span>":'<span class="ch nu">Main markets closed</span>';
+  var sub=closing&&(!next||closing.b<next.a)?closing.n+" closes in "+dur(closing.b-lm)+" ("+hm(closing.b)+")":next?next.n+" opens in "+dur(next.a-lm)+" ("+hm(next.a)+")":"Tokyo opens next";
+  $("c-clock").innerHTML="<b>"+hm(lm)+"</b> London "+chip+"<br>"+esc(sub);
  }
  draw();setInterval(draw,30000);
 })();
