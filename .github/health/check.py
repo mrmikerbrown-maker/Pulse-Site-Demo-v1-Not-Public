@@ -531,6 +531,9 @@ def run_once(browser, seen_before, seen_now):
             for extra in a.get("extra_pages", []):
                 page_check(extra, probs)
         data_checks(a["id"], probs)
+        if a["id"] == "home" and os.environ.get("TEST_ALERT") == "1":
+            probs.append(("test", "TEST ALERT to check the emails reach you. Nothing is wrong; "
+                                  "this closes itself on the next check."))
         job_checks(a, probs)
         if not probs:
             # Only open a browser when the page itself is up. A browser complaint must show up on

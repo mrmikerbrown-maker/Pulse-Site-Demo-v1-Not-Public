@@ -37,6 +37,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           LOOP_MINUTES: ${{ github.event_name == 'push' && '0' || '340' }}
+          TEST_ALERT: ${{ github.event_name == 'push' && '1' || '0' }}
           PYTHONUNBUFFERED: "1"   # show progress in the log as it happens
         run: python .github/health/check.py
       - name: Start the next run
