@@ -212,7 +212,7 @@ function gauge(r,v){/* bar runs from −2.5 to +2.5 typical days */
 CA.then(function(d){
  var R=d.rows.filter(function(r){return r.mv&&r.mv[0]!=null});
  /* Ticker: every instrument on the Cross-Asset page, looping slowly. The list is drawn twice so the loop is seamless. */
- var items=R.map(function(r){var v=r.mv[0],c=dirC(r,v);return '<span class="tc '+c+'"><i>'+esc(r.n)+"</i><b>"+(v>0?"▲ ":v<0?"▼ ":"")+mvTxt(r,v)+"</b></span>"}).join("");
+ var items=R.map(function(r){var v=r.mv[0],c=dirC(r,v);return '<span class="tc '+c+'"><i>'+esc(r.n)+(r.g==="Index futures"&&r.id!=="vix"?" futures":"")+"</i><b>"+(v>0?"▲ ":v<0?"▼ ":"")+mvTxt(r,v)+"</b></span>"}).join("");
  $("tk").innerHTML=items+items;$("tk").style.setProperty("--dur",Math.round(R.length*4.5)+"s");
  $("tk-asof").textContent=hhmm(d.asof);
  $("tk-v").title="Prices as of "+hhmm(d.asof)+" London (refreshed every 5 minutes on weekdays). Hover or tap to pause.";
