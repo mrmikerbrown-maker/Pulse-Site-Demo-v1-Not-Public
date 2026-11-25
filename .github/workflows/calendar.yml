@@ -2,6 +2,8 @@ name: "Calendar: update this week"
 # GitHub only fires scheduled jobs a few times a day in practice (often hours late or skipped),
 # so each run keeps going for up to 5h50m and checks the calendar every 5 minutes itself.
 # A new run starts every hour and takes over from the previous one, so a skipped start doesn't matter.
+# GitHub skips so many of those hourly starts that the calendar used to sit idle for hours, so each
+# run now starts the next one itself when it finishes (and the site health check restarts it if not).
 on:
   schedule:
     - cron: "7 * * * *"
@@ -9,6 +11,7 @@ on:
 permissions:
   contents: write
   pages: write
+  actions: write   # to start the next run
 concurrency:
   group: calendar
   cancel-in-progress: true
@@ -31,3 +34,8 @@ jobs:
             [ $(( $(date +%s) + wait )) -lt "$end" ] || break
             sleep "$wait"
           done
+      - name: Start the next run
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run calendar.yml --ref "${GITHUB_REF_NAME}"
