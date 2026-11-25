@@ -4,8 +4,8 @@ Every feed module gives build.py the same two functions, so a different feed can
   quotes(tickers)       -> {ticker: {"price", "chg_abs", "chg_pct", "perf_w", "perf_m", "perf_ytd", "mode"}}
                            chg_* = since the previous daily close; perf_* = % change over 1 week / 1 month / year to date.
   history(ticker, n)    -> [(unix_seconds, close), ...] daily closes, oldest first, about n bars.
-                           Futures ("ES1!" = front month) come back-adjusted, so rolling from one contract
-                           to the next doesn't show up as a jump.
+                           Futures ("ES1!" = front month) come back-adjusted (roll gaps taken out by shifting
+                           older prices), unless adjusted=False, which gives the real traded prices.
 The ticker for each market comes from that feed's column in markets.csv (column name = module name).
 Free, delayed data: quotes from TradingView's screener, history from its chart data service. No login or key.
 """
@@ -36,14 +36,14 @@ def _m(f, p):
     return "~m~%d~m~%s" % (len(s), s)
 
 
-def history(ticker, n=300):
+def history(ticker, n=300, adjusted=True):
     from websocket import create_connection
     ws = create_connection("wss://data.tradingview.com/socket.io/websocket",
                            header=["Origin: https://www.tradingview.com"], timeout=20)
     cs = "cs_" + "".join(random.choice(string.ascii_lowercase) for _ in range(12))
     for m in [_m("set_auth_token", ["unauthorized_user_token"]), _m("chart_create_session", [cs, ""]),
               _m("resolve_symbol", [cs, "sym1", "=" + json.dumps(dict({"symbol": ticker, "adjustment": "splits"},
-                                                                        **({"backadjustment": "default"} if ticker.endswith("!") else {})))]),
+                                                                        **({"backadjustment": "default"} if adjusted and ticker.endswith("!") else {})))]),
               _m("create_series", [cs, "s1", "s1", "sym1", "1D", n, ""])]:
         ws.send(m)
     buf, t0 = "", time.time()

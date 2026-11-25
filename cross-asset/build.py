@@ -63,8 +63,13 @@ def refresh_typical(feed, markets, today):
     sd, ytd_days = dict(old.get("sd", {})), old.get("ytd_days", 0)
     for m in markets:
         try:
-            bars = feed.history(m[FEED], 300)
-            ch = daily_changes(bars[:-1], m["unit"])[-252:]  # leave out today's unfinished bar
+            if m[FEED].endswith("!"):
+                ser = futures_series(feed, m[FEED])
+                bars = [(t, r) for t, _, r in ser]
+                ch = futures_changes(ser[:-1], m["unit"])[-252:]  # leave out today's unfinished bar
+            else:
+                bars = feed.history(m[FEED], 300)
+                ch = daily_changes(bars[:-1], m["unit"])[-252:]
             if len(ch) >= 120:
                 sd[m["id"]] = round(statistics.stdev(ch), 4)
             if m["id"] == "dxy":   # trades every weekday, so its bar count = trading days so far this year
@@ -78,16 +83,37 @@ def refresh_typical(feed, markets, today):
     return new
 
 
-def futures_perf(feed, ticker, price):
-    """% change over 1 week / 1 month / YTD for a continuous future, from back-adjusted closes.
-    The last bar is the current session, so 1 week = vs the close 5 sessions earlier, 1 month = 21 sessions."""
-    bars = feed.history(ticker, 300)
-    if len(bars) < 30:
+def futures_series(feed, ticker):
+    """Daily closes for a continuous future, as [(time, back-adjusted close, real close)].
+    Back-adjustment shifts older prices by the roll gap, so the difference between two adjusted closes is a real
+    price change, but adjusted levels themselves can be far off (even below zero for oil). So a % move is
+    (change in adjusted close) / (real close at the start)."""
+    adj = dict(feed.history(ticker, 300, adjusted=True))
+    raw = dict(feed.history(ticker, 300, adjusted=False))
+    return [(t, adj[t], raw[t]) for t in sorted(adj) if t in raw]
+
+
+def futures_changes(ser, unit):
+    if unit == "pct":
+        return [(b[1] - a[1]) / a[2] * 100 for a, b in zip(ser, ser[1:]) if a[2]]
+    return [b[1] - a[1] for a, b in zip(ser, ser[1:])]
+
+
+def futures_perf(feed, ticker, price, unit):
+    """1 week / 1 month / YTD move for a continuous future. The last bar is the current session,
+    so 1 week = vs the close 5 sessions earlier, 1 month = 21 sessions; YTD = vs last close of last year."""
+    ser = futures_series(feed, ticker)
+    if len(ser) < 30:
         return None
     year = dt.datetime.now(LDN).year
-    prev = [c for t, c in bars if dt.datetime.fromtimestamp(t, LDN).year < year]
-    pct = lambda ref: (price / ref - 1) * 100 if ref else None
-    return pct(bars[-6][1]), pct(bars[-22][1]), pct(prev[-1] if prev else None)
+    prev = [x for x in ser if dt.datetime.fromtimestamp(x[0], LDN).year < year]
+    now_adj = ser[-1][1] + (price - ser[-1][2])          # live price on the adjusted scale
+
+    def mv(ref):
+        if not ref:
+            return None
+        return (now_adj - ref[1]) / ref[2] * 100 if unit == "pct" else now_adj - ref[1]
+    return mv(ser[-6]), mv(ser[-22]), mv(prev[-1] if prev else None)
 
 
 def bp_from_perf(price, perf):
@@ -112,9 +138,12 @@ def main():
         p, u = x["price"], m["unit"]
         if m[FEED].endswith("!"):
             try:
-                fp = futures_perf(feed, m[FEED], p)
+                fp = futures_perf(feed, m[FEED], p, m["unit"])
                 if fp:
-                    x["perf_w"], x["perf_m"], x["perf_ytd"] = fp
+                    if m["unit"] == "pct":
+                        x["perf_w"], x["perf_m"], x["perf_ytd"] = fp
+                    else:                      # points (VIX futures): turn back into % so the code below handles it
+                        x["perf_w"], x["perf_m"], x["perf_ytd"] = [None if v is None else v / (p - v) * 100 for v in fp]
             except Exception as e:
                 print("futures history failed for", m["id"], e)
         if u == "pct":
