@@ -19,7 +19,7 @@ permissions:
   issues: write                # open / update / close the alert issues
   actions: write               # read the data jobs' results and start the calendar / next check
 concurrency:
-  group: site-health
+  group: site-health-${{ github.ref }}
   cancel-in-progress: false    # a new run waits for the current one instead of stopping it
 jobs:
   check:
