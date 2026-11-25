@@ -83,8 +83,8 @@ var css=
 function build(){
  if(document.querySelector(".nq-hd"))return;
  // Glossary words get a dotted underline with a pop-up definition on every page (see glossary.js).
- // Newcomer tour (tour.js): loaded only when the address has ?tour= (started from the homepage "New to markets?" strip).
- if(/[?&]tour=/.test(location.search)&&!document.querySelector('script[src$="tour.js"]')){var ts=document.createElement("script");ts.src=HUB+"tour.js";ts.defer=true;document.head.appendChild(ts)}
+ // Page guides and the newcomer tour (tour.js): adds "How this page works" under each page title; ?tour= / ?guide start one.
+ if(!document.querySelector('script[src$="tour.js"]')){var ts=document.createElement("script");ts.src=HUB+"tour.js";ts.defer=true;document.head.appendChild(ts)}
  if(!window.NQG&&!document.querySelector('script[src$="glossary.js"]')){var gs=document.createElement("script");gs.src=HUB+"glossary.js";gs.defer=true;document.head.appendChild(gs)}
  var st=document.createElement("style");st.textContent=css;document.head.appendChild(st);
  function cur(h){return h&&isHere(h)?' aria-current="page"':""}
