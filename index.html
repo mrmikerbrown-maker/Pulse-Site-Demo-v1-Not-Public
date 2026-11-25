@@ -68,7 +68,8 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
 .bars em{font-style:normal;color:var(--text2);font-weight:600}
 
 /* ---------- Summary line ---------- */
-.story{margin-top:12px;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--pink);border-radius:12px;padding:14px 16px;font-size:15.5px;color:var(--text);min-height:68px}
+.story{margin-top:12px;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--pink);border-radius:12px;padding:12px 16px 14px;font-size:16px;color:var(--text);min-height:68px}
+.story .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
 .story small{display:block;color:var(--muted);font-size:12.5px;margin-top:4px}
 .story b{font-weight:700}.story b.up{color:var(--up)}.story b.dn{color:var(--down)}
 
@@ -261,24 +262,27 @@ CAL.then(function(E){
    Uses the futures on the Cross-Asset page so it works around the clock. */
 Promise.all([CA,CAL.catch(function(){return[]})]).then(function(a){
  var d=a[0],E=a[1]||[],by={};d.rows.forEach(function(r){by[r.id]=r});
+ /* Headline style: a verb for each market, sized by the move against its typical day, clauses joined with semicolons. */
  var parts=[],used={};
  function word(cls,txt){return '<b class="'+cls+'">'+txt+"</b>"}
- var s=by.spx;if(s){var v=s.mv[0],x=ratio(s);used.spx=1;
-  parts.push("Stocks "+(Math.abs(v)<0.15?"flat":word(v>0?"up":"dn",(x>=1.5?"sharply ":"")+(v>0?"higher":"lower"))))}
- var y=by.us10;if(y){var b=y.mv[0];used.us10=1;
-  parts.push("Treasury yields "+(Math.abs(b)<2?"steady":word(b>0?"dn":"up",(Math.abs(b)>=8?"sharply ":"")+(b>0?"higher":"lower"))))}
- var u=by.dxy;if(u&&Math.abs(u.mv[0])>=0.25){used.dxy=1;parts.push("the dollar "+(u.mv[0]>0?"firmer":"softer"))}
- /* The standout move only comes from the markets most visitors trade or follow. Other bond yields (e.g. Japan) and
-    smaller markets stay on the Cross-Asset page, so the line never mixes a JGB move into a story about US data. */
+ function verb(x,v,w){/* w = [small up, up, big up, small down, down, big down] */return x<0.5?(v>0?w[0]:w[3]):x<1.5?(v>0?w[1]:w[4]):(v>0?w[2]:w[5])}
  var STAND={gold:1,silver:1,brent:1,wti:1,btc:1,eurusd:1,gbpusd:1,usdjpy:1,ndx:1,dji:1,ukx:1,dax:1};
- var st=d.rows.filter(function(r){return STAND[r.id]&&!used[r.id]&&r.mv&&ratio(r)>=1.5}).sort(function(a,b){return ratio(b)-ratio(a)})[0];
- if(st){var sv=st.mv[0];parts.push(esc(nameOf(st))+" "+word(good(st,sv)?"up":"dn",(sv>0?"up ":"down ")+mvTxt(st,sv).replace(/^[+−]/,"")))}
- if(parts.length>3)parts.splice(2,parts.length-3);
- var txt=cap(parts.join(", ")),nx=E.filter(function(e){return Date.parse(e.t)>Date.now()})[0];
+ var st=d.rows.filter(function(r){return STAND[r.id]&&r.id!=="spx"&&r.mv&&ratio(r)>=1.5}).sort(function(a,b){return ratio(b)-ratio(a)})[0];
+ var pc=function(r){return mvTxt(r,r.mv[0])},NM={ndx:"the Nasdaq",dji:"the Dow",ukx:"the FTSE",dax:"the DAX"};
+ var s=by.spx;if(s){var v=s.mv[0],x=ratio(s);
+  var cl="Stocks "+(Math.abs(v)<0.1?"flat":word(v>0?"up":"dn",verb(x,v,["edge up","rise","rally","edge down","fall","slide"])));
+  /* A standout stock index going the same way is folded in: "Stocks slide, led by the Nasdaq (−2.7%)". */
+  if(st&&NM[st.id]&&(st.mv[0]>0)===(v>0)&&Math.abs(v)>=0.1){cl+=", led by "+NM[st.id]+" ("+word(st.mv[0]>0?"up":"dn",pc(st))+")";st=null}
+  parts.push(cl)}
+ var y=by.us10;if(y){var b=y.mv[0];
+  parts.push("Treasury yields "+(Math.abs(b)<2?"steady":word(b>0?"dn":"up",Math.abs(b)>=8?(b>0?"jump":"drop"):(b>0?"rise":"ease"))))}
+ if(st)parts.push(esc(st.id in NM?NM[st.id].replace("the ","The "):nameOf(st))+" "+word(good(st,st.mv[0])?"up":"dn",pc(st)));
+ else{var u=by.dxy;if(u&&Math.abs(u.mv[0])>=0.25)parts.push("Dollar "+word("",u.mv[0]>0?"firms":"softens"))}
+ var txt=parts.join("; "),nx=E.filter(function(e){return Date.parse(e.t)>Date.now()})[0];
  var CN={US:"US",GB:"UK",UK:"UK",EZ:"euro-area",EU:"euro-area",DE:"German",FR:"French",JP:"Japanese",CN:"Chinese",CA:"Canadian",AU:"Australian",NZ:"New Zealand",CH:"Swiss"};
  if(nx&&dayKey(nx.t)===dayKey(Date.now()))txt+=" ahead of "+(CN[nx.c]||esc(nx.c))+" data at "+hhmm(nx.t);
  var old=(Date.now()-Date.parse(d.asof))/36e5>3;
- $("story").innerHTML=txt+'.<small>'+(old?"As of "+lon(d.asof,{weekday:"short",hour:"2-digit",minute:"2-digit",hour12:false})+" London, the last update. ":"")+"Written automatically from the prices above, every 5 minutes on weekdays.</small>";
+ $("story").innerHTML='<div class="k">Markets in one line</div>'+txt+"."+(old?"<small>As of "+lon(d.asof,{weekday:"short",hour:"2-digit",minute:"2-digit",hour12:false})+" London</small>":"");
 }).catch(function(){$("story").innerHTML='<span class="mu">Today\'s summary is unavailable right now. Open Cross-Asset Moves for the latest prices.</span>'});
 
 /* ---------- Index Contribution: S&P 500 tile and card ----------
