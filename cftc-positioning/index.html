@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Speculator Positioning</title>
+<script>try{var t=localStorage.getItem("ict-theme");if(t?t==="light":matchMedia("(prefers-color-scheme: light)").matches)document.documentElement.classList.add("light")}catch(e){}</script>
+<style>
+:root{--bg:#050505;--card:#100F0E;--line:#26231F;--text:#F5F1E8;--text2:#CFC9BC;--muted:#8F897E;--dim:#625D55;--accent:#F5F1E8;--pink:#C42424;--up:#B8F23C;--down:#FF5A4D;--upa:61,220,151;--downa:255,92,122;--hl:rgba(var(--accrgb),.10);color-scheme:dark}
+:root.light{--bg:#F5F1E8;--card:#FBF9F3;--line:#E0D9CA;--text:#050505;--text2:#38342E;--muted:#6B655A;--dim:#A29B8E;--accent:#050505;--pink:#C42424;--up:#467300;--down:#B8322A;--upa:14,159,110;--downa:226,61,82;--hl:rgba(var(--accrgb),.10);color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text2);font-family:"AP Display",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4;padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--rng:#35322D;--tick:#F5F1E8}:root.light{--rng:#DDD5C4;--tick:#050505}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text2);font-family:"AP Display",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4;padding-bottom:env(safe-area-inset-bottom,0px)}
+body:before{content:"";position:fixed;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#C42424,#550202);z-index:20}
+a{color:inherit;text-decoration:none}
+.top{display:flex;align-items:center;gap:8px;margin:0 0 22px}
+.logo{display:block;width:150px;height:auto;margin:0 auto 0 0}
+:root.light .logo{filter:invert(1) hue-rotate(180deg)}
+.theme{appearance:none;display:inline-flex;align-items:center;justify-content:center;flex:none;width:30px;height:30px;padding:0;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text2);cursor:pointer}
+.theme svg{width:15px;height:15px}
+.i-moon{display:none}:root.light .i-sun{display:none}:root.light .i-moon{display:block}
+@media (max-width:760px){.logo{width:120px}}
+.wrap{max-width:1100px;margin:0 auto;padding:8px 16px 40px}
+h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--text);letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 12px;font-weight:700}
+.sub{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:62ch}
+.srcbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 18px;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:12px 16px;margin:14px 0;font-size:13px;color:var(--text)}
+.srcbox span{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.srcbox .old{color:var(--pinkt)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+button{font:inherit;font-size:13px;padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text2);cursor:pointer}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex-wrap:nowrap}
+.seg button{border:0;border-radius:0;font-size:12.5px;padding:7px 12px;color:var(--muted);white-space:nowrap;background:var(--bg)}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--accent);color:var(--onaccent);font-weight:700}
+.ctl{display:flex;gap:10px 18px;flex-wrap:wrap;align-items:center;margin:0 0 12px;font-size:12px;color:var(--muted)}
+.ctl label{display:flex;align-items:center;gap:8px;letter-spacing:.08em;text-transform:uppercase;font-size:10.5px}
+/* headline */
+.hl{font-size:clamp(18px,2.4vw,22px);line-height:1.3;color:var(--text);margin:0 0 16px;max-width:70ch}
+.hl b{font-weight:500}.hl span{font-weight:300}
+.ex{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.ex h3{margin:0 0 8px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.ex a{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:7px 0;border-top:1px solid var(--line);cursor:pointer;font-variant-numeric:tabular-nums}
+.ex a b{color:var(--text);font-weight:600;font-size:14px}.ex a em{font-style:normal;text-align:right;font-weight:700;font-size:14px}
+.ex a small{grid-column:1/-1;color:var(--muted);font-size:12px}
+.ex a:hover b{text-decoration:underline}
+/* table of markets */
+.row{display:grid;grid-template-columns:140px 100px 118px minmax(0,1fr) 178px;gap:14px;align-items:center;padding:10px 6px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;cursor:pointer}
+.row:hover{background:rgba(var(--accrgb),.04)}
+.row.hd{cursor:default;padding-top:0;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.row.hd:hover{background:none}
+.row.hd>div:nth-child(2),.row.hd>div:nth-child(3){text-align:right}
+.nm b{display:block;color:var(--text);font-size:14px;font-weight:600}.nm small{color:var(--muted);font-size:11.5px}
+.v{text-align:right;color:var(--text);font-size:14px;font-weight:700}.v small{display:block;font-weight:400;color:var(--muted);font-size:11px}
+.up{color:var(--up)}.dn{color:var(--down)}
+.gh{padding:16px 6px 6px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;border-bottom:1px solid var(--line)}
+.gh i{font-style:normal;text-transform:none;letter-spacing:0;font-weight:400;margin-left:8px}
+/* 3-year range strip */
+.strip{position:relative;height:26px}
+.strip .r{position:absolute;top:10px;height:6px;background:var(--rng);border-radius:3px}
+.strip .z{position:absolute;top:4px;width:1px;height:18px;background:var(--muted)}
+.strip .w{position:absolute;top:4px;width:2px;height:18px;background:var(--tick);opacity:.7;border-radius:1px;margin-left:-1px}
+.strip .d{position:absolute;top:6px;width:14px;height:14px;border-radius:50%;margin-left:-7px;box-shadow:0 0 0 2px var(--card)}
+.strip .d.l{background:var(--up)}.strip .d.s{background:var(--down)}
+.rk{font-size:12px;color:var(--text2)}.rk b{display:block;color:var(--text);font-size:13px}
+.rk.x b{color:var(--pinkt)}
+.key{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:12px}
+.key i{display:inline-block;vertical-align:-2px;margin-right:6px}
+/* detail */
+.det{padding:6px 6px 18px;border-bottom:1px solid var(--line);display:none}
+.det.open{display:block}
+.det .ds{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:6px 0 12px;font-size:13px;color:var(--text)}
+.det .ds span{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.det .ds b{font-size:16px;font-variant-numeric:tabular-nums}
+.det p{margin:0 0 10px;font-size:13.5px;max-width:75ch}
+.chart{position:relative}.chart svg{display:block;width:100%;height:190px;overflow:visible}
+.chart text{fill:var(--muted);font-size:10.5px;font-family:inherit}
+.tip{position:absolute;pointer-events:none;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-size:12px;color:var(--text);white-space:nowrap;z-index:5;display:none;font-variant-numeric:tabular-nums}
+.note{border:1px solid var(--line);border-left:3px solid var(--muted);border-radius:10px;padding:10px 14px;font-size:13px;margin:12px 0 0;background:var(--card)}
+.note b{color:var(--text)}
+details.how{margin-top:14px}details.how summary{cursor:pointer;font-weight:700;color:var(--text);font-size:14px}
+details.how ul{margin:10px 0 0;padding-left:18px;font-size:13.5px;max-width:75ch}details.how li{margin-bottom:6px}
+.foot{margin-top:26px;font-size:12px;color:var(--dim);border-top:1px solid var(--line);padding-top:14px}
+@media (max-width:760px){
+ .card{padding:16px}
+ .ex{grid-template-columns:1fr;gap:14px}
+ .row{grid-template-columns:minmax(0,1fr) auto auto;gap:6px 12px;padding:10px 2px}
+ .row .strip{grid-column:1/-1;order:9}
+ .row .rk{grid-column:1/-1;order:10;display:flex;justify-content:space-between;font-size:11.5px}.rk b{display:inline;font-size:12px}
+ .row.hd{display:none}
+ .ctl{gap:10px}.ctl label{width:100%;justify-content:space-between}
+ .seg{max-width:100%;overflow-x:auto}
+}
+</style>
+<script src="../nav.js" defer></script>
+<link rel="icon" type="image/png" sizes="32x32" href="../brand/logo/icon-32.png">
+<link rel="apple-touch-icon" href="../brand/logo/icon-192.png">
+<link rel="stylesheet" href="../brand/brand.css">
+</head>
+<body>
+<div class="wrap">
+<div class="top"><img class="logo" alt="Alpha Pulse" src="../brand/logo/bar-paper.svg"><button class="theme" id="theme" type="button" aria-label="Switch light/dark"><svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg><svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1z"/></svg></button></div>
+<h1>Speculator Positioning</h1>
+<p class="sub">Where speculators are most long or short in FX, rates, stock indices and commodities, from the CFTC's weekly Commitments of Traders report, and how extreme that is against the last three years.</p>
+<div class="srcbox" id="stamp"></div>
+<div class="card" id="top"><p class="hl" id="hl"></p><div class="ex" id="ex"></div></div>
+<div class="card">
+ <div class="ctl">
+  <label>Market <div class="seg" id="grp"><button data-g="All" class="on">All</button><button data-g="FX">FX</button><button data-g="Rates">Rates</button><button data-g="Equities">Indices</button><button data-g="Commodities">Commodities</button></div></label>
+  <label>Who <div class="seg" id="who"><button data-w="std" class="on">Speculators</button><button data-w="hf">Hedge funds only</button></div></label>
+  <label>Sort <div class="seg" id="srt"><button data-s="grp" class="on">By market</button><button data-s="ext">Most extreme</button><button data-s="chg">Biggest change</button></div></label>
+ </div>
+ <div class="row hd"><div>Market</div><div>Net position<br>(contracts)</div><div>Change on<br>the week</div><div>Now against its 3-year range</div><div>3-year rank</div></div>
+ <div id="rows"></div>
+ <div class="key"><span><i style="width:12px;height:12px;border-radius:50%;background:var(--up)"></i>Net long now</span><span><i style="width:12px;height:12px;border-radius:50%;background:var(--down)"></i>Net short now</span><span><i style="width:2px;height:13px;background:var(--tick);opacity:.55"></i>A week earlier</span><span><i style="width:22px;height:6px;border-radius:3px;background:var(--rng)"></i>Range over 3 years</span><span><i style="width:1px;height:13px;background:var(--muted)"></i>Flat (zero)</span><span>Click a market for its 3-year history</span></div>
+ <div class="note" id="ratesnote" hidden><b>Treasury futures:</b> hedge funds' large shorts are mostly the "basis trade" (short futures, long the cash bond, to earn the small price gap). They are not straight bets on higher yields, so read rates positioning with care.</div>
+</div>
+<details class="how"><summary>How to read this page</summary><ul>
+<li><b>Net position</b> is speculators' long contracts minus their short contracts. The small figure under it is that net position as a share of all open contracts in the market, so markets of different sizes can be compared.</li>
+<li><b>Week change</b> is the change in the net position since the week before, in contracts. The small figure under it is that change as a share of the market, in percentage points: −0.7 pts means the net position moved from, say, −15.8% to −16.5% of open contracts.</li>
+<li><b>3-year rank</b> compares this week's net position with every week of the last three years. "Most short in 3 years" means no week was shorter. When a trade is this crowded, a surprise can force many traders out at once and the move can be sharp. It is not a signal on its own.</li>
+<li><b>Speculators</b> uses the measure each market is usually quoted on: the CFTC's "non-commercial" traders for currencies, stock indices and bonds (the figure news wires quote), and "managed money" (hedge funds and CTAs) for commodities. <b>Hedge funds only</b> swaps currencies, indices and bonds to "leveraged funds". The two can disagree, because "non-commercial" also includes asset managers. Click a market to see both.</li>
+<li>FX futures are priced against the dollar: long yen means betting the yen rises, which is USD/JPY falling.</li>
+<li>Positions are taken on Tuesday and published on Friday, so they are three days old when they come out.</li>
+</ul></details>
+<div class="foot">Data: CFTC Commitments of Traders, futures only (Legacy report for non-commercial traders, Disaggregated report for managed money, Traders in Financial Futures report for leveraged funds). Positions as of each Tuesday, published Friday 15:30 New York (20:30 London). Not investment advice.</div>
+</div>
+<div class="tip" id="tip"></div>
+<script>
+var D,$=function(i){return document.getElementById(i)},G="All",W="std",S="grp",OPEN=null;
+var GN={FX:"FX",Rates:"Rates",Equities:"Stock indices, VIX and bitcoin",Commodities:"Commodities"};
+function ldn(iso,o){return new Date(iso).toLocaleString("en-GB",Object.assign({timeZone:"Europe/London"},o))}
+function day(d){return ldn(d+"T12:00:00Z",{weekday:"short",day:"numeric",month:"short"}).replace(",","")}
+function k(n,sig){var a=Math.abs(n),s=n<0?"−":(sig&&n>0?"+":"");return s+(a>=1e6?(a/1e6).toFixed(2)+"m":a>=1e4?(a/1e3).toFixed(0)+"k":a>=1e3?(a/1e3).toFixed(1)+"k":a)}
+function pc(n){return (n<0?"−":"+")+Math.abs(n).toFixed(1)+"%"}
+function pp(n){return (n<0?"−":"+")+Math.abs(n).toFixed(1)+" pts"}
+/* Which trader group to show. Speculators (default): non-commercial for financial futures, managed money for commodities.
+   Hedge funds only: leveraged funds for financial futures, managed money for commodities. */
+function key(m,w){return m.g==="Commodities"?(w==="alt"?"nc":"mm"):(w==="hf"?"lf":"nc")}
+var KN={nc:"Non-commercial",lf:"Leveraged funds",mm:"Managed money"};
+function stats(m,w){
+ var s=m[w==="nc"||w==="lf"||w==="mm"?w:key(m,w)],net=[],last=null,prev=null;
+ s.forEach(function(x,i){if(x){net.push(x[0]-x[1]);prev=last;last=x}});
+ var n=net[net.length-1],p=net[net.length-2],mn=Math.min.apply(0,net),mx=Math.max.apply(0,net);
+ var below=net.filter(function(x){return x<n}).length,above=net.filter(function(x){return x>n}).length;
+ return {m:m,net:n,prev:p,chg:n-p,oi:last[2],l:last[0],s:last[1],poi:100*n/last[2],cpoi:100*(n-p)/last[2],mn:mn,mx:mx,
+  pct:100*below/(net.length-1),hi:100*above/(net.length-1),series:s.map(function(x){return x?x[0]-x[1]:null}),isMax:n>=mx,isMin:n<=mn};
+}
+/* Wording follows the sign: a net-long market at the bottom of its range is "least long", not "most short". */
+function rankTxt(t){
+ var L=t.net>=0;
+ if(t.isMax)return [L?"Most long in 3 years":"Least short in 3 years",L];
+ if(t.isMin)return [L?"Least long in 3 years":"Most short in 3 years",!L];
+ if(t.pct>=50)return [(L?"Longer":"Less short")+" than "+Math.round(t.pct)+"% of weeks",L&&t.pct>=90];
+ return [(L?"Less long":"Shorter")+" than "+Math.round(t.hi)+"% of weeks",!L&&t.hi>=90];
+}
+function headline(all){
+ var byP=all.slice().sort(function(a,b){return a.pct-b.pct});
+ var short=byP.slice(0,3),long=byP.slice(-3).reverse(),mv=all.slice().sort(function(a,b){return Math.abs(b.cpoi)-Math.abs(a.cpoi)}).slice(0,3);
+ var who=W==="std"?"Speculators":"Hedge funds",a=short[0],b=long[0],c=mv[0];
+ var ext=function(t){var r=rankTxt(t)[0];return /in 3 years/.test(r)?"the "+r.replace("in 3 years","in three years").toLowerCase():r.toLowerCase()+" in the last three years"};
+ var pick=short.filter(function(t){return t.net<0})[0]||long.filter(function(t){return t.net>0})[0]||a;
+ $("hl").innerHTML="<b>"+who+" are "+ext(pick)+" on "+pick.m.s+".</b> <span>The biggest shift this week was in "+c.m.s+", with net "+(c.chg>0?"buying":"selling")+" of "+k(Math.abs(c.chg))+" contracts.</span>";
+ var li=function(t,txt,col){return '<a data-c="'+t.m.code+'"><b>'+t.m.s+'</b><em class="'+(col>0?"up":"dn")+'">'+pc(t.poi)+'<small style="display:block;text-align:right;font-weight:400;font-size:11px;color:var(--muted)">of market</small></em><small>'+txt+'</small></a>'};
+ $("ex").innerHTML='<div><h3>Shortest against own 3-year history</h3>'+short.map(function(t){return li(t,rankTxt(t)[0]+" · net "+k(t.net,1),t.net>0?1:-1)}).join("")+'</div>'+
+  '<div><h3>Longest against own 3-year history</h3>'+long.map(function(t){return li(t,rankTxt(t)[0]+" · net "+k(t.net,1),t.net>0?1:-1)}).join("")+'</div>'+
+  '<div><h3>Biggest change on the week</h3>'+mv.map(function(t){return '<a data-c="'+t.m.code+'"><b>'+t.m.s+'</b><em class="'+(t.chg>0?"up":"dn")+'">'+pp(t.cpoi)+'<small style="display:block;text-align:right;font-weight:400;font-size:11px;color:var(--muted)">of market</small></em><small>'+(t.chg>0?"Net buying of ":"Net selling of ")+k(Math.abs(t.chg))+" contracts on the week · now net "+k(t.net,1)+'</small></a>'}).join("")+'</div>';
+ [].forEach.call($("ex").querySelectorAll("a"),function(a){a.onclick=function(){G="All";S="grp";sync();OPEN=a.dataset.c;draw();var r=document.querySelector('.row[data-c="'+OPEN+'"]');if(r)r.scrollIntoView({behavior:"smooth",block:"center"})}});
+}
+function strip(t){
+ var lo=Math.min(t.mn,0),hi=Math.max(t.mx,0),x=function(v){return (100*(v-lo)/(hi-lo||1)).toFixed(2)+"%"};
+ return '<div class="strip" data-tip="Range '+k(t.mn,1)+' to '+k(t.mx,1)+' · week earlier '+k(t.prev,1)+' · now '+k(t.net,1)+'"><div class="r" style="left:'+x(t.mn)+';width:calc('+x(t.mx)+' - '+x(t.mn)+')"></div><div class="z" style="left:'+x(0)+'"></div><div class="w" style="left:'+x(t.prev)+'"></div><div class="d '+(t.net>=0?"l":"s")+'" style="left:'+x(t.net)+'"></div></div>';
+}
+function row(t){
+ var r=rankTxt(t);
+ return '<div class="row" data-c="'+t.m.code+'"><div class="nm"><b>'+t.m.s+'</b><small>'+t.m.n+'</small></div>'+
+  '<div class="v '+(t.net>=0?"up":"dn")+'">'+k(t.net,1)+'<small>'+pc(t.poi)+' of market</small></div>'+
+  '<div class="v">'+k(t.chg,1)+'<small>'+pp(t.cpoi)+' of market</small></div>'+strip(t)+
+  '<div class="rk'+(r[1]?" x":"")+'"><b>'+r[0]+'</b>'+(t.net>=0?"Net long":"Net short")+'</div></div>'+
+  '<div class="det'+(OPEN===t.m.code?" open":"")+'" id="d'+t.m.code+'">'+(OPEN===t.m.code?detail(t):"")+'</div>';
+}
+function detail(t){
+ var cur=key(t.m,W),oth=t.m.g==="Commodities"?"nc":(cur==="nc"?"lf":"nc"),ot=stats(t.m,oth);
+ return '<div class="ds"><div><span>Long contracts</span><b>'+k(t.l)+'</b></div><div><span>Short contracts</span><b>'+k(t.s)+'</b></div><div><span>Net</span><b class="'+(t.net>=0?"up":"dn")+'">'+k(t.net,1)+'</b></div><div><span>Open interest</span><b>'+k(t.oi)+'</b></div><div><span>'+KN[oth]+'</span><b class="'+(ot.net>=0?"up":"dn")+'">'+k(ot.net,1)+'</b></div></div>'+
+  '<p>'+t.m.means+'. Trader group: '+KN[cur].toLowerCase()+'. Net position each week for three years:</p><div class="chart" data-c="'+t.m.code+'"></div>';
+}
+function chart(el,t){
+ var s=t.series,n=s.length,W0=el.clientWidth||600,H=190,pl=44,pb=18,lo=Math.min(t.mn,0),hi=Math.max(t.mx,0),y=function(v){return 6+(H-pb-6)*(hi-v)/(hi-lo||1)},bw=(W0-pl)/n;
+ var g='',ticks=[lo,0,hi].filter(function(v,i,a){return a.indexOf(v)===i});
+ ticks.forEach(function(v){g+='<line x1="'+pl+'" x2="'+W0+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="var(--line)"/><text x="'+(pl-6)+'" y="'+(y(v)+3)+'" text-anchor="end">'+k(v,1)+'</text>'});
+ s.forEach(function(v,i){if(v==null)return;var y0=y(0),y1=y(v);g+='<rect x="'+(pl+i*bw+.4).toFixed(1)+'" width="'+Math.max(bw-.8,1).toFixed(1)+'" y="'+Math.min(y0,y1).toFixed(1)+'" height="'+Math.max(Math.abs(y1-y0),.5).toFixed(1)+'" fill="var(--'+(v>=0?"up":"down")+')" opacity="'+(i===n-1?1:.75)+'"/>'});
+ [0,Math.floor(n/3),Math.floor(2*n/3),n-1].forEach(function(i,j){g+='<text x="'+(pl+i*bw+bw/2)+'" y="'+(H-3)+'" text-anchor="'+(j===3?"end":j?"middle":"start")+'">'+ldn(D.dates[i]+"T12:00:00Z",{month:"short",year:"numeric"})+'</text>'});
+ g+='<line id="hx" x1="0" x2="0" y1="0" y2="'+(H-pb)+'" stroke="var(--text)" stroke-width="1" opacity="0"/>';
+ el.innerHTML='<svg viewBox="0 0 '+W0+' '+H+'" preserveAspectRatio="none">'+g+'</svg>';
+ var sv=el.firstChild,hx=sv.querySelector("#hx");
+ sv.onmousemove=function(e){var r=sv.getBoundingClientRect(),i=Math.max(0,Math.min(n-1,Math.floor((e.clientX-r.left-pl)/bw)));if(s[i]==null)return;var xx=pl+i*bw+bw/2;hx.setAttribute("x1",xx);hx.setAttribute("x2",xx);hx.setAttribute("opacity",.4);tip("Week of "+day(D.dates[i])+" · net "+k(s[i],1),e)};
+ sv.onmouseleave=function(){hx.setAttribute("opacity",0);$("tip").style.display="none"};
+}
+function tip(h,e){var t=$("tip");t.textContent=h;t.style.display="block";t.style.left=Math.min(e.pageX+12,document.documentElement.clientWidth-t.offsetWidth-8)+"px";t.style.top=(e.pageY-34)+"px"}
+function draw(){
+ var all=D.markets.map(function(m){return stats(m,W)});
+ headline(all);
+ var list=all.filter(function(t){return G==="All"||t.m.g===G}),h="";
+ if(S==="ext")list.sort(function(a,b){return Math.max(b.pct,b.hi)-Math.max(a.pct,a.hi)});
+ if(S==="chg")list.sort(function(a,b){return Math.abs(b.cpoi)-Math.abs(a.cpoi)});
+ var lastG="";list.forEach(function(t){if(S==="grp"&&t.m.g!==lastG){lastG=t.m.g;h+='<div class="gh">'+GN[lastG]+'</div>'}h+=row(t)});
+ $("rows").innerHTML=h;
+ $("ratesnote").hidden=!(G==="All"||G==="Rates");
+ [].forEach.call(document.querySelectorAll(".row[data-c]"),function(r){r.onclick=function(){OPEN=OPEN===r.dataset.c?null:r.dataset.c;draw()}});
+ [].forEach.call(document.querySelectorAll(".strip"),function(s){s.onmousemove=function(e){tip(s.dataset.tip,e)};s.onmouseleave=function(){$("tip").style.display="none"}});
+ var c=document.querySelector(".chart");if(c)chart(c,all.filter(function(t){return t.m.code===c.dataset.c})[0]);
+}
+function sync(){[["grp","g",G],["who","w",W],["srt","s",S]].forEach(function(a){[].forEach.call($(a[0]).children,function(b){b.classList.toggle("on",b.dataset[a[1]]===a[2])})})}
+[["grp","g"],["who","w"],["srt","s"]].forEach(function(a){$(a[0]).onclick=function(e){var b=e.target.closest("button");if(!b)return;if(a[0]==="grp")G=b.dataset.g;if(a[0]==="who")W=b.dataset.w;if(a[0]==="srt")S=b.dataset.s;sync();draw()}});
+$("theme").onclick=function(){var l=document.documentElement.classList.toggle("light");try{localStorage.setItem("ict-theme",l?"light":"dark")}catch(e){}};
+fetch("data.json?"+Date.now()).then(function(r){return r.json()}).then(function(j){D=j;
+ var age=(Date.now()-new Date(D.generated))/864e5,pa=(Date.now()-new Date(D.asof+"T12:00:00Z"))/864e5;
+ $("stamp").innerHTML='<div><span>Source</span>CFTC Commitments of Traders (futures only)</div><div><span>Updates</span>Weekly, Fridays around 20:30 London (later in US holiday weeks)</div><div><span>Positions as of</span><b'+(pa>11?' class="old"':'')+'>'+day(D.asof)+'</b></div><div><span>Last refreshed</span><b'+(age>8?' class="old"':'')+'>'+ldn(D.generated,{weekday:"short",day:"numeric",month:"short"}).replace(",","")+', '+ldn(D.generated,{hour:"2-digit",minute:"2-digit"})+' London</b></div>';
+ draw();addEventListener("resize",function(){var c=document.querySelector(".chart");if(c)draw()});
+}).catch(function(){$("rows").innerHTML="<p>Positioning data could not load. Try again in a minute.</p>"});
+</script>
+</body>
+</html>

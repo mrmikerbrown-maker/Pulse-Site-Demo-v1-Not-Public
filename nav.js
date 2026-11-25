@@ -17,7 +17,8 @@ var TOOLS=[
   ["Index Contribution",HUB+"index-contribution-site/","Which stocks moved the S&amp;P 500, Nasdaq 100 and Dow"],
   ["Market Clock",HUB+"clock/","When markets open, close and move most"],
   ["Earnings Moves",HUB+"earnings-moves/","Move options price for big US companies' results, against past moves"],
-  ["Yield Curves",HUB+"yield-curve/","US, German and UK government bond curves and spreads"]
+  ["Yield Curves",HUB+"yield-curve/","US, German and UK government bond curves and spreads"],
+  ["Speculator Positioning",HUB+"cftc-positioning/","Where speculators are most long or short, from weekly CFTC data"]
  ]],
  ["Economy",[
   ["Data Surprises",HUB+"surprises/","How releases landed against expectations"],
