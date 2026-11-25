@@ -1,0 +1,13 @@
+name: vol-probe (temporary)
+on:
+  push:
+    branches: [claude/project-thread-klenjt]
+    paths: [vol-probe/**, .github/workflows/vol-probe.yml]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install requests websocket-client
+      - run: python vol-probe/probe.py
