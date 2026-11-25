@@ -437,21 +437,25 @@ def implied_move(sym, report_date, when, sess):
     other = p1["n"] - 1  # ordinary sessions the straddle also covers (before and after the results day)
     before = [e for e in exps if e < first and e in pts and pts[e]["n"] >= 1]
     normal, method, e0 = None, None, None
+    nb = na = None
+    if before:
+        nb = pts[before[-1]]["var"] / pts[before[-1]]["n"]
+    if len(after) > 1:
+        dn = pts[after[1]]["n"] - p1["n"]
+        if dn > 0 and pts[after[1]]["var"] > p1["var"]:
+            na = (pts[after[1]]["var"] - p1["var"]) / dn
     if other <= 0:
         method = "only"  # the expiry covers just the results day
-    elif before:
-        e0 = before[-1]
-        normal = pts[e0]["var"] / pts[e0]["n"]
-        method = "before"
-    elif len(after) > 1:
+    elif nb is not None and na is not None:
+        # both sides available: average them, so one thin or stale expiry doesn't swing the answer
+        normal, method, e0 = (nb + na) / 2, "both", before[-1]
         e2 = after[1]
-        dn = pts[e2]["n"] - p1["n"]
-        if dn > 0 and pts[e2]["var"] > p1["var"]:
-            normal = (pts[e2]["var"] - p1["var"]) / dn
-            method = "after"
-            e0 = e2
+    elif nb is not None:
+        normal, method, e0 = nb, "before", before[-1]
+    elif na is not None:
+        normal, method, e0 = na, "after", after[1]
     earn = raw
-    if method in ("before", "after") and normal is not None:
+    if method in ("before", "after", "both") and normal is not None:
         rest = p1["var"] - normal * other
         earn = math.sqrt(rest) if rest > 0.25 * p1["var"] else None  # if almost nothing is left, don't trust it
     elif method is None:
@@ -465,6 +469,7 @@ def implied_move(sym, report_date, when, sess):
         "other_days": max(other, 0),
         "method": method or "raw",
         "ref_expiry": iso(e0) if e0 else None,     # the expiry used to size a normal day
+        "ref_expiry2": iso(after[1]) if method == "both" else None,
         "straddle": round(p1["st"], 2),
         "price": round(p1["f"], 2),
         "expiry": iso(e1),
