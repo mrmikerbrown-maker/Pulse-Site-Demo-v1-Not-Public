@@ -69,6 +69,8 @@ AREAS = [
      "workflows": ["ecb-pricing.yml", "boe-pricing.yml"]},
     {"id": "fed", "name": "Fed scenario planner and Fed pricing", "page": "fed-scenario-planner/",
      "extra_pages": ["cb-pricing/#fed"], "workflows": ["fed-scenario-planner.yml"]},
+    {"id": "positioning", "name": "Speculator Positioning", "page": "cftc-positioning/",
+     "workflows": ["cftc-positioning.yml"]},
     {"id": "glossary", "name": "Glossary", "page": "glossary/"},
 ]
 
@@ -264,6 +266,13 @@ def data_checks(area_id, problems):
         if body is None or b"IDX_SPX" not in body:
             problems.append(("sheet", "The published Google Sheet (live index numbers) isn't answering properly: %s"
                              % (err or "no IDX_SPX row")))
+    elif area_id == "positioning":
+        # Weekly CFTC data: positions dated Tuesday, published Friday (a few days later in US
+        # holiday weeks). The job runs Fri, Sat, Mon and Tue, so it never sits idle 4+ days.
+        d = get_json("cftc-positioning/data.json", problems, "Positioning data")
+        if d:
+            check_generated(d, "positioning", "Positioning data", 100, False, problems)
+            check_asof(d.get("asof"), "positioning", "Positioning data", 11, "us", problems)
     elif area_id == "earnings":
         d = get_json("earnings-moves/data.json", problems, "Earnings data")
         if d:
