@@ -70,7 +70,7 @@ AREAS = [
     {"id": "fed", "name": "Fed scenario planner and Fed pricing", "page": "fed-scenario-planner/",
      "extra_pages": ["cb-pricing/#fed"], "workflows": ["fed-scenario-planner.yml"]},
     {"id": "cross-asset", "name": "Cross-Asset Moves", "page": "cross-asset/",
-     "workflows": ["cross-asset.yml"]},
+     "workflows": ["cross-asset.yml"], "keep_running": "cross-asset.yml"},
     {"id": "yield-curve", "name": "Yield Curves", "page": "yield-curve/",
      "workflows": ["yield-curve.yml"]},
     {"id": "positioning", "name": "Speculator Positioning", "page": "cftc-positioning/",
@@ -452,8 +452,8 @@ def job_checks(area, problems):
             if is_running(wf):
                 KICKED.pop(wf, None)
             elif wf in KICKED and (now_utc() - KICKED[wf]).total_seconds() > 1200:
-                problems.append(("notrunning:" + wf, "The calendar job is not running, and starting it "
-                                 "automatically at %s London didn't work" % london(KICKED[wf])))
+                problems.append(("notrunning:" + wf, "The %s job is not running, and starting it "
+                                 "automatically at %s London didn't work" % (area["name"], london(KICKED[wf]))))
             elif wf not in KICKED:
                 print("  %s is not running: starting it" % wf)
                 if not DRY:
