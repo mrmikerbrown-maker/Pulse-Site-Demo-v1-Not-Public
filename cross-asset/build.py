@@ -17,8 +17,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 FEED = os.environ.get("CROSS_ASSET_FEED", "tradingview")
 LDN = ZoneInfo("Europe/London")
-# Continuous futures (tickers ending "!", e.g. ES1!) jump when the front contract rolls, so the feed's own
-# 1 week / 1 month / YTD changes are worked out again from back-adjusted daily closes (see futures_perf).
+# Continuous futures (tickers ending "!", e.g. ES1!) jump when the front contract rolls. Moves shown are the
+# front-month price against the front-month price then (how futures moves are quoted), but the typical move is
+# worked out from roll-free daily changes (see futures_series), so a roll day doesn't inflate it.
 # Cash-market hours (local time) used for the "Open" / "Closed 16:30" / "Tue close" label under stock indices.
 SESSIONS = {"us": ("America/New_York", (9, 30), (16, 0)), "uk": ("Europe/London", (8, 0), (16, 30)),
             "eu": ("Europe/Berlin", (9, 0), (17, 30)), "jp": ("Asia/Tokyo", (9, 0), (15, 30)),
@@ -99,23 +100,6 @@ def futures_changes(ser, unit):
     return [b[1] - a[1] for a, b in zip(ser, ser[1:])]
 
 
-def futures_perf(feed, ticker, price, unit):
-    """1 week / 1 month / YTD move for a continuous future. The last bar is the current session,
-    so 1 week = vs the close 5 sessions earlier, 1 month = 21 sessions; YTD = vs last close of last year."""
-    ser = futures_series(feed, ticker)
-    if len(ser) < 30:
-        return None
-    year = dt.datetime.now(LDN).year
-    prev = [x for x in ser if dt.datetime.fromtimestamp(x[0], LDN).year < year]
-    now_adj = ser[-1][1] + (price - ser[-1][2])          # live price on the adjusted scale
-
-    def mv(ref):
-        if not ref:
-            return None
-        return (now_adj - ref[1]) / ref[2] * 100 if unit == "pct" else now_adj - ref[1]
-    return mv(ser[-6]), mv(ser[-22]), mv(prev[-1] if prev else None)
-
-
 def bp_from_perf(price, perf):
     """Yield move in bp from a % change in the yield (feeds quote yield changes as % of the yield)."""
     if perf is None:
@@ -136,16 +120,6 @@ def main():
             missing.append(m["name"])
             continue
         p, u = x["price"], m["unit"]
-        if m[FEED].endswith("!"):
-            try:
-                fp = futures_perf(feed, m[FEED], p, m["unit"])
-                if fp:
-                    if m["unit"] == "pct":
-                        x["perf_w"], x["perf_m"], x["perf_ytd"] = fp
-                    else:                      # points (VIX futures): turn back into % so the code below handles it
-                        x["perf_w"], x["perf_m"], x["perf_ytd"] = [None if v is None else v / (p - v) * 100 for v in fp]
-            except Exception as e:
-                print("futures history failed for", m["id"], e)
         if u == "pct":
             mv = [x["chg_pct"], x["perf_w"], x["perf_m"], x["perf_ytd"]]
         elif u == "bp":
