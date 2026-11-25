@@ -262,6 +262,8 @@ function good(r,v){return r.u==="bp"?v<0:v>0}
 function dirC(r,v){return Math.abs(v)<1e-9?"":good(r,v)?"u":"d"}
 function nameOf(r){return r.g==="Bond yields"?r.n+" yield":r.n}
 function ratio(r){return r.sd?Math.abs(r.mv[0])/r.sd:0}
+/* Change in price terms from today's % move: price minus price / (1 + move). */
+function chg(p,v,d){var c=p-p/(1+v/100);return (c>=0?"+":"−")+Math.abs(c).toLocaleString("en-GB",{minimumFractionDigits:d,maximumFractionDigits:d})}
 function gauge(r,v){/* bar runs from −2.5 to +2.5 typical days */
  var x=r.sd?v/r.sd:0,w=Math.min(Math.abs(x),2.5)/2.5*50,col=good(r,v)?"var(--up)":"var(--down)";
  return '<div class="gg"><u style="left:30%"></u><u style="left:70%"></u><i style="'+(x>=0?"left:50%":"right:50%")+";width:"+w.toFixed(1)+"%;background:"+col+'"></i><s></s></div><div class="ggl"><span>Bigger fall</span><span>Typical day</span><span>Bigger rise</span></div>'}
@@ -277,13 +279,13 @@ CA.then(function(d){
  /* S&P 500 futures today (CME E-mini, front month): trades nearly 24 hours, so it shows today's move even before the
     US cash market opens at 14:30 London. During the cash session the tile adds the stock driving the cash index most. */
  var sp=R.filter(function(r){return r.id==="spx"})[0];
- if(sp){var sv=sp.mv[0],sx=ratio(sp);
-  tile("t-spx",'<div class="n '+(sv>=0?"up":"dn")+'">'+mvTxt(sp,sv)+'</div><div class="s">At '+sp.p.toLocaleString("en-GB",{maximumFractionDigits:0})+" · "+(sx>=1.5?'<span class="hot">'+sx.toFixed(1)+"× a typical day</span>":sx.toFixed(1)+"× a typical day")+'</div><div class="nx" id="spx-drv"></div>'+gauge(sp,sv),sv>=0?"pos":"neg")}
+ if(sp){var sv=sp.mv[0];
+  tile("t-spx",'<div class="n '+(sv>=0?"up":"dn")+'">'+mvTxt(sp,sv)+'</div><div class="s">At '+sp.p.toLocaleString("en-GB",{maximumFractionDigits:0})+' · <b class="'+(sv>=0?"up":"dn")+'">'+chg(sp.p,sv,0)+" pts</b></div>"+'<div class="nx" id="spx-drv"></div>',sv>=0?"pos":"neg")}
  else tile("t-spx",'<p class="wait">Open Cross-Asset Moves for S&amp;P 500 futures.</p>');
- /* Gold today: the move, the price, and the move against gold's typical day (standard deviation of daily moves over 3 years). */
+ /* Gold today: the move and the price. (Mike, 25 Nov: no typical-day comparison on the homepage tiles.) */
  var g=R.filter(function(r){return r.id==="gold"})[0];
- if(g){var gv=g.mv[0],gx=ratio(g);
-  tile("t-gold",'<div class="n '+(gv>=0?"up":"dn")+'">'+mvTxt(g,gv)+'</div><div class="s">$'+g.p.toLocaleString("en-GB",{maximumFractionDigits:0})+" an ounce · "+(gx>=1.5?'<span class="hot">'+gx.toFixed(1)+"× a typical day</span>":gx.toFixed(1)+"× a typical day")+"</div>"+gauge(g,gv),gv>=0?"pos":"neg")}
+ if(g){var gv=g.mv[0];
+  tile("t-gold",'<div class="n '+(gv>=0?"up":"dn")+'">'+mvTxt(g,gv)+'</div><div class="s">$'+g.p.toLocaleString("en-GB",{maximumFractionDigits:0})+" an ounce · "+'<b class="'+(gv>=0?"up":"dn")+'">'+chg(g.p,gv,0).replace(/^([+−])/,"$1$")+"</b></div>",gv>=0?"pos":"neg")}
  else tile("t-gold",'<p class="wait">Open Cross-Asset Moves for gold.</p>');
 
  /* Cross-Asset card: how many markets moved 1.5× their typical day or more. */
@@ -302,11 +304,17 @@ CAL.then(function(E){
  function draw(){
   var up=E.filter(function(e){return Date.parse(e.t)>Date.now()-5*60e3});
   if(!up.length){tile("t-rel",'<div class="n">No more this week</div><div class="s">The calendar rolls on to next week automatically.</div>');$("c-cal").innerHTML="Nothing key left this week";return}
-  var f=up[0],n=up[1],today=dayKey(f.t)===dayKey(Date.now());
-  tile("t-rel",'<div class="n">'+(today?"":lon(f.t,{weekday:"short"})+" ")+hhmm(f.t)+' <span class="cd">'+countdown(f.t)+'</span></div><div class="s">'+esc(f.c+" "+f.name)+(f.forecast!=null?" · exp "+esc(val(f,f.forecast)):"")+"</div>"+
-   (n?'<div class="nx">Then <b>'+esc(whenT(n.t)+" · "+n.c+" "+n.name)+"</b></div>":""));
+  /* Homepage rule (Mike, 25 Nov): release names without MoM / YoY / QoQ, and no consensus figure (that's on the calendar). */
+  var nm=function(e){return (e.c+" "+e.name).replace(/\s+(MoM|YoY|QoQ|m\/m|y\/y|q\/q)\b/gi,"").replace(/\s+/g," ").trim()};
+  var f=up[0],today=dayKey(f.t)===dayKey(Date.now());
+  /* Releases at the same moment as the first one are listed as "Also at"; after them comes "Then". Same name twice (e.g. CPI MoM and YoY) shows once. */
+  var seen={},same=[],n=null;seen[nm(f)]=1;
+  up.slice(1).forEach(function(e){var k=nm(e);if(seen[k])return;seen[k]=1;if(e.t===f.t)same.push(k);else if(!n)n=e});
+  tile("t-rel",'<div class="n">'+(today?"":lon(f.t,{weekday:"short"})+" ")+hhmm(f.t)+' <span class="cd">'+countdown(f.t)+'</span></div><div class="s">'+esc(nm(f))+"</div>"+
+   (same.length?'<div class="nx">Also at '+hhmm(f.t)+": <b>"+esc(same.slice(0,2).join(", "))+(same.length>2?" +"+(same.length-2)+" more":"")+"</b></div>":"")+
+   (n?'<div class="nx">Then <b>'+esc(whenT(n.t)+" · "+nm(n))+"</b></div>":""));
   var left=up.length;
-  $("c-cal").innerHTML="Next: <b>"+esc(f.c+" "+f.name)+'</b> <span class="ch nu">'+esc(whenT(f.t))+"</span><br><b>"+left+"</b> key release"+(left>1?"s":"")+" left this week";
+  $("c-cal").innerHTML="Next: <b>"+esc(nm(f))+'</b> <span class="ch nu">'+esc(whenT(f.t))+"</span><br><b>"+left+"</b> key release"+(left>1?"s":"")+" left this week";
  }
  draw();setInterval(draw,30000);
  return E;
