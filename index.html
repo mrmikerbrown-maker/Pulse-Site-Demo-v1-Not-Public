@@ -126,7 +126,7 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
  </div>
 
  <div class="tiles">
-  <a class="t" id="t-spx" href="index-contribution-site/"><div class="k">S&amp;P 500 today</div><p class="wait">Loading…</p><div class="from">Index Contribution →</div></a>
+  <a class="t" id="t-spx" href="cross-asset/"><div class="k">S&amp;P 500 futures today</div><p class="wait">Loading…</p><div class="from">Cross-Asset Moves →</div></a>
   <a class="t" id="t-gold" href="cross-asset/"><div class="k">Gold today</div><p class="wait">Loading…</p><div class="from">Cross-Asset Moves →</div></a>
   <a class="t evt" id="t-rel" href="calendar/"><div class="k">Next big release</div><p class="wait">Loading…</p><div class="from">Economic Calendar →</div></a>
   <a class="t" id="t-fed" href="cb-pricing/#fed"><div class="k">Next Fed meeting</div><p class="wait">Loading…</p><div class="from">Central Bank Pricing →</div></a>
@@ -212,12 +212,18 @@ function gauge(r,v){/* bar runs from −2.5 to +2.5 typical days */
 CA.then(function(d){
  var R=d.rows.filter(function(r){return r.mv&&r.mv[0]!=null});
  /* Ticker: every instrument on the Cross-Asset page, looping slowly. The list is drawn twice so the loop is seamless. */
- var items=R.map(function(r){var v=r.mv[0],c=dirC(r,v);return '<span class="tc '+c+'"><i>'+esc(r.n)+"</i><b>"+(v>0?"▲ ":v<0?"▼ ":"")+mvTxt(r,v)+"</b></span>"}).join("");
+ var items=R.map(function(r){var v=r.mv[0],c=dirC(r,v);return '<span class="tc '+c+'"><i>'+esc(r.n)+(r.g==="Index futures"&&r.id!=="vix"?" futures":"")+"</i><b>"+(v>0?"▲ ":v<0?"▼ ":"")+mvTxt(r,v)+"</b></span>"}).join("");
  $("tk").innerHTML=items+items;$("tk").style.setProperty("--dur",Math.round(R.length*4.5)+"s");
  $("tk-asof").textContent=hhmm(d.asof);
  $("tk-v").title="Prices as of "+hhmm(d.asof)+" London (refreshed every 5 minutes on weekdays). Hover or tap to pause.";
  $("tk-v").onclick=function(){this.classList.toggle("paused")};
 
+ /* S&P 500 futures today (CME E-mini, front month): trades nearly 24 hours, so it shows today's move even before the
+    US cash market opens at 14:30 London. During the cash session the tile adds the stock driving the cash index most. */
+ var sp=R.filter(function(r){return r.id==="spx"})[0];
+ if(sp){var sv=sp.mv[0],sx=ratio(sp);
+  tile("t-spx",'<div class="n '+(sv>=0?"up":"dn")+'">'+mvTxt(sp,sv)+'</div><div class="s">At '+sp.p.toLocaleString("en-GB",{maximumFractionDigits:0})+" · "+(sx>=1.5?'<span class="hot">'+sx.toFixed(1)+"× a typical day</span>":sx.toFixed(1)+"× a typical day")+'</div><div class="nx" id="spx-drv"></div>'+gauge(sp,sv),sv>=0?"pos":"neg")}
+ else tile("t-spx",'<p class="wait">Open Cross-Asset Moves for S&amp;P 500 futures.</p>');
  /* Gold today: the move, the price, and the move against gold's typical day (standard deviation of daily moves over 3 years). */
  var g=R.filter(function(r){return r.id==="gold"})[0];
  if(g){var gv=g.mv[0],gx=ratio(g);
@@ -228,7 +234,7 @@ CA.then(function(d){
  var un=R.filter(function(r){return ratio(r)>=1.5}).sort(function(a,b){return ratio(b)-ratio(a)});
  $("c-ca").innerHTML=un.length?'<b>'+un.length+"</b> unusual move"+(un.length>1?"s":"")+": "+un.slice(0,2).map(function(r){var v=r.mv[0];return '<span class="ch '+dirC(r,v)+'">'+esc(r.n)+" "+(v>0?"▲":"▼")+" "+mvTxt(r,v).replace(/^[+−]/,"")+"</span>"}).join(""):'No unusual moves: every market is within <b>1.5×</b> its typical day';
 }).catch(function(){$("tk").innerHTML='<span class="tc"><i>Prices unavailable right now. Open Cross-Asset Moves.</i></span>';$("tk").style.animation="none";$("tk-asof").textContent="–";
- tile("t-gold",'<p class="wait">Open Cross-Asset Moves for gold.</p>');fail("c-ca")});
+ tile("t-gold",'<p class="wait">Open Cross-Asset Moves for gold.</p>');tile("t-spx",'<p class="wait">Open Cross-Asset Moves for S&amp;P 500 futures.</p>');fail("c-ca")});
 
 /* ---------- Calendar: next-release tile and card ---------- */
 var CAL=json("calendar/data/calendar.json").then(function(d){
@@ -301,13 +307,11 @@ Promise.all([CA,CAL.catch(function(){return[]})]).then(function(a){
   var top=S.slice().sort(function(a,b){return Math.abs(b.pts)-Math.abs(a.pts)}).slice(0,2);
   var pts=ix.close-ix.prev,u=ix.pct>=0;
   var when=open?"Live, about 15 minutes delayed":"At the "+esc(String(ix.last||"").replace(/ \d\d:\d\d$/,"").replace(/^0/,""))+" close";
-  var sd=ca&&ca.rows.filter(function(r){return r.id==="spx"})[0];
-  var t0=top[0];
-  tile("t-spx",'<div class="n '+(u?"up":"dn")+'">'+fx(ix.pct,2)+'%</div><div class="s">'+esc(t0.s)+" "+(t0.pts>=0?"added":"took off")+' <b class="'+(t0.pts>=0?"up":"dn")+'">'+Math.abs(t0.pts).toFixed(1)+" pts</b> · "+when+"</div>"+
-   (sd&&sd.sd?gauge({u:"pct",sd:sd.sd},ix.pct):""),u?"pos":"neg");
-  $("c-index").innerHTML='S&amp;P 500 <span class="ch '+(u?"u":"d")+'">'+(u?"▲ ":"▼ ")+Math.abs(ix.pct).toFixed(2)+"%</span> "+fx(pts,1)+" pts<br>"+
+  var t0=top[0],dv=$("spx-drv");
+  if(open&&dv)dv.innerHTML="In the cash index, <b>"+esc(t0.s)+"</b> "+(t0.pts>=0?"added":"took off")+' <b class="'+(t0.pts>=0?"up":"dn")+'">'+Math.abs(t0.pts).toFixed(1)+" pts</b>";
+  $("c-index").innerHTML='S&amp;P 500 '+(open?"":'<span class="mu">'+when.replace("At the ","")+"</span> ")+'<span class="ch '+(u?"u":"d")+'">'+(u?"▲ ":"▼ ")+Math.abs(ix.pct).toFixed(2)+"%</span> "+fx(pts,1)+" pts<br>"+
    top.map(function(x){return esc(x.s)+' <b class="'+(x.pts>=0?"up":"dn")+'">'+fx(x.pts,1)+" pts</b>"}).join(" · ");
- }).catch(function(){tile("t-spx",'<p class="wait">Open the tracker for the latest move.</p>');fail("c-index")});
+ }).catch(function(){fail("c-index")});
 })();
 
 /* ---------- Fed pricing tile: tightening or easing priced for the next meeting, and the path over three meetings ----------
