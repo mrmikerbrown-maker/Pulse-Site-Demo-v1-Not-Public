@@ -7,6 +7,9 @@ on:
   schedule:
     - cron: "3 * * * 1-5"
   workflow_dispatch:
+  push:
+    branches: [claude/project-thread-j9cova]
+    paths: ["cross-asset/build.py", "cross-asset/feeds/**", "cross-asset/markets.csv"]
 permissions:
   contents: write
   pages: write

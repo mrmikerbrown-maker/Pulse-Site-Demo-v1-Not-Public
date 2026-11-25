@@ -17,6 +17,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 FEED = os.environ.get("CROSS_ASSET_FEED", "tradingview")
 LDN = ZoneInfo("Europe/London")
+# Continuous futures (tickers ending "!", e.g. ES1!) jump when the front contract rolls, so the feed's own
+# 1 week / 1 month / YTD changes are worked out again from back-adjusted daily closes (see futures_perf).
 # Cash-market hours (local time) used for the "Open" / "Closed 16:30" / "Tue close" label under stock indices.
 SESSIONS = {"us": ("America/New_York", (9, 30), (16, 0)), "uk": ("Europe/London", (8, 0), (16, 30)),
             "eu": ("Europe/Berlin", (9, 0), (17, 30)), "jp": ("Asia/Tokyo", (9, 0), (15, 30)),
@@ -65,7 +67,7 @@ def refresh_typical(feed, markets, today):
             ch = daily_changes(bars[:-1], m["unit"])[-252:]  # leave out today's unfinished bar
             if len(ch) >= 120:
                 sd[m["id"]] = round(statistics.stdev(ch), 4)
-            if m["id"] == "spx":
+            if m["id"] == "dxy":   # trades every weekday, so its bar count = trading days so far this year
                 year = dt.datetime.now(LDN).year
                 ytd_days = sum(1 for t, _ in bars if dt.datetime.fromtimestamp(t, LDN).year == year)
         except Exception as e:
@@ -74,6 +76,18 @@ def refresh_typical(feed, markets, today):
     new = {"date": today, "ytd_days": ytd_days, "sd": sd}
     json.dump(new, open(path, "w"), indent=0)
     return new
+
+
+def futures_perf(feed, ticker, price):
+    """% change over 1 week / 1 month / YTD for a continuous future, from back-adjusted closes.
+    The last bar is the current session, so 1 week = vs the close 5 sessions earlier, 1 month = 21 sessions."""
+    bars = feed.history(ticker, 300)
+    if len(bars) < 30:
+        return None
+    year = dt.datetime.now(LDN).year
+    prev = [c for t, c in bars if dt.datetime.fromtimestamp(t, LDN).year < year]
+    pct = lambda ref: (price / ref - 1) * 100 if ref else None
+    return pct(bars[-6][1]), pct(bars[-22][1]), pct(prev[-1] if prev else None)
 
 
 def bp_from_perf(price, perf):
@@ -96,6 +110,13 @@ def main():
             missing.append(m["name"])
             continue
         p, u = x["price"], m["unit"]
+        if m[FEED].endswith("!"):
+            try:
+                fp = futures_perf(feed, m[FEED], p)
+                if fp:
+                    x["perf_w"], x["perf_m"], x["perf_ytd"] = fp
+            except Exception as e:
+                print("futures history failed for", m["id"], e)
         if u == "pct":
             mv = [x["chg_pct"], x["perf_w"], x["perf_m"], x["perf_ytd"]]
         elif u == "bp":
