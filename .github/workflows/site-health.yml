@@ -1,0 +1,43 @@
+name: "Site health: check pages and data"
+# Checks the live site every 15 minutes: every page loads (also in a real browser, so a JavaScript
+# error or a "could not load the data" message counts), every data job's last run worked, and every
+# data file is fresh. Problems become GitHub issues labelled "site-alert", assigned to the repo
+# owner, so GitHub emails them: one email when a problem starts, one when it's fixed.
+# The checks are in .github/health/check.py (limits for each page are at the top of that file).
+#
+# GitHub only fires scheduled jobs a few times a day in practice, so each run keeps checking for
+# about 5h45m and then starts the next run itself. The hourly schedule is only a backup to restart
+# the chain if it ever breaks.
+on:
+  schedule:
+    - cron: "23 * * * *"
+  workflow_dispatch:           # lets you run it by hand from the Actions tab
+permissions:
+  contents: read
+  issues: write                # open / update / close the alert issues
+  actions: write               # read the data jobs' results and start the calendar / next check
+concurrency:
+  group: site-health
+  cancel-in-progress: false    # a new run waits for the current one instead of stopping it
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install a headless browser (the check still runs without it)
+        continue-on-error: true
+        run: pip install playwright==1.48.0 && python -m playwright install --with-deps chromium
+      - name: Check the site every 15 minutes
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          LOOP_MINUTES: "340"
+        run: python .github/health/check.py
+      - name: Start the next run
+        if: ${{ !cancelled() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run site-health.yml --ref "${GITHUB_REF_NAME}"

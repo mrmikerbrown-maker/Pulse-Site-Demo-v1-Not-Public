@@ -90,6 +90,14 @@ var GG=[
 ["Fed funds futures","Exchange-traded contracts (CBOT, symbol ZQ) that settle on the average effective fed funds rate for one calendar month. The price is 100 minus that rate, so they show what the market expects the Fed to do at each meeting.",["fed funds futures","fed fund futures","ZQ"]],
 ["Cumulative pricing","The total move priced from today up to a given meeting, counted in 25bp steps. 100% means one full 25bp hike is priced by then, 200% means two. A figure in brackets means cuts.",["cumulative pricing","Cumulative"]],
 ["Basis point (bp)","One hundredth of a percentage point. If a yield goes from 4.00% to 4.10%, it moved 10 basis points.",["basis point","basis points","bps","bp"]],
+["Yield curve","A line joining the yields on one government's bonds from the shortest to the longest maturity. Its shape shows what the market expects for interest rates, inflation and growth.",["yield curve","yield curves","curve"]],
+["Inverted yield curve","When short-dated bonds pay more than long-dated ones. It usually means markets expect interest rates to be cut, often because they expect the economy to slow.",["inverted","inversion","inverted curve"]],
+["Steepening","The gap between long and short yields widens. Long yields rise relative to short ones.",["steepened","steepening","steeper","steepens"]],
+["Flattening","The gap between long and short yields narrows. Long yields fall relative to short ones.",["flattened","flattening","flatter","flattens"]],
+["2s10s","The 10-year yield minus the 2-year yield, in basis points. The most watched measure of the yield curve's slope. Below zero means the curve is inverted.",["2s10s","5s30s","2s30s"]],
+["Treasuries","Bonds issued by the US government. Their yields are the benchmark for borrowing costs around the world.",["Treasuries","Treasury","US Treasuries"]],
+["Bunds","Bonds issued by the German government, the benchmark for the euro area.",["Bunds","Bund","German Bunds"]],
+["Gilts","Bonds issued by the UK government.",["Gilts","Gilt","UK Gilts"]],
 ["US dollar (DXY)","The dollar index measures the dollar against a basket of major currencies such as the euro and the yen. Up means the dollar is getting stronger.",["DXY","US dollar","dollar index","dollar"]],
 ["Currency pairs (FX)","Currencies trade in pairs. EUR/USD is the price of one euro in dollars, so if it rises the euro is getting stronger against the dollar. USD/JPY is the price of one dollar in yen. FX is short for foreign exchange.",["EUR/USD","USD/JPY","GBP/USD","USD/CHF","currency pair","FX","forex"]],
 ["Gold","A precious metal people buy as a store of value and a safe haven. It pays no interest, so it tends to fall when yields rise and rise when yields fall, but the link is loose.",["gold"],1],
@@ -117,6 +125,16 @@ var GG=[
 ["Implied volatility","How much movement option prices imply, expressed as a yearly percentage. It rises before results and usually drops sharply straight after them (the 'vol crush').",["implied volatility","implied vol","vol crush"]],
 ["Expiry","The date an option ends. Big US stocks have options expiring every Friday, some on other weekdays too.",["expiry","expiries"]],
 ["Before the open / after the close","When a company releases results: before US trading starts at 9:30 New York time, or after it ends at 16:00. Results after the close show up in the next day's price.",["before the open","after the close","before the US open","after the US close"]]
+]],
+["Positioning",[
+["Commitments of Traders (COT)","A weekly report from the CFTC, the US futures regulator, showing how many futures contracts each type of trader holds long and short. Positions are taken on Tuesday and published on Friday.",["Commitments of Traders","COT report"]],
+["Speculators (non-commercial)","Traders in a futures market who are there to profit from price moves rather than to hedge a business. In the CFTC's oldest report they are called 'non-commercial'. It is the figure news wires quote as 'speculators'.",["speculator","speculators","non-commercial"]],
+["Managed money","Hedge funds and commodity trading advisers (CTAs) in the CFTC's commodity report. It is the usual measure of speculators in oil, metals and crops.",["managed money"]],
+["Leveraged funds","Hedge funds and other trading firms in the CFTC's report on financial futures (currencies, bonds, stock indices). Narrower than 'non-commercial', which also includes asset managers.",["leveraged funds"]],
+["Net position","Long contracts minus short contracts. A positive number is net long (betting on a rise), a negative number is net short.",["net position","net long","net short"]],
+["Open interest","The total number of futures contracts still open in a market. Used to compare positions in markets of different sizes.",["open interest","open contracts"]],
+["Crowded trade","When many traders hold the same position. If the news turns against it, they can all rush to exit at once and the move can be sharp.",["crowded","crowding"]],
+["Basis trade","Buying a bond and selling its futures contract to earn the small price gap between them. It makes hedge funds look very short Treasury futures even when they are not betting on higher yields.",["basis trade"]]
 ]],
 ["News and events",[
 ["Tariffs","Taxes a government puts on imported goods. News about tariffs can move markets more than economic data because it changes the outlook for growth, inflation and company profits.",["tariff","tariffs"]],
