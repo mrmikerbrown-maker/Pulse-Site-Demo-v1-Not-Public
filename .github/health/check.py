@@ -525,6 +525,7 @@ def run_once(browser, seen_before, seen_now):
 
     # 2. Each part of the site.
     for a in AREAS:
+        print("  checking %s ..." % a["id"])
         probs = list(down_ids.get(a["id"], []))
         if not probs:
             for extra in a.get("extra_pages", []):
