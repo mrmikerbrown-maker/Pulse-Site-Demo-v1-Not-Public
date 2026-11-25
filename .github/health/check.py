@@ -69,6 +69,12 @@ AREAS = [
      "workflows": ["ecb-pricing.yml", "boe-pricing.yml"]},
     {"id": "fed", "name": "Fed scenario planner and Fed pricing", "page": "fed-scenario-planner/",
      "extra_pages": ["cb-pricing/#fed"], "workflows": ["fed-scenario-planner.yml"]},
+    {"id": "cross-asset", "name": "Cross-Asset Moves", "page": "cross-asset/",
+     "workflows": ["cross-asset.yml"], "kick_if_idle": "cross-asset.yml"},
+    {"id": "yield-curve", "name": "Yield Curves", "page": "yield-curve/",
+     "workflows": ["yield-curve.yml"]},
+    {"id": "positioning", "name": "Speculator Positioning", "page": "cftc-positioning/",
+     "workflows": ["cftc-positioning.yml"]},
     {"id": "glossary", "name": "Glossary", "page": "glossary/"},
 ]
 
@@ -264,6 +270,41 @@ def data_checks(area_id, problems):
         if body is None or b"IDX_SPX" not in body:
             problems.append(("sheet", "The published Google Sheet (live index numbers) isn't answering properly: %s"
                              % (err or "no IDX_SPX row")))
+    elif area_id == "cross-asset":
+        # The page reads data.json straight from the repo (raw.githubusercontent.com), not from
+        # the published site, because the job saves every 5 minutes without republishing.
+        st, body, err = http("https://raw.githubusercontent.com/%s/main/cross-asset/data.json?t=%d"
+                             % (REPO, time.time()))
+        d = None
+        if body is None:
+            problems.append(("fetch:cross-asset", "Cross-asset data could not be downloaded: " + err))
+        else:
+            try:
+                d = json.loads(body)
+            except Exception:
+                problems.append(("broken:cross-asset", "Cross-asset data is not valid JSON"))
+        if d:
+            if in_cross_asset_hours(now_utc() - timedelta(minutes=45)) and d.get("asof"):
+                age = (now_utc() - parse_ts(d["asof"])).total_seconds() / 60
+                if age > 45:
+                    problems.append(("stale:cross-asset", "Cross-asset prices last updated %s London, "
+                                     "%d minutes ago (limit 45 during 07:00-22:00 London on weekdays)"
+                                     % (london(parse_ts(d["asof"])), age)))
+            if d.get("missing"):
+                problems.append(("missing:cross-asset", "Cross-asset prices missing for: "
+                                 + ", ".join(map(str, d["missing"]))[:200]))
+    elif area_id == "yield-curve":
+        d = get_json("yield-curve/data.json", problems, "Yield curve data")
+        if d:
+            check_generated(d, "yield-curve", "Yield curve data", 30, True, problems)
+            check_problem_list(d, "yield-curve", "Yield curve data", problems)
+    elif area_id == "positioning":
+        # Weekly CFTC data: positions dated Tuesday, published Friday (a few days later in US
+        # holiday weeks). The job runs Fri, Sat, Mon and Tue, so it never sits idle 4+ days.
+        d = get_json("cftc-positioning/data.json", problems, "Positioning data")
+        if d:
+            check_generated(d, "positioning", "Positioning data", 100, False, problems)
+            check_asof(d.get("asof"), "positioning", "Positioning data", 11, "us", problems)
     elif area_id == "earnings":
         d = get_json("earnings-moves/data.json", problems, "Earnings data")
         if d:
@@ -387,6 +428,12 @@ def is_running(wf):
 KICKED = {}  # workflow -> time this check last started it
 
 
+def in_cross_asset_hours(t):
+    """Weekdays 07:00-22:00 London: when the cross-asset job refreshes prices."""
+    lt = t.astimezone(LONDON)
+    return lt.weekday() < 5 and 7 <= lt.hour < 22
+
+
 def job_checks(area, problems):
     for wf in area.get("workflows", []):
         try:
@@ -397,6 +444,18 @@ def job_checks(area, problems):
         if r and r["conclusion"] != "success":
             problems.append(("job:" + wf, "The job \"%s\" failed on its last run (%s London). Log: %s" % (
                 r["name"], london(parse_ts(r["created_at"])), r["html_url"])))
+    wf = area.get("kick_if_idle")
+    if wf and in_cross_asset_hours(now_utc()):
+        # The cross-asset job also loses hours to GitHub skipping its hourly start. A run started
+        # by hand does one update and stops, so starting one on each check keeps the prices at
+        # most ~15 minutes old until the next scheduled run takes over. Staleness alerts as above.
+        try:
+            if not is_running(wf):
+                print("  %s is not running: starting one update" % wf)
+                if not DRY:
+                    api("POST", "/actions/workflows/%s/dispatches" % wf, {"ref": "main"})
+        except Exception as e:
+            print("  (could not check/start %s: %s)" % (wf, e))
     wf = area.get("keep_running")
     if wf:
         # GitHub skips many of the calendar's hourly starts, leaving it switched off for hours.

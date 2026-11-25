@@ -12,6 +12,8 @@ on:
   schedule:
     - cron: "23 * * * *"
   workflow_dispatch:           # lets you run it by hand from the Actions tab
+  push:                        # TEMPORARY test from this branch: one check, changes nothing
+    branches: [claude/project-thread-38ekuq]
 permissions:
   contents: read
   issues: write                # open / update / close the alert issues
@@ -34,11 +36,12 @@ jobs:
       - name: Check the site every 15 minutes
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          LOOP_MINUTES: "340"
+          LOOP_MINUTES: ${{ github.event_name == 'push' && '0' || '340' }}
+          DRY_RUN: ${{ github.event_name == 'push' && '1' || '0' }}
           PYTHONUNBUFFERED: "1"   # show progress in the log as it happens
         run: python .github/health/check.py
       - name: Start the next run
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && github.event_name != 'push' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run site-health.yml --ref "${GITHUB_REF_NAME}"
