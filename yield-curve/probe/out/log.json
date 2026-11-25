@@ -1,0 +1,242 @@
+{
+ "ust": {
+  "2024": [
+   200,
+   19098,
+   [
+    "Date,\"1 Mo\",\"2 Mo\",\"3 Mo\",\"4 Mo\",\"6 Mo\",\"1 Yr\",\"2 Yr\",\"3 Yr\",\"5 Yr\",\"7 Yr\",\"10 Yr\",\"20 Yr\",\"30 Yr\"",
+    "12/31/2024,4.40,4.39,4.37,4.32,4.24,4.16,4.25,4.27,4.38,4.48,4.58,4.86,4.78"
+   ]
+  ],
+  "2025": [
+   200,
+   20155,
+   [
+    "Date,\"1 Mo\",\"1.5 Month\",\"2 Mo\",\"3 Mo\",\"4 Mo\",\"6 Mo\",\"1 Yr\",\"2 Yr\",\"3 Yr\",\"5 Yr\",\"7 Yr\",\"10 Yr\",\"20 Yr\",\"30 Yr\"",
+    "12/31/2025,3.74,3.75,3.67,3.67,3.63,3.59,3.48,3.47,3.55,3.73,3.94,4.18,4.79,4.84"
+   ]
+  ],
+  "2026": [
+   200,
+   18335,
+   [
+    "Date,\"1 Mo\",\"1.5 Month\",\"2 Mo\",\"3 Mo\",\"4 Mo\",\"6 Mo\",\"1 Yr\",\"2 Yr\",\"3 Yr\",\"5 Yr\",\"7 Yr\",\"10 Yr\",\"20 Yr\",\"30 Yr\"",
+    "11/24/2026,4.21,4.27,4.28,4.36,4.36,4.46,4.59,4.63,4.67,4.69,4.79,4.91,5.33,5.30"
+   ]
+  ]
+ },
+ "bund": {
+  "R01XX": [
+   200,
+   23226
+  ],
+  "R02XX": [
+   200,
+   23226
+  ],
+  "R03XX": [
+   200,
+   23226
+  ],
+  "R05XX": [
+   200,
+   23226
+  ],
+  "R07XX": [
+   200,
+   23226
+  ],
+  "R10XX": [
+   200,
+   23227
+  ],
+  "R15XX": [
+   200,
+   23204
+  ],
+  "R20XX": [
+   200,
+   23204
+  ],
+  "R30XX": [
+   200,
+   23204
+  ],
+  "R0.5XX": 404,
+  "R00.5": 404,
+  "R0M06": 404
+ },
+ "gilt": {
+  "latest-yield-curve-data.zip": [
+   200,
+   383238,
+   [
+    "GLC Inflation daily data current month.xlsx",
+    "GLC Nominal daily data current month.xlsx",
+    "GLC Real daily data current month.xlsx",
+    "OIS daily data current month.xlsx"
+   ]
+  ],
+  "GLC Nominal daily data current month.xlsx": [
+   "info",
+   "1. fwds, short end",
+   "2. fwd curve",
+   "3. spot, short end",
+   "4. spot curve"
+  ],
+  "GLC Nominal daily data current month.xlsx|4. spot curve": [
+   16,
+   "2026-11-02",
+   "2026-11-23"
+  ],
+  "glcnominalddata.zip": [
+   200,
+   39275836,
+   [
+    "GLC Nominal daily data_1979 to 1984.xlsx",
+    "GLC Nominal daily data_1985 to 1989.xlsx",
+    "GLC Nominal daily data_1990 to 1994.xlsx",
+    "GLC Nominal daily data_1995 to 1999.xlsx",
+    "GLC Nominal daily data_2000 to 2004.xlsx",
+    "GLC Nominal daily data_2005 to 2015.xlsx",
+    "GLC Nominal daily data_2016 to 2024.xlsx",
+    "GLC Nominal daily data_2025 to present.xlsx"
+   ]
+  ],
+  "GLC Nominal daily data_1979 to 1984.xlsx": [
+   "info",
+   "1. nominal fwds, short end",
+   "2. nominal fwd curve",
+   "3. nominal spot, short end",
+   "4. nominal spot curve"
+  ],
+  "GLC Nominal daily data_1979 to 1984.xlsx|4. nominal spot curve": [
+   1566,
+   "1979-01-01",
+   "1984-12-31"
+  ],
+  "GLC Nominal daily data_1985 to 1989.xlsx": [
+   "info",
+   "1. nominal fwds, short end",
+   "2. nominal fwd curve",
+   "3. nominal spot, short end",
+   "4. nominal spot curve"
+  ],
+  "GLC Nominal daily data_1985 to 1989.xlsx|4. nominal spot curve": [
+   1304,
+   "1985-01-01",
+   "1989-12-29"
+  ],
+  "GLC Nominal daily data_1990 to 1994.xlsx": [
+   "info",
+   "1. nominal fwds, short end",
+   "2. nominal fwd curve",
+   "3. nominal spot, short end",
+   "4. nominal spot curve"
+  ],
+  "GLC Nominal daily data_1990 to 1994.xlsx|4. nominal spot curve": [
+   1305,
+   "1990-01-01",
+   "1994-12-30"
+  ],
+  "GLC Nominal daily data_1995 to 1999.xlsx": [
+   "info",
+   "1. nominal fwds, short end",
+   "2. nominal fwd curve",
+   "3. nominal spot, short end",
+   "4. nominal spot curve"
+  ],
+  "GLC Nominal daily data_1995 to 1999.xlsx|4. nominal spot curve": [
+   1305,
+   "1995-01-02",
+   "1999-12-31"
+  ],
+  "GLC Nominal daily data_2000 to 2004.xlsx": [
+   "info",
+   "1. nominal fwds, short end",
+   "2. nominal fwd curve",
+   "3. nominal spot, short end",
+   "4. nominal spot curve"
+  ],
+  "GLC Nominal daily data_2000 to 2004.xlsx|4. nominal spot curve": [
+   1305,
+   "2000-01-03",
+   "2004-12-31"
+  ],
+  "GLC Nominal daily data_2005 to 2015.xlsx": [
+   "info",
+   "1. fwds, short end",
+   "2. fwd curve",
+   "3. spot, short end",
+   "4. spot curve"
+  ],
+  "GLC Nominal daily data_2005 to 2015.xlsx|4. spot curve": [
+   2869,
+   "2005-01-03",
+   "2015-12-31"
+  ],
+  "GLC Nominal daily data_2016 to 2024.xlsx": [
+   "info",
+   "1. fwds, short end",
+   "2. fwd curve",
+   "3. spot, short end",
+   "4. spot curve"
+  ],
+  "GLC Nominal daily data_2016 to 2024.xlsx|4. spot curve": [
+   2348,
+   "2016-01-01",
+   "2024-12-31"
+  ],
+  "GLC Nominal daily data_2025 to present.xlsx": [
+   "info",
+   "1. fwds, short end",
+   "2. fwd curve",
+   "3. spot, short end",
+   "4. spot curve"
+  ],
+  "GLC Nominal daily data_2025 to present.xlsx|4. spot curve": [
+   478,
+   "2025-01-01",
+   "2026-10-30"
+  ],
+  "IUDSNPY": [
+   200,
+   [
+    "19 Nov 2026,4.9407",
+    "20 Nov 2026,4.8697",
+    "23 Nov 2026,4.863"
+   ]
+  ],
+  "IUDMNPY": [
+   200,
+   [
+    "19 Nov 2026,5.2885",
+    "20 Nov 2026,5.2072",
+    "23 Nov 2026,5.1793"
+   ]
+  ],
+  "IUDLNPY": [
+   200,
+   [
+    "19 Nov 2026,5.5835",
+    "20 Nov 2026,5.5124",
+    "23 Nov 2026,5.4656"
+   ]
+  ],
+  "IUDSNZC": [
+   200,
+   [
+    "19 Nov 2026,4.945",
+    "20 Nov 2026,4.864",
+    "23 Nov 2026,4.851"
+   ]
+  ]
+ },
+ "ecb_aaa": [
+  200,
+  [
+   "YC.B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y,B,U2,EUR,4F,G_N_A,SV_C_YM,SR_10Y,2026-11-23,3.3209069064,A,F,,,P1D,,E,,,,,,,,,,,,,,,Technical notes are available at the following link: https://www.ecb.europa.eu/stats/financial_markets_and_interest_rates/euro_area_yield_curves/shared/pdf/technical_notes.pdf,,6,,,AAA yield curve - 10-year spot rate,\"Euro area (changing composition) - Government bond, nominal, all issuers whose rating is triple A - Svensson model - continuous compounding - yield error minimisation - Yield curve spot rate, 10-year maturity\",PCPA,0",
+   "YC.B.U2.EUR.4F.G_N_A.SV_C_YM.SR_10Y,B,U2,EUR,4F,G_N_A,SV_C_YM,SR_10Y,2026-11-24,3.3120809567,A,F,,,P1D,,E,,,,,,,,,,,,,,,Technical notes are available at the following link: https://www.ecb.europa.eu/stats/financial_markets_and_interest_rates/euro_area_yield_curves/shared/pdf/technical_notes.pdf,,6,,,AAA yield curve - 10-year spot rate,\"Euro area (changing composition) - Government bond, nominal, all issuers whose rating is triple A - Svensson model - continuous compounding - yield error minimisation - Yield curve spot rate, 10-year maturity\",PCPA,0"
+  ]
+ ]
+}
