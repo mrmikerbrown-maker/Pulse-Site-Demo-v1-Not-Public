@@ -95,6 +95,16 @@ var MORE=[
    ["#tz","<b>Time zone</b> switches the hours to where you are."],
    ["#plot","<b>The chart</b> shows the average size of the move in each hour. Taller means busier."]],
   tip:"If you can only watch markets for an hour, this page tells you which hour matters most."},
+ {path:"release-playback/",name:"Release Playback",
+  why:"Big US numbers like inflation and jobs can move every market at once. This page replays what happened after past releases, so you can see how big the first reaction tends to be and whether it usually lasts.",
+  pts:[
+   ["#relS","<b>Pick a release</b>: CPI inflation, jobs, core PCE, retail sales, ISM services or GDP."],
+   ["#mktS","<b>Pick a market</b>: S&amp;P 500 futures, the 10-year Treasury yield, the dollar or gold."],
+   ["#hl","<b>The headline</b> says how often the market rose or fell on the day when the number came in above or below forecast."],
+   ["#one","<b>The latest release</b>, replayed every 5 minutes on the day, then over the next 10 trading days against the typical path."],
+   ["#g3","<b>What happened next</b>: every past release split into above forecast, in line and below forecast, and how often the first move kept going, held or faded."],
+   ["#tbody","<b>Every release</b> since 2015. Click one to replay it at the top."]],
+  tip:"A surprise of the same size doesn't always get the same reaction: what else is going on that day matters too."},
  {path:"surprises/",name:"Data Surprises",
   why:"Markets do not react to an economic number itself, only to how far it lands from what was expected. This page lets you play with that gap and see how markets usually respond.",
   pts:[
