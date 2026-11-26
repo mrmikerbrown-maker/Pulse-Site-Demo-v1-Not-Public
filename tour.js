@@ -146,7 +146,7 @@ var MORE=[
 ];
 var NEXT=[
  ["index-contribution-site/","Index Contribution","Which stocks drove the S&amp;P 500, Nasdaq 100 and Dow today."],
- ["surprises/","Data Surprises","Whether recent economic numbers beat or missed forecasts."],
+ ["surprises/","Data Surprises","Why markets react to the surprise, not the number, with a quiz to test yourself."],
  ["fed-scenario-planner/","Fed Scenario Planner","What markets did after past Fed decisions, and what a surprise might do."],
  ["glossary/","Glossary","Every market term on the site, explained in plain words."]
 ];

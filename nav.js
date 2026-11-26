@@ -23,7 +23,7 @@ var TOOLS=[
  ]],
  ["Macro",[
   ["Economic Calendar",HUB+"calendar/","This week's key releases and central bank decisions, with forecasts, in London time"],
-  ["Data Surprises",HUB+"surprises/","How releases landed against expectations"],
+  ["Data Surprises",HUB+"surprises/","Try a surprise with the sliders and see the textbook reaction, then test yourself"],
   ["Release Playback",HUB+"release-playback/","How markets moved after past CPI, jobs and other big releases"],
   ["Economy Thermometer",HUB+"economy-thermometer/","Is each G10 economy hot or cold?"]
  ]],

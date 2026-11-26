@@ -18,6 +18,7 @@ For every release:
 import datetime as dt, json, os, random, re, string, sys, time
 import requests
 from fred_first_print import first_prints
+from busy_days import mark
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 def path_(f): return os.path.join(HERE, f)
@@ -193,6 +194,7 @@ for key, name, tab, title, what, band, unit, dec in RELEASES:
     rows.sort(key=lambda r: r["d"], reverse=True)
     rels[key] = {"tab": tab, "title": title, "what": what, "band": band, "u": unit, "dec": dec, "rows": rows}
 
+mark(rels)
 first5 = min([k.split("|")[1] for k in reps] or ["2026-10-27"])
 out = {"asof": NOW.strftime("%Y-%m-%dT%H:%MZ"), "generated": NOW.strftime("%Y-%m-%dT%H:%M:%SZ"), "markets": {k: {x: v for x, v in m.items() if x != "tv"} for k, m in MARKETS.items()},
        "releases": rels, "replays": reps, "intraday_from": first5, "problems": problems}

@@ -97,6 +97,9 @@ td.l small{color:var(--muted);margin-left:4px}
 .fate{font-size:12px}.fate.k,.fate.h{color:var(--text)}.fate.f{color:var(--muted)}.fate.s{color:var(--dim)}
 .upc{color:var(--up)}.dnc{color:var(--down)}.flc{color:var(--muted)}
 .show-s{display:none}.show-s small{display:block;font-size:10.5px;color:var(--muted)}
+.bz{display:inline-block;width:15px;height:15px;line-height:15px;text-align:center;border-radius:50%;background:var(--down);color:var(--bg);font-size:10px;font-weight:700;margin-left:6px;vertical-align:1px;cursor:help}
+.cau{font-size:13px;color:var(--text2);border-left:3px solid var(--down);padding:4px 10px;margin:-4px 0 12px;max-width:90ch}.cau b{color:var(--text);font-weight:500}
+.note{font-size:13px;color:var(--text2);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:-4px 0 12px;max-width:90ch}.note b{color:var(--text);font-weight:500}
 .i5{font-size:9.5px;font-weight:700;letter-spacing:.05em;border:1px solid var(--line);border-radius:4px;padding:1px 4px;margin-left:6px;color:var(--muted);vertical-align:1px}
 /* explainer + source */
 .how,.srcd{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 18px;margin:0 0 14px;font-size:14px;color:var(--text2)}
@@ -115,7 +118,10 @@ details[open]>summary:before{transform:rotate(45deg)}
 @media (max-width:900px){.two{grid-template-columns:1fr}.g3{grid-template-columns:1fr}}
 @media (max-width:560px){
  .hide-s{display:none}.show-s{display:table-cell}
- .i5{display:block;width:fit-content;margin:3px 0 0}
+ .bz{display:inline-block;width:15px;height:15px;line-height:15px;text-align:center;border-radius:50%;background:var(--down);color:var(--bg);font-size:10px;font-weight:700;margin-left:6px;vertical-align:1px;cursor:help}
+.cau{font-size:13px;color:var(--text2);border-left:3px solid var(--down);padding:4px 10px;margin:-4px 0 12px;max-width:90ch}.cau b{color:var(--text);font-weight:500}
+.note{font-size:13px;color:var(--text2);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:-4px 0 12px;max-width:90ch}.note b{color:var(--text);font-weight:500}
+.i5{display:block;width:fit-content;margin:3px 0 0}
  .ctl .lbl{width:100%}
  .seg button{padding:7px 10px;font-size:12.5px}
  .card{padding:12px 12px}
@@ -136,7 +142,7 @@ details[open]>summary:before{transform:rotate(45deg)}
 <p class="sub">Replay how markets moved after big US data releases, then see how often the first day's move held, kept going or faded. Every past release is split by whether the number came in above, in line with or below forecast, because markets react to the surprise, not the number itself.</p>
 <div class="ctl"><span class="lbl">Release</span><div class="seg" id="relS"></div></div>
 <div class="ctl"><span class="lbl">Market</span><div class="seg" id="mktS"></div></div>
-<div class="ctl"><span class="lbl">History</span><div class="seg" id="perS"><button data-v="all" class="on">Since 2015</button><button data-v="3y">Last 3 years</button></div></div>
+<div class="ctl"><span class="lbl">History</span><div class="seg" id="perS"><button data-v="all" class="on">Since 2015</button><button data-v="3y">Last 3 years</button></div><div class="seg" id="busyS"><button data-v="all" class="on">All release days</button><button data-v="quiet">Leave out busy days</button></div></div>
 <p class="what" id="what"></p>
 <p class="warn" id="warn" hidden></p>
 
@@ -145,6 +151,7 @@ details[open]>summary:before{transform:rotate(45deg)}
 <div class="card" id="one" data-nogloss>
  <div class="ch2"><h2 id="oneT">Latest release</h2><small id="oneW"></small></div>
  <div class="rel" id="oneR"></div>
+ <div id="oneX"></div>
  <div class="two">
   <div class="pane">
    <div class="pr"><div><h3>Release day, every 5 minutes</h3><p class="cap" id="dayCap"></p></div><button class="play" id="play1" type="button">Play</button></div>
@@ -178,6 +185,7 @@ details[open]>summary:before{transform:rotate(45deg)}
   <li><b>Day 1 move.</b> From the market's last close <i>before</i> the release to its close on release day. US data comes out at 13:30 London (12:30 when the US and UK clocks are out of step), so day 1 covers the reaction and the rest of that session. S&amp;P 500 futures, the dollar index and gold are in %; the 10-year yield is in basis points (1bp = 0.01 percentage points).</li>
   <li><b>The next 10 days.</b> The same starting point, measured to each of the next 10 closes. The dashed line is the median (middle) path of every past release with the same kind of surprise; the shaded band holds the middle half of them.</li>
   <li><b>Held, kept going or faded.</b> We compare the move after 5 trading days with the day 1 move. <b>Kept going</b>: same direction and bigger. <b>Held</b>: same direction and at least half of it still there. <b>Faded</b>: less than half left, or it reversed. Day 1 moves smaller than <span id="minTxt"></span> are left out as too small to call. Same rule as the Earnings Moves page.</li>
+  <li><b>Busy days.</b> Marked <span class="bz" style="cursor:default">!</span> in the table: a Fed decision later the same day, or another release on this page out at the same time. Use <b>Leave out busy days</b> to drop them from every number on the page.</li>
   <li><b>Rose on the day.</b> The share of releases where the market closed higher on release day than the close before. For the 10-year yield, "rose" means the yield went up (bond prices went down).</li>
  </ol>
  <p class="ex" id="ex"></p>
@@ -205,7 +213,7 @@ details[open]>summary:before{transform:rotate(45deg)}
    d = date (UTC), t = time (UTC), a = actual, f = forecast, g = above / inline / below forecast,
    m[market] = moves from the last close before the release to each of the next 10 closes (% or bp),
    r = 1 when a 5-minute replay exists in replays["key|date"] (moves from the release time, every 5 min, -60 to +480 min). */
-var CW={d:560,n:440,g:320},DATA,REL="cpi",MKT="y10",PER="all",SEL=null;
+var CW={d:560,n:440,g:320},DATA,REL="cpi",MKT="y10",PER="all",BUSY="all",SEL=null;
 var $=function(i){return document.getElementById(i)};
 var GN={above:"Above forecast",inline:"In line",below:"Below forecast"};
 var MK=["es","y10","dxy","gold"];
@@ -215,7 +223,7 @@ function col(v,k){k=k||MKT;if(v==null||Math.abs(v)<1e-9)return"flc";var up=v>0;i
 function colv(v,k){var c=col(v,k);return c==="upc"?"var(--up)":c==="dnc"?"var(--down)":"var(--muted)"}
 function fv(v){var R=DATA.releases[REL];return (R.u==="k"?Math.round(v)+"k":v.toFixed(R.dec)+(R.u==="%"?"%":R.u===" pts"?"":""))}
 function ldn(d,t,o){return new Date(d+"T"+(t||"12:00")+":00Z").toLocaleString("en-GB",Object.assign({timeZone:"Europe/London"},o)).replace("Sept","Sep")}
-function rows(){var R=DATA.releases[REL].rows,cut=PER==="3y"?"2022-11-25":"0";return R.filter(function(r){return r.d>=cut&&r.m[MKT]&&r.m[MKT].length})}
+function rows(){var R=DATA.releases[REL].rows,cut=PER==="3y"?"2022-11-25":"0";return R.filter(function(r){return r.d>=cut&&r.m[MKT]&&r.m[MKT].length&&!(BUSY==="quiet"&&r.x)})}
 function fate(r){var p=r.m[MKT];if(!p||p.length<5)return null;var a=p[0],b=p[4];if(Math.abs(a)<M().min)return"s";
  if(a*b>0&&Math.abs(b)>Math.abs(a))return"k";if(a*b>0&&Math.abs(b)>=0.5*Math.abs(a))return"h";return"f"}
 var FW={k:"Kept going",h:"Held",f:"Faded",s:"Too small"};
@@ -273,13 +281,14 @@ function render(){
  var nm=m.u==="bp"?"the 10-year yield":m.name==="Gold"?"gold":m.name==="US dollar index"?"the dollar":"S&P 500 futures";
  var rn={cpi:"core CPI",nfp:"payrolls",pce:"core PCE",rs:"retail sales",ism:"the ISM services index",gdp:"GDP"}[REL];
  var held=S.above.c+S.below.c?pc(S.above.k+S.above.h+S.below.k+S.below.h,S.above.c+S.below.c):"–";
- $("hl").innerHTML='<span class="lbl">'+R.tab+' · '+m.name+' · '+Ls.length+' releases '+(PER==="3y"?"in the last 3 years":"since 2015")+'</span><b>When '+rn+' came in above forecast, '+nm+' '+dir(S.above)+'. Below forecast, it '+dir(S.below)+'.</b> <span>After five days the first move was still at least half there '+held+' of the time.</span>';
+ $("hl").innerHTML='<span class="lbl">'+R.tab+' · '+m.name+' · '+Ls.length+' releases '+(PER==="3y"?"in the last 3 years":"since 2015")+(BUSY==="quiet"?", busy days left out":"")+'</span><b>When '+rn+' came in above forecast, '+nm+' '+dir(S.above)+'. Below forecast, it '+dir(S.below)+'.</b> <span>After five days the first move was still at least half there '+held+' of the time.</span>';
  /* selected release card */
  var all=DATA.releases[REL].rows.filter(function(r){return r.m[MKT]});if(!SEL||SEL.k!==REL)SEL=all[0];SEL.k=REL;
  var latest=SEL===all[0];
  $("oneT").textContent=latest?"Latest release":"Selected release";
  $("oneW").textContent=ldn(SEL.d,SEL.t,{weekday:"short",day:"numeric",month:"short",year:"numeric"})+" · "+ldn(SEL.d,SEL.t,{hour:"2-digit",minute:"2-digit"})+" London";
  $("oneR").innerHTML='<span class="big">'+fv(SEL.a)+' <small>vs '+fv(SEL.f)+' forecast · '+SEL.p+'</small></span><span class="tag '+SEL.g+'">'+GN[SEL.g]+'</span>';
+ $("oneX").innerHTML=(SEL.x?'<p class="cau"><b>Busy day.</b> '+SEL.x.join(". ")+'. The day\'s close includes that too, so this move can\'t be pinned on this release alone.</p>':'')+(SEL.n?'<p class="note"><b>What else was going on.</b> '+SEL.n+'</p>':'');
  var rep=DATA.replays[REL+"|"+SEL.d];
  if(rep){var s=rep[MKT],at=function(i){for(var j=i;j>=12;j--)if(s[j]!=null)return s[j];return null},end=at(s.length-1);
   $("dayCap").textContent=m.name+": "+fm(at(13))+" in the first 5 minutes, "+fm(at(24))+" after an hour, "+fm(end)+" by "+new Date(new Date(SEL.d+"T"+SEL.t+":00Z").getTime()+8*3600e3).toLocaleTimeString("en-GB",{timeZone:"Europe/London",hour:"2-digit",minute:"2-digit"})+".";
@@ -302,7 +311,7 @@ function render(){
   '<div class="fk"><span>After 5 days:</span><span>Kept going <b>'+pc(s.k,s.c)+'</b></span><span>Held <b>'+pc(s.h,s.c)+'</b></span><span>Faded <b>'+pc(s.f,s.c)+'</b></span></div></div>'}).join("");
  /* table */
  $("thD1").textContent="Day 1";$("thD5").innerHTML=innerWidth<560?"Day 5":"After 5 days";
- $("tbody").innerHTML=Ls.map(function(r,i){var p=r.m[MKT],f=fate(r);return '<tr class="rw g-'+r.g+(r===SEL?" sel":"")+'" data-i="'+DATA.releases[REL].rows.indexOf(r)+'"><td>'+ldn(r.d,r.t,{day:"numeric",month:"short",year:"2-digit"})+(r.r?'<span class="i5">5-MIN</span>':'')+'</td><td class="hide-s">'+r.p+'</td><td class="hide-s"'+(r.tv!=null?' title="First announced. Later revised to '+fv(r.tv)+'"':'')+'>'+fv(r.a)+(r.tv!=null?'<sup style="color:var(--muted)">r</sup>':'')+'</td><td class="hide-s">'+fv(r.f)+'</td><td class="show-s">'+fv(r.a)+' vs '+fv(r.f)+'<small>'+GN[r.g]+'</small></td><td class="l hide-s">'+GN[r.g]+'</td><td class="'+col(p[0])+'">'+fm(p[0])+'</td><td class="'+col(p[4])+'">'+(p.length>=5?fm(p[4]):"–")+'</td><td class="l hide-s"><span class="fate '+(f||"s")+'">'+(f?FW[f]:"Not yet")+'</span></td></tr>'}).join("");
+ $("tbody").innerHTML=Ls.map(function(r,i){var p=r.m[MKT],f=fate(r);return '<tr class="rw g-'+r.g+(r===SEL?" sel":"")+'" data-i="'+DATA.releases[REL].rows.indexOf(r)+'"><td>'+ldn(r.d,r.t,{day:"numeric",month:"short",year:"2-digit"})+(r.x?'<span class="bz" title="'+r.x.join(". ")+'">!</span>':'')+(r.r?'<span class="i5">5-MIN</span>':'')+'</td><td class="hide-s">'+r.p+'</td><td class="hide-s"'+(r.tv!=null?' title="First announced. Later revised to '+fv(r.tv)+'"':'')+'>'+fv(r.a)+(r.tv!=null?'<sup style="color:var(--muted)">r</sup>':'')+'</td><td class="hide-s">'+fv(r.f)+'</td><td class="show-s">'+fv(r.a)+' vs '+fv(r.f)+'<small>'+GN[r.g]+'</small></td><td class="l hide-s">'+GN[r.g]+'</td><td class="'+col(p[0])+'">'+fm(p[0])+'</td><td class="'+col(p[4])+'">'+(p.length>=5?fm(p[4]):"–")+'</td><td class="l hide-s"><span class="fate '+(f||"s")+'">'+(f?FW[f]:"Not yet")+'</span></td></tr>'}).join("");
  /* explainer bits */
  $("bandTxt").textContent=R.band?"Counted as in line when within "+(R.u==="k"?R.band+"k jobs":R.band+(R.u==="%"?" percentage points":" points"))+" of the forecast.":"Counted as in line only when it matches the forecast to the decimal place published.";
  $("minTxt").textContent="0.4% for S&P 500 futures and gold, 0.15% for the dollar index and 2bp for the 10-year yield (about a third of a typical day for each)";
@@ -314,7 +323,7 @@ function segs(){
 }
 function on(id,fn){$(id).onclick=function(e){var v=e.target.getAttribute("data-v");if(!v)return;fn(v);[].forEach.call(this.children,function(b){b.classList.toggle("on",b===e.target)});render()}}
 fetch("data.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(d){DATA=d;segs();
- on("relS",function(v){REL=v;SEL=null});on("mktS",function(v){MKT=v});on("perS",function(v){PER=v});
+ on("relS",function(v){REL=v;SEL=null});on("mktS",function(v){MKT=v});on("perS",function(v){PER=v});on("busyS",function(v){BUSY=v});
  $("mini").onclick=function(e){var c=e.target.closest("[data-k]");if(!c)return;MKT=c.getAttribute("data-k");segs();render()};
  $("tbody").onclick=function(e){var tr=e.target.closest("tr");if(!tr)return;SEL=DATA.releases[REL].rows[+tr.getAttribute("data-i")];SEL.k=REL;render();$("one").scrollIntoView({behavior:"smooth",block:"start"})};
  $("play1").onclick=function(){sweep(["cpDr"],46,CW.d,4000)};
