@@ -182,6 +182,18 @@ def main():
         return 0
     events.sort(key=lambda e: (e["t"], -e["imp"], e["c"], e["name"]))
     data = {"week_start": start.strftime("%Y-%m-%d"), "source": used, "countries": COUNTRIES, "events": events}
+    # The following week's releases too (names and times only; most have no consensus yet), so the
+    # homepage "Next big release" tile is never empty late on a Friday. The homepage picks the big ones.
+    # Only TradingView can look ahead; if it fails, keep what was saved before.
+    try:
+        ahead = [e for e in map(tidy, fetch_tradingview(end, end + timedelta(days=7))) if not NOISE.search(e["name"])]
+        ahead.sort(key=lambda e: (e["t"], -e["imp"], e["c"], e["name"]))
+        data["next_week"] = [{k: e[k] for k in ("t", "c", "name", "imp")} for e in ahead]
+    except Exception as ex:
+        print("warning: next week:", ex)
+        if os.path.exists(OUT):
+            with open(OUT) as f:
+                data["next_week"] = json.load(f).get("next_week", [])
     old, old_checked, old_fetched = None, None, None
     if os.path.exists(OUT):
         with open(OUT) as f:
