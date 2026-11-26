@@ -15,7 +15,7 @@ var STEPS=[
   pts:[
    ["#next","<b>Next up</b> shows the next big release, its time (London) and the consensus: the average forecast from economists."],
    ["#chips","<b>Countries</b> opens a list: tick one or more economies, such as the US or the UK, to narrow the calendar. It starts on all countries."],
-   ["#dayt","<b>Pick a day</b> with the arrows (or your arrow keys), jump to yesterday, today or tomorrow, or see all days. It covers the last five working days to the next five, and points you to the busiest days."],
+   ["#dayt","<b>Pick a day</b> with the arrows (or your arrow keys), jump to yesterday, today or tomorrow, or see all days. It covers the last five working days to the next five."],
    ["#seg","<b>Key releases</b> shows only the market movers. Key + medium adds the smaller ones."],
    ["#days","<b>Click any release</b> to see what it measures and why markets care."],
    ["#days","<b>Result</b> appears once a number lands and shows how far it was from the consensus. A big miss is what moves markets."]],
