@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Volatility Monitor</title>
+<meta name="description" content="How nervous are markets? VIX, MOVE, VSTOXX, oil, gold and currency volatility against their past year.">
+<script>try{var t=localStorage.getItem("ict-theme");if(t?t==="light":matchMedia("(prefers-color-scheme: light)").matches)document.documentElement.classList.add("light")}catch(e){}</script>
+<style>
+:root{--bg:#050505;--card:#100F0E;--line:#26231F;--text:#F5F1E8;--text2:#CFC9BC;--muted:#8F897E;--dim:#625D55;--accent:#F5F1E8;--onaccent:#050505;--slot:#1A1816;
+ --calm:#B8F23C;--mid:#8F897E;--elev:#F2B23C;--stress:#FF5A4D;--calmr:184,242,60;--midr:143,137,126;--elevr:242,178,60;--stressr:255,90,77;--up:#B8F23C;--down:#FF5A4D;color-scheme:dark}
+:root.light{--bg:#F5F1E8;--card:#FBF9F3;--line:#E0D9CA;--text:#050505;--text2:#38342E;--muted:#6B655A;--dim:#A29B8E;--accent:#050505;--onaccent:#F5F1E8;--slot:#EDE7DA;
+ --calm:#467300;--mid:#8F897E;--elev:#B36B00;--stress:#B8322A;--calmr:70,115,0;--midr:143,137,126;--elevr:179,107,0;--stressr:184,50,42;--up:#467300;--down:#B8322A;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text2);font-family:"AP Display",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+body:before{content:"";position:fixed;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#C42424,#550202);z-index:20}
+a{color:inherit}
+.top{display:flex;align-items:center;gap:8px;margin:0 0 22px}
+.logo{display:block;width:150px;height:auto;margin:0 auto 0 0}
+:root.light .logo{filter:invert(1) hue-rotate(180deg)}
+.theme{appearance:none;display:inline-flex;align-items:center;justify-content:center;flex:none;width:30px;height:30px;padding:0;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text2);cursor:pointer}
+.theme svg{width:15px;height:15px}
+.i-moon{display:none}:root.light .i-sun{display:none}:root.light .i-moon{display:block}
+.err{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;color:var(--text)}
+.wrap{max-width:1100px;margin:0 auto;padding:8px 16px 40px}
+h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--text);letter-spacing:-.01em;font-weight:700}
+.sub{color:var(--muted);font-size:15px;margin:0 0 22px;max-width:62ch}
+.lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.guide{display:inline-block;font-size:12px;border:1px solid var(--line);border-radius:99px;padding:4px 11px;margin:-12px 0 22px;color:var(--text2)}
+/* top: overall gauge + headline */
+.hero{display:grid;grid-template-columns:300px minmax(0,1fr);gap:16px;margin:0 0 16px}
+.dial{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px 12px;text-align:center}
+.dial svg{width:100%;max-width:260px;height:auto;display:block;margin:4px auto 0}
+.dial .v{font-size:30px;font-weight:700;color:var(--text);margin-top:2px;font-variant-numeric:tabular-nums}
+.dial .w{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.dial .n{font-size:12px;color:var(--muted);margin-top:4px}
+.hl{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+.hl p{margin:0;font-size:clamp(18px,2.3vw,22px);line-height:1.3;color:var(--text);max-width:60ch}
+.hl p b{font-weight:500}.hl p span{font-weight:300;color:var(--text2)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:7px;font-size:13px;padding:5px 10px;border-radius:99px;background:rgba(var(--c),.13);color:var(--text);border:1px solid rgba(var(--c),.35)}
+.chip i{width:8px;height:8px;border-radius:99px;background:rgb(var(--c))}
+.chip b{font-variant-numeric:tabular-nums}
+.leg{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--muted);margin-top:auto}
+.leg span{display:inline-flex;align-items:center;gap:6px}.leg i{width:18px;height:8px;border-radius:3px}
+/* section */
+.sec{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:26px 0 10px}
+.sec h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:700}
+.sec small{font-size:12px;color:var(--dim)}
+/* gauge cards */
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.g .grp{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+.g{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 15px 12px;position:relative;overflow:hidden;min-width:0}
+.g:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:rgb(var(--c))}
+.g .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.g .nm{min-width:0}
+.g .nm b{display:block;color:var(--text);font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g .nm small{display:block;font-size:11.5px;color:var(--muted)}
+.tag{flex:none;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border-radius:5px;background:rgba(var(--c),.16);color:rgb(var(--c))}
+.g .fig{display:flex;align-items:baseline;gap:10px;margin:8px 0 2px}
+.g .fig b{font-size:28px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.g .fig span{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.upc{color:var(--up)}.dnc{color:var(--down)}.flc{color:var(--muted)}
+.g .pc{font-size:12.5px;color:var(--text2);margin:0 0 8px}.g .pc b{color:var(--text)}
+/* 1-year range bar: coloured by where in the year's range */
+.rng{position:relative;height:12px;margin-top:22px!important;border-radius:99px;background:linear-gradient(90deg,rgba(var(--calmr),.85) 0%,rgba(var(--midr),.55) 35%,rgba(var(--midr),.55) 62%,rgba(var(--elevr),.9) 80%,rgba(var(--stressr),.95) 100%);margin:16px 0 4px}
+.rng .now{position:absolute;top:-6px;width:4px;height:24px;margin-left:-2px;border-radius:2px;background:var(--text);box-shadow:0 0 0 2px var(--card)}
+.rng .wk{position:absolute;top:-3px;width:0;height:0;margin-left:-5px;border:5px solid transparent;border-top:6px solid var(--muted);top:-9px}
+.rng .now:after{content:attr(data-v);position:absolute;bottom:26px;left:50%;transform:translateX(-50%);font-size:10.5px;color:var(--text);font-weight:700;white-space:nowrap}
+.rl{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.spark{display:block;width:100%;height:52px;margin:10px 0 6px}
+.mean{font-size:12.5px;color:var(--text2);border-top:1px solid var(--line);padding-top:8px;margin-top:4px}
+.mean b{color:var(--text);font-weight:700}
+.rv{font-size:11px;color:var(--elev);margin:-2px 0 4px;letter-spacing:.02em}
+.missing{opacity:.75}.missing .fig b{font-size:18px;color:var(--muted)}
+/* heat map */
+.heat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px 14px;overflow-x:auto}
+.hr{display:grid;grid-template-columns:150px minmax(0,1fr) 48px;align-items:center;gap:10px;padding:4px 0}
+.hr b{font-size:13px;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cells{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:2px;height:20px}
+.cells i{border-radius:2px}
+.hr span{font-size:12px;text-align:right;font-variant-numeric:tabular-nums;color:var(--text)}
+.hx{display:grid;grid-template-columns:150px minmax(0,1fr) 48px;gap:10px;font-size:11px;color:var(--muted);margin-top:6px}
+.hx div{display:flex;justify-content:space-between}
+/* explainer + source */
+details{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 18px;margin:14px 0 0;font-size:14px;color:var(--text2)}
+details>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+details>summary::-webkit-details-marker{display:none}
+details>summary:before{content:"";width:7px;height:7px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:rotate(-45deg);flex:none}
+details[open]>summary:before{transform:rotate(45deg)}
+details[open]>summary{margin-bottom:10px}
+details ol{margin:0;padding-left:20px;max-width:80ch}details li{margin:0 0 7px}details li b{color:var(--text);font-weight:500}
+.ex{margin:10px 0 0;padding:10px 12px;border-left:3px solid var(--accent);background:var(--bg);border-radius:6px;font-variant-numeric:tabular-nums}.ex b{color:var(--text)}
+.srcbox{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px 18px;font-size:13px;color:var(--text)}
+.srcbox span{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}.hero{grid-template-columns:1fr}.dial{display:grid;grid-template-columns:170px 1fr;align-items:center;text-align:left;gap:6px 14px}.dial .lbl{grid-column:1/-1}.dial svg{margin:0}.dial .v{margin-top:0}}
+@media(max-width:560px){.sec small{display:none}.grid{grid-template-columns:1fr}.hr,.hx{grid-template-columns:96px minmax(0,1fr) 40px;gap:8px}.hr b{font-size:12px}.dial{grid-template-columns:140px 1fr}.g .fig b{font-size:26px}}
+</style>
+<script src="../nav.js" defer></script>
+<link rel="stylesheet" href="../brand/brand.css">
+</head>
+<body>
+<div class="wrap">
+<div class="top"><img class="logo" alt="Alpha Pulse" src="../brand/logo/bar-paper.svg"><button class="theme" id="theme" type="button" aria-label="Switch light/dark"><svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg><svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1z"/></svg></button></div>
+<h1>Volatility Monitor</h1>
+<p class="sub">How nervous are markets? Each gauge shows how big a move traders are paying to protect against, and how that compares with the past year. Red means stressed, green means calm.</p>
+<div class="err" id="err" hidden>The latest volatility data could not be loaded. Please try again in a few minutes.</div>
+<div id="main" hidden>
+
+<div class="hero">
+  <div class="dial" id="dialc">
+    <div class="lbl">Market stress today</div>
+    <svg id="dial" viewBox="0 0 200 116"></svg>
+    <div><div class="v" id="dv"></div><div class="w" id="dw"></div><div class="n">Average of the 7 option-based gauges, from 0 (calmest day of the past year) to 100 (most stressed). Currencies are left out.</div></div>
+  </div>
+  <div class="hl" id="hlbox">
+    <div class="lbl" id="asof"></div>
+    <p id="head"></p>
+    <div class="chips" id="chips"></div>
+    <div class="leg">
+      <span><i style="background:rgb(var(--calmr))"></i>Calm · bottom quarter of the year</span>
+      <span><i style="background:rgb(var(--midr))"></i>Mid-range</span>
+      <span><i style="background:rgb(var(--elevr))"></i>Elevated · top quarter</span>
+      <span><i style="background:rgb(var(--stressr))"></i>Stressed · top 10%</span>
+    </div>
+  </div>
+</div>
+
+<div id="groups"></div>
+
+<div class="sec" id="heath"><h2>Stress over the past 3 months</h2><small>each square is one trading day</small></div>
+<div class="heat" id="heat"></div>
+
+<details id="how"><summary>How the numbers are worked out</summary>
+<ol>
+<li><b>What the gauges are.</b> Each one is an index built from option prices. Options are insurance against price moves, so when traders fear a big move they pay more for them, and the index rises. The number is the move traders expect over the next month, quoted as a yearly figure. VIX 20 means the S&amp;P 500 is expected to move about 20% over a year.</li>
+<li><b>Expected daily move.</b> To turn the yearly figure into a day, divide by 15.87 (the square root of 252 trading days). VIX 20 → about ±1.3% a day. For MOVE the result is in basis points of Treasury yield, not %.</li>
+<li><b>Where it sits in its year.</b> We take every daily close of the past 12 months (about 252 days) and count how many were lower than today. 90 of 100 lower = "higher than 90% of the past year". That is the percentile, and it sets the colour: under 25 calm, 25 to 75 mid-range, 75 to 90 elevated, above 90 stressed.</li>
+<li><b>The range bar.</b> Left end = lowest close of the past year, right end = highest. The white mark is today, the small grey arrow is one week ago.</li>
+<li><b>Currencies are different.</b> There is no free feed of currency option prices, so for now these three gauges use <b>realised</b> volatility: how much the pair actually moved over the last 21 trading days (standard deviation of daily % changes × 15.87). It looks backwards, while the others look forwards. A paid feed (CME CVOL) would swap in implied FX vol later.</li>
+<li><b>Market stress today.</b> The simple average of the percentiles of the option-based gauges (stocks, bonds, commodities). The currency gauges are left out because they measure past moves, not option prices, so mixing them in would blur the reading.</li>
+</ol>
+<div class="ex" id="ex"></div>
+</details>
+<details id="src"><summary>Source and updates</summary>
+<div class="srcbox">
+<div><span>Source</span>TradingView (Cboe, ICE and HSI indices, FX prices) and STOXX (VSTOXX), free</div>
+<div><span>Updates</span>Every 15 minutes, 07:00 to 22:00 London, weekdays. Cboe indices are 15 min delayed; VSTOXX is the previous close.</div>
+<div><span>Latest VIX close or level</span><b id="s1"></b></div>
+<div><span>Last refreshed</span><b id="s2"></b></div>
+</div>
+</details>
+</div>
+</div>
+
+<script>
+let DATA = null;
+const META = [
+ {k:"VIX",   grp:"Stocks", nm:"VIX", say:"VIX", sub:"S&P 500 · US stocks", unit:"%", what:"S&P 500"},
+ {k:"VXN",   grp:"Stocks", nm:"VXN", say:"Nasdaq vol", sub:"Nasdaq 100 · US tech", unit:"%", what:"Nasdaq 100"},
+ {k:"V2X",   grp:"Stocks", nm:"VSTOXX", say:"European stock vol", sub:"Euro Stoxx 50 · European stocks", unit:"%", what:"Euro Stoxx 50"},
+ {k:"VHSI",  grp:"Stocks", nm:"VHSI", say:"Hang Seng vol", sub:"Hang Seng · Hong Kong stocks", unit:"%", what:"the Hang Seng"},
+ {k:"MOVE",  grp:"Bonds",  nm:"MOVE", say:"Treasury vol", sub:"US Treasury yields", unit:"bp", what:"Treasury yields"},
+ {k:"EURUSD",grp:"Currencies", nm:"EUR/USD", sub:"Euro vs dollar", unit:"%", what:"EUR/USD", fx:true},
+ {k:"USDJPY",grp:"Currencies", nm:"USD/JPY", sub:"Dollar vs yen", unit:"%", what:"USD/JPY", fx:true},
+ {k:"GBPUSD",grp:"Currencies", nm:"GBP/USD", sub:"Pound vs dollar", unit:"%", what:"GBP/USD", fx:true},
+ {k:"OVX",   grp:"Commodities", nm:"Oil vol (OVX)", say:"oil vol", sub:"US crude oil", unit:"%", what:"crude oil"},
+ {k:"GVZ",   grp:"Commodities", nm:"Gold vol (GVZ)", say:"gold vol", sub:"Gold", unit:"%", what:"Gold"},
+];
+const BAND = p => p>=90?["Stressed","stressr"]:p>=75?["Elevated","elevr"]:p<25?["Calm","calmr"]:["Mid-range","midr"];
+const css = n => getComputedStyle(document.documentElement).getPropertyValue("--"+n).trim();
+const f1 = (x,d=1)=>x.toFixed(d);
+function stats(s){
+  const c=s.c, n=c.length, last=c[n-1], yr=c.slice(-252);
+  const lo=Math.min(...yr), hi=Math.max(...yr);
+  const pct = yr.slice(0,-1).filter(v=>v<last).length/(yr.length-1)*100;
+  return {last, prev:c[n-2], wk:c[n-6], lo, hi, pct, yr};
+}
+function pctAt(c,i){const w=c.slice(Math.max(0,i-251),i+1);const v=c[i];return w.slice(0,-1).filter(x=>x<v).length/Math.max(1,w.length-1)*100}
+// currencies: no free implied-vol feed, so use realised vol = st.dev of the last 21 daily % changes x sqrt(252)
+function realised(p){const r=[];for(let i=1;i<p.length;i++)r.push(Math.log(p[i]/p[i-1]));const c=[];for(let i=21;i<=r.length;i++){const w=r.slice(i-21,i),m=w.reduce((a,b)=>a+b,0)/21;c.push(Math.sqrt(w.reduce((a,b)=>a+(b-m)**2,0)/20*252)*100)}return {c}}
+// percentile shown as a whole number; 100 only when today really is the year's top level
+const P=st=>st.last>=st.hi?100:Math.min(99,Math.round(st.pct));
+const TODAY=new Date().toLocaleDateString("en-CA",{timeZone:"Europe/London"});
+const dayName=d=>new Date(d+"T12:00:00Z").toLocaleDateString("en-GB",{weekday:"short",timeZone:"UTC"});
+function render(){
+if(!DATA)return;
+const SER={};for(const m of META){const x=DATA.series[m.k];if(!x)continue;SER[m.k]=m.fx?Object.assign(realised(x.c),{d:x.d.slice(21)}):x}
+const out=[];
+for(const m of META){const s=SER[m.k]; if(s&&s.c&&s.c.length>60){m.s=s;m.st=stats(s);out.push(m)}}
+// dial
+// overall gauge: option-based (implied) gauges only; the realised FX gauges are left out so the two kinds are never mixed
+const impl=out.filter(m=>!m.fx), avg = impl.reduce((a,m)=>a+m.st.pct,0)/impl.length;
+(function(){
+  const sv=document.getElementById("dial"), cx=100, cy=100, r=80, seg=[[0,25,"calmr"],[25,75,"midr"],[75,90,"elevr"],[90,100,"stressr"]];
+  const pt=(p,rr)=>{const a=Math.PI*(1-p/100);return [cx+rr*Math.cos(a),cy-rr*Math.sin(a)]};
+  let h="";
+  for(const [a,b,c] of seg){const [x1,y1]=pt(a+.6,r),[x2,y2]=pt(b-.6,r);h+=`<path d="M${x1} ${y1} A${r} ${r} 0 0 1 ${x2} ${y2}" stroke="rgb(${css(c)})" stroke-width="16" fill="none" opacity=".9"/>`}
+  const [nx,ny]=pt(avg,r-24);
+  h+=`<line x1="${cx}" y1="${cy}" x2="${nx}" y2="${ny}" stroke="${css("text")}" stroke-width="4" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="7" fill="${css("text")}"/>`;
+  h+=`<text x="14" y="111" font-size="10" fill="${css("muted")}">0</text><text x="178" y="111" font-size="10" fill="${css("muted")}">100</text>`;
+  sv.innerHTML=h;
+  const [w,c]=BAND(avg);
+  document.getElementById("dv").textContent=Math.round(avg);
+  const dw=document.getElementById("dw");dw.textContent=w;dw.style.color=`rgb(${css(c)})`;
+})();
+// headline
+const byP=[...out].sort((a,b)=>b.st.pct-a.st.pct);
+const vix=out.find(m=>m.k==="VIX"), topG=byP[0], low=byP[byP.length-1];
+const em = m => m.st.last/Math.sqrt(m.oneday?1:252);
+// Headline: lead with what stands out (one-year highs / top 10%), then translate VIX into a daily S&P move against the year's average.
+// Currencies are realised vol, so they are left out of the headline.
+const opt=out.filter(m=>!m.fx), say=m=>m.say||m.nm;
+const list=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
+const isHi=m=>m.st.last>=m.st.hi, hi=opt.filter(isHi).map(say), top10=opt.filter(m=>m.st.pct>=90&&!isHi(m)).map(say);
+const lo=opt.filter(m=>m.st.pct<=10).map(say);
+let s1;
+if(hi.length) s1=`${cap(list(hi))} ${hi.length>1?"are at one-year highs":"is at a one-year high"}${top10.length?`; ${list(top10)} ${top10.length>1?"are":"is"} in the top 10% of ${top10.length>1?"their":"its"} year`:""}.`;
+else if(top10.length) s1=`${cap(list(top10))} ${top10.length>1?"are":"is"} in the top 10% of ${top10.length>1?"their":"its"} one-year range.`;
+else if(lo.length) s1=`${cap(list(lo))} ${lo.length>1?"are":"is"} near one-year lows.`;
+else s1=`No gauge is near a one-year extreme. VIX is at ${f1(vix.st.last)}.`;
+const vAvg=vix.st.yr.reduce((a,b)=>a+b,0)/vix.st.yr.length;
+document.getElementById("head").innerHTML=`<b>${s1}</b> <span>Options are pricing S&amp;P 500 swings of about ±${f1(vix.st.last/15.87)}% a day, against ±${f1(vAvg/15.87)}% on an average day this year.</span>`;
+document.getElementById("chips").innerHTML = byP.filter(m=>!m.fx).slice(0,5).map(m=>{const [w,c]=BAND(m.st.pct);return `<span class="chip" style="--c:var(--${c})"><i></i>${m.nm} <b>${P(m.st)}</b></span>`}).join("");
+const ran=new Date(DATA.asof), ldn=o=>ran.toLocaleString("en-GB",Object.assign({timeZone:"Europe/London"},o));
+const stamp=ldn({weekday:"short",day:"numeric",month:"short"})+", "+ldn({hour:"2-digit",minute:"2-digit"})+" London";
+const old=(Date.now()-ran)/36e5>3;
+const asofEl=document.getElementById("asof");asofEl.textContent=`Latest levels · ${stamp}`;asofEl.style.color=old?"var(--down)":"";
+const vd=vix.s.d[vix.s.d.length-1];
+document.getElementById("s1").textContent=(vd===TODAY?"Today, ":dayName(vd)+" close, ")+f1(vix.st.last);
+const s2=document.getElementById("s2");s2.textContent=stamp;s2.style.color=old?"var(--down)":"";
+// cards
+function spark(m){
+  const c=m.st.yr, W=300,H=52, lo=m.st.lo, hi=m.st.hi, y=v=>H-3-(v-lo)/(hi-lo||1)*(H-6);
+  const sorted=[...c].sort((a,b)=>a-b), q=p=>sorted[Math.floor(p*(sorted.length-1))];
+  const bands=[[lo,q(.25),"calmr",.12],[q(.75),q(.9),"elevr",.14],[q(.9),hi,"stressr",.18]];
+  let h=bands.map(([a,b,cc,o])=>`<rect x="0" width="${W}" y="${y(b)}" height="${Math.max(0,y(a)-y(b))}" fill="rgb(${css(cc)})" opacity="${o}"/>`).join("");
+  const d=c.map((v,i)=>`${i?"L":"M"}${(i/(c.length-1)*W).toFixed(1)} ${y(v).toFixed(1)}`).join("");
+  const [,bc]=BAND(m.st.pct);
+  h+=`<path d="${d}" fill="none" stroke="${css("text2")}" stroke-width="1.3" vector-effect="non-scaling-stroke"/>`;
+  h+=`<circle cx="${W}" cy="${y(c[c.length-1])}" r="3.5" fill="rgb(${css(bc)})"/>`;
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${h}</svg>`;
+}
+function card(m){
+  const st=m.st,[w,c]=BAND(st.pct), ch=st.last-st.prev, chp=ch/st.prev*100;
+  const pos=v=>((v-st.lo)/(st.hi-st.lo||1)*100).toFixed(1);
+  const cls = ch>0?"dnc":ch<0?"upc":"flc"; // vol rising = more fear, shown in red
+  const dm = em(m);
+  const mean = m.fx
+   ? `Over the last 21 trading days ${m.what} actually moved about <b>±${f1(dm,2)}% a day</b>.`
+   : m.unit==="bp"
+   ? `Traders expect US Treasury yields to move about <b>±${f1(dm)}bp a day</b>.`
+   : m.oneday ? `Traders expect the S&amp;P 500 to move about <b>±${f1(st.last/15.87)}%</b> in the next session.`
+   : `Traders expect ${m.what} to move about <b>±${f1(dm,2)}% a day</b>, or ±${f1(st.last/3.46)}% over a month.`;
+  return `<div class="g" style="--c:var(--${c})">
+   <div class="grp">${m.grp}</div><div class="top"><div class="nm"><b>${m.nm}</b><small>${m.sub}</small></div><span class="tag">${w}</span></div>
+   <div class="fig"><b>${f1(st.last)}</b><span class="${cls}">${ch>=0?"+":"−"}${f1(Math.abs(ch),2)} (${chp>=0?"+":"−"}${f1(Math.abs(chp))}%) ${m.s.d[m.s.d.length-1]===TODAY?"today":"on "+dayName(m.s.d[m.s.d.length-1])}</span></div>
+   ${m.fx?'<div class="rv">Realised vol: past moves, not option prices</div>':""}<div class="pc">${st.last>=st.hi?"<b>Highest</b> level of the past year":st.last<=st.lo?"<b>Lowest</b> level of the past year":`Higher than <b>${P(st)}%</b> of the past year`}</div>
+   <div class="rng"><span class="wk" style="left:${pos(st.wk)}%" title="1 week ago"></span><span class="now" style="left:${pos(st.last)}%" data-v="${f1(st.last)}"></span></div>
+   <div class="rl"><span>Year low ${f1(st.lo)}</span><span>Year high ${f1(st.hi)}</span></div>
+   ${spark(m)}
+   <div class="mean">${mean}</div></div>`;
+}
+let gh=`<div class="sec"><h2>The gauges</h2><small>stocks · bonds · currencies · commodities</small></div><div class="grid">${out.map(card).join("")}</div>`;
+document.getElementById("groups").innerHTML=gh;
+// heat map
+let hh="";
+const N=63;
+for(const m of out){
+  const c=m.s.c, cells=[];
+  for(let i=c.length-N;i<c.length;i++){const p=pctAt(c,i);const [,cc]=BAND(p);cells.push(`<i style="background:rgb(${css(cc)});opacity:${(.35+.65*Math.abs(p-50)/50).toFixed(2)}" title="${Math.round(p)}"></i>`)}
+  hh+=`<div class="hr"><b>${m.nm}</b><div class="cells">${cells.join("")}</div><span>${P(m.st)}</span></div>`;
+}
+const vds=vix.s.d, t3=new Date(vds[Math.max(0,vds.length-N)]+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short"});
+hh+=`<div class="hx"><span></span><div><span>${t3}</span><span>latest</span></div><span>now</span></div>`;
+document.getElementById("heat").innerHTML=hh;
+// worked example
+const st=vix.st;
+document.getElementById("ex").innerHTML=`Worked example, VIX today: <b>${f1(st.last)}</b> ÷ 15.87 = <b>±${f1(st.last/15.87,2)}%</b> expected daily S&amp;P 500 move. Over the past year VIX closed between ${f1(st.lo)} and ${f1(st.hi)}; ${Math.round(st.pct*(st.yr.length-1)/100)} of the last ${st.yr.length-1} closes were lower than today, so it is ${st.last>=st.hi?"the <b>highest</b> level of the year":`higher than <b>${P(st)}%</b> of the year`} → <b>${BAND(st.pct)[0]}</b>.`;
+}
+
+/* Load data.json. The data job saves without rebuilding the website, so the copy on raw.githubusercontent.com
+   is tried first (newest); the site's own copy is the fallback. */
+function load(){
+ const urls=[],m=location.hostname.match(/^([^.]+)\.github\.io$/),seg=location.pathname.split("/")[1];
+ if(m&&seg)urls.push("https://raw.githubusercontent.com/"+m[1]+"/"+seg+"/main/vol-monitor/data.json?t="+Date.now());
+ urls.push("data.json?t="+Date.now());
+ Promise.all(urls.map(u=>fetch(u,{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null))).then(res=>{
+  res=res.filter(Boolean).sort((a,b)=>a.asof<b.asof?1:-1);
+  if(!res.length){document.getElementById("err").hidden=false;return}
+  DATA=res[0];document.getElementById("main").hidden=false;render();
+  if(/[?&]how/.test(location.search))document.getElementById("how").open=true;
+ });
+}
+document.getElementById("theme").onclick=function(){const l=document.documentElement.classList.toggle("light");try{localStorage.setItem("ict-theme",l?"light":"dark")}catch(e){}};
+new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:["class"]});
+load();
+</script>
+</body>
+</html>

@@ -180,9 +180,10 @@ h1{font-size:clamp(24px,4.4vw,34px);line-height:1.15;margin:0 0 8px;color:var(--
   <a class="go" href="calendar/?tour=1">Start the tour →</a>
  </div>
 
- <section class="sec"><div class="sech" role="button" tabindex="0" aria-expanded="true"><h2>Markets</h2><span class="tg">6 tools<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3"/></svg></span><p>What moved, by how much, and who drove it</p></div>
+ <section class="sec"><div class="sech" role="button" tabindex="0" aria-expanded="true"><h2>Markets</h2><span class="tg">7 tools<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3"/></svg></span><p>What moved, by how much, and who drove it</p></div>
   <div class="g3">
    <a class="c" href="cross-asset/"><h3>Cross-Asset Moves</h3><p>Stocks, yields, FX and commodities against a typical day</p><div class="lv" id="c-ca"><span class="wait">Loading…</span></div></a>
+   <a class="c" href="vol-monitor/"><h3>Volatility Monitor</h3><p>How nervous markets are, against the past year</p><div class="lv" id="c-vol"><span class="wait">Loading…</span></div></a>
    <a class="c" href="index-contribution-site/"><h3>Index Contribution</h3><p>Which stocks moved the S&amp;P 500, Nasdaq 100 and Dow</p><div class="lv" id="c-index"><span class="wait">Loading…</span></div></a>
    <a class="c" href="earnings-moves/"><h3>Earnings Moves</h3><p>The move options price for big US companies' results</p><div class="lv" id="c-earn"><span class="wait">Loading…</span></div></a>
    <a class="c" href="yield-curve/"><h3>Yield Curves</h3><p>US, German and UK government bond curves</p><div class="lv" id="c-yc"><span class="wait">Loading…</span></div></a>
@@ -268,6 +269,12 @@ function newest(f,ok){
 }
 var CA=newest("cross-asset/data.json",function(d){return d.rows&&d.rows.length});
 /* Last 48 hours of trading in 15-minute steps for the S&P 500 and Gold tiles (cross-asset/intraday.py, same 5-minute job). */
+/* Volatility Monitor card: VIX level and where it sits in its past year (same calculation as vol-monitor/index.html). */
+newest("vol-monitor/data.json",function(d){return d.series&&d.series.VIX}).then(function(d){
+ var c=d.series.VIX.c,yr=c.slice(-252),v=yr[yr.length-1],p=yr.slice(0,-1).filter(function(x){return x<v}).length/(yr.length-1)*100;
+ var w=p>=90?["Stressed","d"]:p>=75?["Elevated","nu"]:p<25?["Calm","u"]:["Mid-range","nu"];
+ $("c-vol").innerHTML="VIX <b>"+v.toFixed(1)+'</b> <span class="ch '+w[1]+'">'+w[0]+"</span><br>"+(v>=Math.max.apply(null,yr)?"Highest level of the past year":"Higher than <b>"+Math.min(99,Math.round(p))+"%</b> of the past year");
+}).catch(function(){fail("c-vol")});
 var ID=newest("cross-asset/intraday.json",function(d){return d.series});
 /* Units: "pct" = % move, "bp" = yield move in basis points, "pt" = points (VIX).
    Colours follow the Cross-Asset page: a rising yield shows red (bond prices fall), a falling yield green. */
