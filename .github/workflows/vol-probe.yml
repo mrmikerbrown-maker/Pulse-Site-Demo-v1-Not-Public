@@ -1,0 +1,12 @@
+name: vol-probe (temporary)
+on:
+  push:
+    branches: [claude/project-thread-klenjt]
+    paths: [vol-probe/probe.py, .github/workflows/vol-probe.yml]
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: python vol-probe/probe.py
