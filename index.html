@@ -341,13 +341,15 @@ CA.then(function(d){
 /* ---------- Calendar: next-release tile and card ----------
    Plain names and tiers come from release-names.js (shared with the calendar's "Next up" box). The tile shows
    tier 1 (genuinely market-moving); tier 2 only fills in if fewer than three tier-1 releases are ahead. The calendar
-   file also carries next week's releases (next_week), so the tile always has something coming up. */
+   file covers a rolling window up to 7 days ahead, so the tile always has something coming up. */
 var CAL=json("calendar/data/calendar.json").then(function(d){
- var all=(d.events||[]).concat(d.next_week||[]).filter(function(e){return e.t&&e.name}).map(relName).filter(function(r){return r.tier>0});
+ var all=(d.events||[]).filter(function(e){return e.t&&e.name}).map(relName).filter(function(r){return r.tier>0});
  /* one line per plain name and time: "German unemployment" covers its rate, change and NSA series */
  var seen={};all=all.filter(function(r){var k=r.t+"|"+r.name;if(seen[k])return false;return seen[k]=1});
  all.sort(function(a,b){return a.t<b.t?-1:a.t>b.t?1:a.tier-b.tier});
- all.weekEnd=Date.parse(d.week_start)+7*864e5;
+ /* end of this week = next Monday 00:00 London */
+ var n=new Date(),dow=(new Date(n.toLocaleString("en-US",{timeZone:"Europe/London"})).getDay()+6)%7,m=new Date(n.getTime()+(7-dow)*864e5);
+ all.weekEnd=Date.parse(m.toLocaleDateString("en-CA",{timeZone:"Europe/London"})+"T00:00:00Z");
  return all});
 var val=function(e,v){if(v==null)return"";var n=Math.round(v*1000)/1000,u=e.unit||"";return u==="%"?n+(e.scale||"")+"%":(n<0?"−":"")+u+Math.abs(n)+(e.scale||"")};
 var whenT=function(t){var dk=dayKey(t),now=Date.now();return (dk===dayKey(now)?"Today":dk===dayKey(now+864e5)?"Tomorrow":lon(t,{weekday:"short"}))+" "+hhmm(t)};

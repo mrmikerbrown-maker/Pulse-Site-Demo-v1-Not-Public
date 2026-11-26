@@ -1,9 +1,9 @@
-# This week's economic calendar
+# Economic calendar (rolling: last 5 working days, today, next 5)
 
 Live page: https://mrmikerbrown-maker.github.io/Pulse-Site-Demo-v1-Not-Public/calendar/
 
 - `index.html` — the page. Reads `data/calendar.json`. Times shown in London time.
-- `scripts/fetch.py` — fetches the week (Mon–Fri; from Saturday it loads the coming week).
+- `scripts/fetch.py` — fetches a rolling window, 7 days back to 7 days ahead (the page shows the last 5 working days, today and the next 5).
   Main source: TradingView's public calendar feed (actual, consensus, previous).
   Backup: the ForexFactory weekly feed (no actuals). No API key, no Claude tokens.
 - `.github/workflows/calendar.yml` (at the top of the repo) — runs the fetch every 15 minutes on weekdays (every 30 minutes overnight for Asia),

@@ -52,7 +52,7 @@ UA = "pulse-site-health-check"
 # ---------------------------------------------------------------------------------------------
 AREAS = [
     {"id": "home", "name": "Home page", "page": ""},
-    {"id": "calendar", "name": "This week (economic calendar)", "page": "calendar/",
+    {"id": "calendar", "name": "Economic calendar", "page": "calendar/",
      "workflows": ["calendar.yml"], "keep_running": "calendar.yml"},
     {"id": "index", "name": "Index Contribution", "page": "index-contribution-site/",
      "workflows": ["index-snapshot.yml", "index-spy.yml"]},
@@ -229,15 +229,12 @@ def data_checks(area_id, problems):
         d = get_json("calendar/data/calendar.json", problems, "Calendar data")
         if d:
             now = now_utc()
-            # The page shows Mon-Fri; from Saturday it switches to next week (fetch.py week_window).
-            day = now.date()
-            if day.weekday() >= 5:
-                day += timedelta(days=7 - day.weekday())
-            want = (day - timedelta(days=day.weekday())).isoformat()
-            grace = now.weekday() == 5 and now.hour < 6  # a few hours to roll over on Saturday
-            if d.get("week_start") != want and not grace:
-                problems.append(("week", "Calendar is still showing the week of %s (should be %s)" % (
-                    d.get("week_start"), want)))
+            # Rolling window (fetch.py window): from 7 days ago to 7 days ahead. It should roll each day.
+            want = (now.date() - timedelta(days=7)).isoformat()
+            grace = now.hour < 3  # a few hours to roll over after midnight
+            if d.get("window_start") != want and not grace:
+                problems.append(("week", "Calendar window starts %s (should be %s): it has not rolled forward" % (
+                    d.get("window_start"), want)))
             # Two different times in the file:
             #   "fetched" = the feed was last read OK (saved at least every 3 hours, even when nothing
             #               changed). If that's old, the fetch itself is broken.
