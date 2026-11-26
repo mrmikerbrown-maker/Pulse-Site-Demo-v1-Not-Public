@@ -61,6 +61,15 @@ var MORE=[
    ["#q","<b>Find a stock</b> by its ticker or name."],
    ["#upc","<b>Each row</b> shows the move options are pricing (±%) next to how far the shares moved after past reports. Click a row for the detail."]],
   tip:"If the options price a smaller move than the shares usually make, the market may be too relaxed about that report."},
+ {path:"vol-monitor/",name:"Volatility Monitor",
+  why:"Volatility is how much traders expect prices to swing. When it jumps, markets are nervous: moves get bigger and faster. This page shows how nervous each market is today, against its own past year.",
+  pts:[
+   ["#dialc","<b>Market stress today</b> rolls the option-based gauges into one number from 0 (calmest day of the past year) to 100 (most stressed)."],
+   ["#hlbox","<b>The headline</b> says which gauges stand out, and turns VIX into the daily S&amp;P 500 swing traders are pricing."],
+   [".g","<b>Each gauge</b> shows today's level, where it sits between its 1-year low and high, and the daily move it implies. Green is calm, red is stressed."],
+   ["#heath","<b>The heat map</b> shows each gauge day by day over the past 3 months, so you can see stress building or fading."],
+   ["#how","<b>How the numbers are worked out</b> explains every figure, with a live example. Currencies use past moves (realised vol), not option prices."]],
+  tip:"High volatility is not a signal to buy or sell. It means bigger swings either way, so positions can move against you faster."},
  {path:"yield-curve/",name:"Yield Curves",
   why:"A yield curve plots what a government pays to borrow for different lengths of time. Its shape tells you what markets expect for interest rates and growth.",
   pts:[

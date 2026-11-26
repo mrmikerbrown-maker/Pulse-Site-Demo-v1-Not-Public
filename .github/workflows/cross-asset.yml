@@ -3,6 +3,7 @@ name: "Cross-Asset Moves: update prices"
 # GitHub fires hourly schedules only a few times a day in practice, so each run keeps going for 5h50m
 # (refreshing every 5 minutes inside the window, idling outside it) and then starts the next run itself.
 # The hourly schedule is only a backup in case that chain ever breaks.
+# Also refreshes the Volatility Monitor (vol-monitor/build.py) every 15 minutes.
 # Saves skip the website rebuild (NO_PAGES): the page reads the newest data.json straight from the repo.
 on:
   schedule:
@@ -33,7 +34,9 @@ jobs:
               git pull -q --rebase --autostash origin "${GITHUB_REF_NAME}" || true
               python3 cross-asset/build.py || echo "update failed, will try again"
               python3 cross-asset/intraday.py || echo "homepage charts failed, will try again"
-              bash .github/save.sh "Update cross-asset prices" cross-asset/data.json cross-asset/typical.json cross-asset/intraday.json || true
+              # Volatility Monitor rides along every third round (every 15 minutes)
+              n=$(( ${n:-0} + 1 )); if [ $(( n % 3 )) -eq 1 ]; then python3 vol-monitor/build.py || echo "volatility monitor failed, will try again"; fi
+              bash .github/save.sh "Update cross-asset prices" cross-asset/data.json cross-asset/typical.json cross-asset/intraday.json vol-monitor/data.json || true
             fi
             [ $(( $(date +%s) + 300 )) -lt "$end" ] || break
             sleep 300

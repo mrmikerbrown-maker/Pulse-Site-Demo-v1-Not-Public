@@ -71,6 +71,8 @@ AREAS = [
      "extra_pages": ["cb-pricing/#fed"], "workflows": ["fed-scenario-planner.yml"]},
     {"id": "cross-asset", "name": "Cross-Asset Moves", "page": "cross-asset/",
      "workflows": ["cross-asset.yml"], "keep_running": "cross-asset.yml"},
+    {"id": "vol-monitor", "name": "Volatility Monitor", "page": "vol-monitor/",
+     "workflows": ["cross-asset.yml"]},
     {"id": "yield-curve", "name": "Yield Curves", "page": "yield-curve/",
      "workflows": ["yield-curve.yml"]},
     {"id": "positioning", "name": "Speculator Positioning", "page": "cftc-positioning/",
