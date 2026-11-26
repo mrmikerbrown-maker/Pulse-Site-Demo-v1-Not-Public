@@ -243,7 +243,7 @@ document.getElementById("seg").onclick=function(e){var b=e.target.closest("butto
 function fetchData(){
  fetch("data/calendar.json?"+Date.now(),{cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
   DATA=d;EV=d.events.map(prep);chips();draw();
-  document.getElementById("src").textContent="Source: "+(d.source==="TradingView"?"TradingView economic calendar":d.source+" weekly calendar (backup source, no actuals)")+". Last change "+sf.format(new Date(d.checked))+" London. Checked every 5 minutes on weekdays. Not investment advice."
+  document.getElementById("src").textContent="Source: "+(d.source==="TradingView"?"TradingView economic calendar":d.source+" weekly calendar (backup source, no actuals)")+". Last change "+sf.format(new Date(d.checked))+" London. Checked every 5 minutes on weekdays (a quiet night with no releases means no changes). Not investment advice."
  }).catch(function(){if(!DATA)document.getElementById("days").innerHTML='<p class="empty">Could not load the calendar. Try again in a minute.</p>'})}
 chips();fetchData();setInterval(fetchData,5*60e3);setInterval(function(){if(DATA)draw()},30e3);
 </script>

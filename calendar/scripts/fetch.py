@@ -18,6 +18,7 @@ OUT = os.path.join(ROOT, "data", "calendar.json")
 HIST = os.path.join(ROOT, "data", "history.csv")
 COUNTRIES = ["US", "EU", "DE", "GB", "JP", "CN", "CA", "AU", "NZ", "CH", "NO", "SE"]
 UA = "newsquawk-calendar-bot (github actions)"
+HEARTBEAT_HOURS = 3  # with no change, still save the "fetched" time this often
 
 
 def get(url, headers=None):
@@ -181,18 +182,30 @@ def main():
         return 0
     events.sort(key=lambda e: (e["t"], -e["imp"], e["c"], e["name"]))
     data = {"week_start": start.strftime("%Y-%m-%d"), "source": used, "countries": COUNTRIES, "events": events}
-    old = None
+    old, old_checked, old_fetched = None, None, None
     if os.path.exists(OUT):
         with open(OUT) as f:
             old = json.load(f)
-            old.pop("checked", None)
+            old_checked = old.pop("checked", None)
+            old_fetched = old.pop("fetched", None)
+    stamp = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+    # "checked" = when the calendar last CHANGED (a new number, forecast or time came out).
+    # "fetched" = when the feed was last read successfully. It is only saved every few hours when
+    # nothing changed, so quiet nights don't mean a save every 5 minutes, but the site health
+    # check can still tell "nothing happened" (fine) apart from "the fetch is broken" (a problem).
     if old != data:
-        data_out = dict(data, checked=now.strftime("%Y-%m-%dT%H:%M:%SZ"))
+        data_out = dict(data, checked=stamp, fetched=stamp)
+        print("Saved %d events from %s (week of %s)" % (len(events), used, data["week_start"]))
+    elif not old_fetched or (now - datetime.strptime(old_fetched, "%Y-%m-%dT%H:%M:%SZ").replace(
+            tzinfo=timezone.utc)) >= timedelta(hours=HEARTBEAT_HOURS):
+        data_out = dict(data, checked=old_checked or stamp, fetched=stamp)
+        print("No change (%d events from %s); saving the 'last fetched' time" % (len(events), used))
+    else:
+        data_out = None
+        print("No change (%d events from %s)" % (len(events), used))
+    if data_out:
         with open(OUT, "w") as f:
             json.dump(data_out, f, separators=(",", ":"))
-        print("Saved %d events from %s (week of %s)" % (len(events), used, data["week_start"]))
-    else:
-        print("No change (%d events from %s)" % (len(events), used))
     print("History: %d new released numbers" % save_history(events))
     return 0
 
