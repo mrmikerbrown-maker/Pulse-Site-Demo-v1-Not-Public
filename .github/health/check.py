@@ -234,14 +234,28 @@ def data_checks(area_id, problems):
             if d.get("week_start") != want and not grace:
                 problems.append(("week", "Calendar is still showing the week of %s (should be %s)" % (
                     d.get("week_start"), want)))
-            # 'checked' only moves when something changed (a new number came out). On weekdays
-            # releases land every few hours across the 12 countries, so 8 weekday-hours of nothing
-            # means the fetch is failing.
+            # Two different times in the file:
+            #   "fetched" = the feed was last read OK (saved at least every 3 hours, even when nothing
+            #               changed). If that's old, the fetch itself is broken.
+            #   "checked" = the calendar last CHANGED. Quiet spells are normal (e.g. no releases
+            #               between Wednesday 15:30 and Thursday 07:00 London), so a long gap only
+            #               counts as a problem if releases were due in that gap and none came in.
+            if d.get("fetched"):
+                h = (now - parse_ts(d["fetched"])).total_seconds() / 3600
+                if h > 4:
+                    problems.append(("fetch:calendar", "Calendar feed last read successfully %s London, "
+                                     "%s ago (limit 4)" % (london(parse_ts(d["fetched"])), ago(h))))
             if d.get("checked"):
-                h = weekday_hours(parse_ts(d["checked"]), now)
-                if h > 8:
-                    problems.append(("stale:calendar", "Calendar data last changed %s London, %s ago "
-                                     "(counting weekdays only, limit 8)" % (london(parse_ts(d["checked"])), ago(h))))
+                changed = parse_ts(d["checked"])
+                due = [e for e in d.get("events") or []
+                       if e.get("actual") is None and e.get("t")
+                       and changed < parse_ts(e["t"]) <= now - timedelta(hours=2)]
+                h = weekday_hours(changed, now)
+                if len(due) >= 3 and h > 8:
+                    eg = ", ".join("%s %s" % (e.get("c"), e.get("name")) for e in due[:3])
+                    problems.append(("stale:calendar", "Calendar data last changed %s London, %s ago, but "
+                                     "%d releases were due since then and none came in (e.g. %s)" % (
+                                         london(changed), ago(h), len(due), eg)))
     elif area_id == "index":
         st, body, err = http(live("index-contribution-site/spy-weights.csv"))
         if body is None:
