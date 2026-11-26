@@ -388,11 +388,13 @@ var RULES=[
 ];
 /* Fallback for anything else: the feed's name with the jargon (SA, NSA, MoM, Prel, Adv...) taken off. */
 function plain(name){return name.replace(/\b(s\.a|n\.s\.a|SA|NSA|MoM|YoY|QoQ|m\/m|y\/y|q\/q|Prel|Flash|Final|Adv|2nd Est|3rd Est|1st Est)\b\.?/g,"").replace(/\s+/g," ").trim()}
+/* Release names in title case (Mike, 26 Nov): "German Unemployment", "US PCE Inflation". Small joining words stay lower case. */
+function tc(s){return s.replace(/\b([a-z])([a-z]*)/g,function(w,a,b){return /^(and|of|the|in|on|at|for|to|vs)$/.test(w)?w:a.toUpperCase()+b})}
 function rel(e){
  for(var i=0;i<RULES.length;i++){var r=RULES[i];if(r[0].test(e.name)){
   var tier=typeof r[2]==="function"?r[2](e.c):r[2];
-  return {t:e.t,name:r[1]?r[1].replace("{C}",CTRY[e.c]||e.c):e.name,tier:tier}}}
- return {t:e.t,name:(CTRY[e.c]||e.c)+" "+plain(e.name),tier:3};
+  return {t:e.t,name:tc(r[1]?r[1].replace("{C}",CTRY[e.c]||e.c):e.name),tier:tier}}}
+ return {t:e.t,name:tc((CTRY[e.c]||e.c)+" "+plain(e.name)),tier:3};
 }
 var CAL=json("calendar/data/calendar.json").then(function(d){
  var all=(d.events||[]).concat(d.next_week||[]).filter(function(e){return e.t&&e.name}).map(rel).filter(function(r){return r.tier>0});
