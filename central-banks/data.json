@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-25T17:29:30Z",
+ "generated": "2026-11-26T02:58:48Z",
  "demo": false,
  "history_start": "2019-01-01",
  "banks": [
@@ -660,7 +660,7 @@
    "name": "Reserve Bank of Australia",
    "rate_name": "Cash rate target",
    "rate": 4.85,
-   "asof": "2026-11-24",
+   "asof": "2026-11-25",
    "last": {
     "date": "2026-11-03",
     "bp": 25,
@@ -793,7 +793,7 @@
      4.85
     ],
     [
-     "2026-11-24",
+     "2026-11-25",
      4.85
     ]
    ],
@@ -1203,8 +1203,8 @@
   "OK   CAD  own feed: 2.5% as of 2026-11-24",
   "OK   CAD  BoC       2.5% as of 2026-11-24 (own feed), last: {'date': '2026-10-28', 'bp': 25, 'kind': 'hike'}",
   "NOTE CAD: meeting dates in config.json run out on 2026-12-09, add the next year's",
-  "OK   AUD  own feed: 4.85% as of 2026-11-24",
-  "OK   AUD  RBA       4.85% as of 2026-11-24 (own feed), last: {'date': '2026-11-03', 'bp': 25, 'kind': 'hike'}",
+  "OK   AUD  own feed: 4.85% as of 2026-11-25",
+  "OK   AUD  RBA       4.85% as of 2026-11-25 (own feed), last: {'date': '2026-11-03', 'bp': 25, 'kind': 'hike'}",
   "OK   NZD  RBNZ      2.75% as of 2026-11-13 (BIS NZ), last: {'date': '2026-10-28', 'bp': 0, 'kind': 'hold'}",
   "OK   NOK  own feed: 4.5% as of 2026-11-24",
   "OK   NOK  Norges    4.5% as of 2026-11-24 (own feed), last: {'date': '2026-11-05', 'bp': 0, 'kind': 'hold'}",
