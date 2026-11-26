@@ -32,4 +32,3 @@ natgas,Commodities,US natural gas,$ per MMBtu,pct,,NYMEX:NG1!
 gold,Commodities,Gold,$ per ounce,pct,,TVC:GOLD
 silver,Commodities,Silver,$ per ounce,pct,,TVC:SILVER
 copper,Commodities,Copper,$ per pound,pct,,COMEX:HG1!
-btc,Commodities,Bitcoin,$,pct,,BITSTAMP:BTCUSD
