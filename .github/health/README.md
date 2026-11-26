@@ -7,7 +7,7 @@ The job **Site health: check pages and data** (`.github/workflows/site-health.ym
 | Part of the site | Page loads | Data job's last run | Data freshness |
 |---|---|---|---|
 | Home, Clock, Surprises, Glossary | yes | none | none |
-| This week (calendar) | yes | yes, and the job restarts itself if it stops | still showing this week, and a change within 8 weekday hours |
+| This week (calendar) | yes | yes, and the job restarts itself if it stops | still showing this week; the feed was read OK in the last 4 hours; and if 3+ releases were due 2 hours ago or more, at least one came in (a quiet night with nothing due is fine) |
 | Index Contribution | yes | both jobs | SPY weights at most 3 US market days old, last session at most 2, Google Sheet answering |
 | Earnings Moves | yes | yes | refreshed within 36 weekday hours, session at most 2 US market days old, no source failures reported |
 | Economy Thermometer | yes | yes | refreshed within 42 hours, not demo data |

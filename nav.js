@@ -14,6 +14,7 @@ var TOOLS=[
  ["Home",HUB],
  ["Markets",[
   ["Cross-Asset Moves",HUB+"cross-asset/","Today's moves in stocks, yields, FX and commodities, against a typical day"],
+  ["Volatility Monitor",HUB+"vol-monitor/","How nervous markets are: VIX, MOVE and more against their past year"],
   ["Index Contribution",HUB+"index-contribution-site/","Which stocks moved the S&amp;P 500, Nasdaq 100 and Dow"],
   ["Earnings Moves",HUB+"earnings-moves/","Move options price for big US companies' results, against past moves"],
   ["Yield Curves",HUB+"yield-curve/","US, German and UK government bond curves and spreads"],
