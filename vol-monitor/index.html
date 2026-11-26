@@ -180,6 +180,8 @@ function stats(s){
 function pctAt(c,i){const w=c.slice(Math.max(0,i-251),i+1);const v=c[i];return w.slice(0,-1).filter(x=>x<v).length/Math.max(1,w.length-1)*100}
 // currencies: no free implied-vol feed, so use realised vol = st.dev of the last 21 daily % changes x sqrt(252)
 function realised(p){const r=[];for(let i=1;i<p.length;i++)r.push(Math.log(p[i]/p[i-1]));const c=[];for(let i=21;i<=r.length;i++){const w=r.slice(i-21,i),m=w.reduce((a,b)=>a+b,0)/21;c.push(Math.sqrt(w.reduce((a,b)=>a+(b-m)**2,0)/20*252)*100)}return {c}}
+// percentile shown as a whole number; 100 only when today really is the year's top level
+const P=st=>st.last>=st.hi?100:Math.min(99,Math.round(st.pct));
 const TODAY=new Date().toLocaleDateString("en-CA",{timeZone:"Europe/London"});
 const dayName=d=>new Date(d+"T12:00:00Z").toLocaleDateString("en-GB",{weekday:"short",timeZone:"UTC"});
 function render(){
@@ -212,7 +214,7 @@ const em = m => m.st.last/Math.sqrt(m.oneday?1:252);
 const opt=out.filter(m=>!m.fx), say=m=>m.say||m.nm;
 const list=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+" and "+a[a.length-1];
 const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
-const hi=opt.filter(m=>m.st.pct>=99.5).map(say), top10=opt.filter(m=>m.st.pct>=90&&m.st.pct<99.5).map(say);
+const isHi=m=>m.st.last>=m.st.hi, hi=opt.filter(isHi).map(say), top10=opt.filter(m=>m.st.pct>=90&&!isHi(m)).map(say);
 const lo=opt.filter(m=>m.st.pct<=10).map(say);
 let s1;
 if(hi.length) s1=`${cap(list(hi))} ${hi.length>1?"are at one-year highs":"is at a one-year high"}${top10.length?`; ${list(top10)} ${top10.length>1?"are":"is"} in the top 10% of ${top10.length>1?"their":"its"} year`:""}.`;
@@ -221,7 +223,7 @@ else if(lo.length) s1=`${cap(list(lo))} ${lo.length>1?"are":"is"} near one-year 
 else s1=`No gauge is near a one-year extreme. VIX is at ${f1(vix.st.last)}.`;
 const vAvg=vix.st.yr.reduce((a,b)=>a+b,0)/vix.st.yr.length;
 document.getElementById("head").innerHTML=`<b>${s1}</b> <span>Options are pricing S&amp;P 500 swings of about ±${f1(vix.st.last/15.87)}% a day, against ±${f1(vAvg/15.87)}% on an average day this year.</span>`;
-document.getElementById("chips").innerHTML = byP.filter(m=>!m.fx).slice(0,5).map(m=>{const [w,c]=BAND(m.st.pct);return `<span class="chip" style="--c:var(--${c})"><i></i>${m.nm} <b>${Math.round(m.st.pct)}</b></span>`}).join("");
+document.getElementById("chips").innerHTML = byP.filter(m=>!m.fx).slice(0,5).map(m=>{const [w,c]=BAND(m.st.pct);return `<span class="chip" style="--c:var(--${c})"><i></i>${m.nm} <b>${P(m.st)}</b></span>`}).join("");
 const ran=new Date(DATA.asof), ldn=o=>ran.toLocaleString("en-GB",Object.assign({timeZone:"Europe/London"},o));
 const stamp=ldn({weekday:"short",day:"numeric",month:"short"})+", "+ldn({hour:"2-digit",minute:"2-digit"})+" London";
 const old=(Date.now()-ran)/36e5>3;
@@ -255,7 +257,7 @@ function card(m){
   return `<div class="g" style="--c:var(--${c})">
    <div class="grp">${m.grp}</div><div class="top"><div class="nm"><b>${m.nm}</b><small>${m.sub}</small></div><span class="tag">${w}</span></div>
    <div class="fig"><b>${f1(st.last)}</b><span class="${cls}">${ch>=0?"+":"−"}${f1(Math.abs(ch),2)} (${chp>=0?"+":"−"}${f1(Math.abs(chp))}%) ${m.s.d[m.s.d.length-1]===TODAY?"today":"on "+dayName(m.s.d[m.s.d.length-1])}</span></div>
-   ${m.fx?'<div class="rv">Realised vol: past moves, not option prices</div>':""}<div class="pc">${st.pct>=99.5?"<b>Highest</b> close of the past year":st.pct<=0.5?"<b>Lowest</b> close of the past year":`Higher than <b>${Math.round(st.pct)}%</b> of the past year`}</div>
+   ${m.fx?'<div class="rv">Realised vol: past moves, not option prices</div>':""}<div class="pc">${st.last>=st.hi?"<b>Highest</b> level of the past year":st.last<=st.lo?"<b>Lowest</b> level of the past year":`Higher than <b>${P(st)}%</b> of the past year`}</div>
    <div class="rng"><span class="wk" style="left:${pos(st.wk)}%" title="1 week ago"></span><span class="now" style="left:${pos(st.last)}%" data-v="${f1(st.last)}"></span></div>
    <div class="rl"><span>Year low ${f1(st.lo)}</span><span>Year high ${f1(st.hi)}</span></div>
    ${spark(m)}
@@ -269,14 +271,14 @@ const N=63;
 for(const m of out){
   const c=m.s.c, cells=[];
   for(let i=c.length-N;i<c.length;i++){const p=pctAt(c,i);const [,cc]=BAND(p);cells.push(`<i style="background:rgb(${css(cc)});opacity:${(.35+.65*Math.abs(p-50)/50).toFixed(2)}" title="${Math.round(p)}"></i>`)}
-  hh+=`<div class="hr"><b>${m.nm}</b><div class="cells">${cells.join("")}</div><span>${Math.round(m.st.pct)}</span></div>`;
+  hh+=`<div class="hr"><b>${m.nm}</b><div class="cells">${cells.join("")}</div><span>${P(m.st)}</span></div>`;
 }
 const vds=vix.s.d, t3=new Date(vds[Math.max(0,vds.length-N)]+"T12:00:00Z").toLocaleDateString("en-GB",{day:"numeric",month:"short"});
 hh+=`<div class="hx"><span></span><div><span>${t3}</span><span>latest</span></div><span>now</span></div>`;
 document.getElementById("heat").innerHTML=hh;
 // worked example
 const st=vix.st;
-document.getElementById("ex").innerHTML=`Worked example, VIX today: <b>${f1(st.last)}</b> ÷ 15.87 = <b>±${f1(st.last/15.87,2)}%</b> expected daily S&amp;P 500 move. Over the past year VIX closed between ${f1(st.lo)} and ${f1(st.hi)}; ${Math.round(st.pct*(st.yr.length-1)/100)} of the last ${st.yr.length-1} closes were lower than today, so it is ${st.pct>=99.5?"the <b>highest</b> close of the year":`higher than <b>${Math.round(st.pct)}%</b> of the year`} → <b>${BAND(st.pct)[0]}</b>.`;
+document.getElementById("ex").innerHTML=`Worked example, VIX today: <b>${f1(st.last)}</b> ÷ 15.87 = <b>±${f1(st.last/15.87,2)}%</b> expected daily S&amp;P 500 move. Over the past year VIX closed between ${f1(st.lo)} and ${f1(st.hi)}; ${Math.round(st.pct*(st.yr.length-1)/100)} of the last ${st.yr.length-1} closes were lower than today, so it is ${st.last>=st.hi?"the <b>highest</b> level of the year":`higher than <b>${P(st)}%</b> of the year`} → <b>${BAND(st.pct)[0]}</b>.`;
 }
 
 /* Load data.json. The data job saves without rebuilding the website, so the copy on raw.githubusercontent.com

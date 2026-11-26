@@ -273,7 +273,7 @@ var CA=newest("cross-asset/data.json",function(d){return d.rows&&d.rows.length})
 newest("vol-monitor/data.json",function(d){return d.series&&d.series.VIX}).then(function(d){
  var c=d.series.VIX.c,yr=c.slice(-252),v=yr[yr.length-1],p=yr.slice(0,-1).filter(function(x){return x<v}).length/(yr.length-1)*100;
  var w=p>=90?["Stressed","d"]:p>=75?["Elevated","nu"]:p<25?["Calm","u"]:["Mid-range","nu"];
- $("c-vol").innerHTML="VIX <b>"+v.toFixed(1)+'</b> <span class="ch '+w[1]+'">'+w[0]+"</span><br>"+(p>=99.5?"Highest close of the past year":"Higher than <b>"+Math.round(p)+"%</b> of the past year");
+ $("c-vol").innerHTML="VIX <b>"+v.toFixed(1)+'</b> <span class="ch '+w[1]+'">'+w[0]+"</span><br>"+(v>=Math.max.apply(null,yr)?"Highest level of the past year":"Higher than <b>"+Math.min(99,Math.round(p))+"%</b> of the past year");
 }).catch(function(){fail("c-vol")});
 var ID=newest("cross-asset/intraday.json",function(d){return d.series});
 /* Units: "pct" = % move, "bp" = yield move in basis points, "pt" = points (VIX).
