@@ -1,5 +1,5 @@
 {
- "generated": "2026-11-25T17:10:57Z",
+ "generated": "2026-11-26T16:51:55Z",
  "demo": false,
  "schema": 3,
  "history_years": 10,
@@ -2230,22 +2230,17 @@
    "bank": "European Central Bank",
    "bank_short": "ECB",
    "prices": {
-    "value": 3.77,
-    "asof": "2026-09",
-    "asof_label": "Sep 2026",
+    "value": 4.03,
+    "asof": "2026-10",
+    "asof_label": "Oct 2026",
     "state": "hot",
     "target": "2%",
     "range_lo": 1.5,
     "range_hi": 2.5,
-    "pos": 59.6,
+    "pos": 62.9,
     "zone_l": 31.2,
     "zone_r": 43.8,
     "trail": [
-     {
-      "k": "Sep 2025",
-      "v": 2.23,
-      "pos": 40.4
-     },
      {
       "k": "Oct 2025",
       "v": 2.1,
@@ -2300,11 +2295,16 @@
       "k": "Aug 2026",
       "v": 3.25,
       "pos": 53.1
+     },
+     {
+      "k": "Sep 2026",
+      "v": 3.78,
+      "pos": 59.7
      }
     ],
     "ago": {
-     "label": "Sep 2025",
-     "value": 2.23
+     "label": "Oct 2025",
+     "value": 2.1
     },
     "kept": false,
     "stale": false
@@ -4450,7 +4450,7 @@
       [
        "Sep 2026",
        6.5,
-       3.77,
+       3.78,
        0
       ]
      ],
@@ -4494,22 +4494,17 @@
    "bank": "Bank of England",
    "bank_short": "BoE",
    "prices": {
-    "value": 3.45,
-    "asof": "2026-09",
-    "asof_label": "Sep 2026",
-    "state": "warm",
+    "value": 3.65,
+    "asof": "2026-10",
+    "asof_label": "Oct 2026",
+    "state": "hot",
     "target": "2%",
     "range_lo": 1.5,
     "range_hi": 2.5,
-    "pos": 55.6,
+    "pos": 58.1,
     "zone_l": 31.2,
     "zone_r": 43.8,
     "trail": [
-     {
-      "k": "Sep 2025",
-      "v": 3.8,
-      "pos": 60.0
-     },
      {
       "k": "Oct 2025",
       "v": 3.56,
@@ -4564,11 +4559,16 @@
       "k": "Aug 2026",
       "v": 3.09,
       "pos": 51.1
+     },
+     {
+      "k": "Sep 2026",
+      "v": 3.45,
+      "pos": 55.6
      }
     ],
     "ago": {
-     "label": "Sep 2025",
-     "value": 3.8
+     "label": "Oct 2025",
+     "value": 3.56
     },
     "kept": false,
     "stale": false
@@ -6726,7 +6726,7 @@
     },
     "kept": false
    },
-   "score": 0.67,
+   "score": 1.0,
    "verdict": "warm"
   },
   {
@@ -8941,22 +8941,17 @@
    "bank": "Swiss National Bank",
    "bank_short": "SNB",
    "prices": {
-    "value": 0.99,
-    "asof": "2026-09",
-    "asof_label": "Sep 2026",
+    "value": 1.46,
+    "asof": "2026-10",
+    "asof_label": "Oct 2026",
     "state": "normal",
     "target": "0 to 2%",
     "range_lo": 0.0,
     "range_hi": 2.0,
-    "pos": 24.9,
+    "pos": 30.7,
     "zone_l": 12.5,
     "zone_r": 37.5,
     "trail": [
-     {
-      "k": "Sep 2025",
-      "v": 0.22,
-      "pos": 15.3
-     },
      {
       "k": "Oct 2025",
       "v": 0.1,
@@ -9011,11 +9006,16 @@
       "k": "Aug 2026",
       "v": 0.81,
       "pos": 22.6
+     },
+     {
+      "k": "Sep 2026",
+      "v": 0.99,
+      "pos": 24.9
      }
     ],
     "ago": {
-     "label": "Sep 2025",
-     "value": 0.22
+     "label": "Oct 2025",
+     "value": 0.1
     },
     "kept": false,
     "stale": false
@@ -10091,21 +10091,16 @@
    "bank_short": "BoC",
    "prices": {
     "value": 3.09,
-    "asof": "2026-09",
-    "asof_label": "Sep 2026",
+    "asof": "2026-10",
+    "asof_label": "Oct 2026",
     "state": "warm",
     "target": "1 to 3%",
     "range_lo": 1.0,
     "range_hi": 3.0,
-    "pos": 51.2,
+    "pos": 51.1,
     "zone_l": 25.0,
     "zone_r": 50.0,
     "trail": [
-     {
-      "k": "Sep 2025",
-      "v": 2.36,
-      "pos": 42.0
-     },
      {
       "k": "Oct 2025",
       "v": 2.16,
@@ -10160,11 +10155,16 @@
       "k": "Aug 2026",
       "v": 3.03,
       "pos": 50.4
+     },
+     {
+      "k": "Sep 2026",
+      "v": 3.09,
+      "pos": 51.2
      }
     ],
     "ago": {
-     "label": "Sep 2025",
-     "value": 2.36
+     "label": "Oct 2025",
+     "value": 2.16
     },
     "kept": false,
     "stale": false
@@ -12283,6 +12283,12 @@
        6.5,
        3.09,
        0
+      ],
+      [
+       "Oct 2026",
+       6.7,
+       3.09,
+       0
       ]
      ],
      "cycles": [
@@ -12303,7 +12309,7 @@
       },
       {
        "from": 163,
-       "to": 238,
+       "to": 239,
        "label": "2020–now"
       }
      ]
@@ -12320,32 +12326,17 @@
    "bank": "Reserve Bank of Australia",
    "bank_short": "RBA",
    "prices": {
-    "value": 3.94,
-    "asof": "2026-06",
-    "asof_label": "Jun 2026",
+    "value": 3.92,
+    "asof": "2026-09",
+    "asof_label": "Sep 2026",
     "state": "warm",
     "target": "2 to 3%",
     "range_lo": 2.0,
     "range_hi": 3.0,
-    "pos": 61.8,
+    "pos": 61.5,
     "zone_l": 37.5,
     "zone_r": 50.0,
     "trail": [
-     {
-      "k": "Jun 2025",
-      "v": 2.1,
-      "pos": 38.7
-     },
-     {
-      "k": "Jul 2025",
-      "v": 3.22,
-      "pos": 52.7
-     },
-     {
-      "k": "Aug 2025",
-      "v": 3.22,
-      "pos": 52.7
-     },
      {
       "k": "Sep 2025",
       "v": 3.22,
@@ -12390,11 +12381,26 @@
       "k": "May 2026",
       "v": 3.94,
       "pos": 61.8
+     },
+     {
+      "k": "Jun 2026",
+      "v": 3.94,
+      "pos": 61.8
+     },
+     {
+      "k": "Jul 2026",
+      "v": 3.92,
+      "pos": 61.5
+     },
+     {
+      "k": "Aug 2026",
+      "v": 3.92,
+      "pos": 61.5
      }
     ],
     "ago": {
-     "label": "Jun 2025",
-     "value": 2.1
+     "label": "Sep 2025",
+     "value": 3.22
     },
     "kept": false,
     "stale": false
@@ -13537,6 +13543,12 @@
        4.45,
        3.94,
        0
+      ],
+      [
+       "Q3 2026",
+       4.62,
+       3.92,
+       0
       ]
      ],
      "cycles": [
@@ -13547,7 +13559,7 @@
       },
       {
        "from": 54,
-       "to": 78,
+       "to": 79,
        "label": "2020–now"
       }
      ]
@@ -14808,22 +14820,17 @@
    "bank": "Norges Bank",
    "bank_short": "Norges Bank",
    "prices": {
-    "value": 3.38,
-    "asof": "2026-09",
-    "asof_label": "Sep 2026",
-    "state": "warm",
+    "value": 3.57,
+    "asof": "2026-10",
+    "asof_label": "Oct 2026",
+    "state": "hot",
     "target": "2%",
     "range_lo": 1.5,
     "range_hi": 2.5,
-    "pos": 54.7,
+    "pos": 57.2,
     "zone_l": 31.2,
     "zone_r": 43.8,
     "trail": [
-     {
-      "k": "Sep 2025",
-      "v": 3.6,
-      "pos": 57.6
-     },
      {
       "k": "Oct 2025",
       "v": 3.07,
@@ -14878,11 +14885,16 @@
       "k": "Aug 2026",
       "v": 3.29,
       "pos": 53.7
+     },
+     {
+      "k": "Sep 2026",
+      "v": 3.38,
+      "pos": 54.7
      }
     ],
     "ago": {
-     "label": "Sep 2025",
-     "value": 3.6
+     "label": "Oct 2025",
+     "value": 3.07
     },
     "kept": false,
     "stale": false
@@ -17036,7 +17048,7 @@
     },
     "kept": false
    },
-   "score": 0.0,
+   "score": 0.33,
    "verdict": "normal"
   },
   {
@@ -17046,22 +17058,17 @@
    "bank": "Riksbank",
    "bank_short": "Riksbank",
    "prices": {
-    "value": 1.15,
-    "asof": "2026-09",
-    "asof_label": "Sep 2026",
+    "value": 0.91,
+    "asof": "2026-10",
+    "asof_label": "Oct 2026",
     "state": "cool",
     "target": "2%",
     "range_lo": 1.5,
     "range_hi": 2.5,
-    "pos": 26.9,
+    "pos": 23.9,
     "zone_l": 31.2,
     "zone_r": 43.8,
     "trail": [
-     {
-      "k": "Sep 2025",
-      "v": 0.89,
-      "pos": 23.6
-     },
      {
       "k": "Oct 2025",
       "v": 0.92,
@@ -17116,11 +17123,16 @@
       "k": "Aug 2026",
       "v": 0.31,
       "pos": 16.3
+     },
+     {
+      "k": "Sep 2026",
+      "v": 1.15,
+      "pos": 26.9
      }
     ],
     "ago": {
-     "label": "Sep 2025",
-     "value": 0.89
+     "label": "Oct 2025",
+     "value": 0.92
     },
     "kept": false,
     "stale": false
