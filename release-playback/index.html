@@ -134,8 +134,6 @@ details[open]>summary:before{transform:rotate(45deg)}
 <div class="top"><img class="logo" alt="Alpha Pulse" src="../brand/logo/bar-paper.svg"><button class="theme" id="theme" type="button" aria-label="Switch light/dark"><svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.4 3.4l1 1M11.6 11.6l1 1M3.4 12.6l1-1M11.6 4.4l1-1"/></svg><svg class="i-moon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.5 9.6A5.6 5.6 0 0 1 6.4 2.5a5.6 5.6 0 1 0 7.1 7.1z"/></svg></button></div>
 <h1>Release Playback</h1>
 <p class="sub">Replay how markets moved after big US data releases, then see how often the first day's move held, kept going or faded. Every past release is split by whether the number came in above, in line with or below forecast, because markets react to the surprise, not the number itself.</p>
-<p class="sk"><b>Sketch.</b> Real numbers: release history and prices fetched from TradingView by a GitHub test run on 25 Nov 2026. Not live yet, and the layout is open to change.</p>
-
 <div class="ctl"><span class="lbl">Release</span><div class="seg" id="relS"></div></div>
 <div class="ctl"><span class="lbl">Market</span><div class="seg" id="mktS"></div></div>
 <div class="ctl"><span class="lbl">History</span><div class="seg" id="perS"><button data-v="all" class="on">Since 2015</button><button data-v="3y">Last 3 years</button></div></div>
@@ -169,14 +167,14 @@ details[open]>summary:before{transform:rotate(45deg)}
 </div>
 
 <div class="card" data-nogloss>
- <div class="ch2"><h2>Every release</h2><small>Click a row to replay it above</small></div>
+ <div class="ch2"><h2>Every release</h2><small>Click a row to replay it above · <sup>r</sup> = later revised (hover to see)</small></div>
  <div class="tb"><table><thead><tr><th>Date</th><th class="hide-s">Period</th><th class="hide-s">Actual</th><th class="hide-s">Forecast</th><th class="show-s">Actual vs fcst</th><th class="l hide-s">Result</th><th id="thD1">Day 1</th><th id="thD5">After 5 days</th><th class="l hide-s">What happened</th></tr></thead><tbody id="tbody"></tbody></table></div>
 </div>
 
 <details class="how" id="how" data-nogloss>
  <summary><h2>How the numbers are worked out</h2></summary>
  <ol>
-  <li><b>Surprise.</b> Actual minus forecast. The forecast is the consensus shown in TradingView's economic calendar just before the release. <span id="bandTxt"></span></li>
+  <li><b>Surprise.</b> Actual minus forecast. The actual is the figure first announced on the day, not today's revised number, because that is what markets reacted to. The forecast is the consensus shown in TradingView's economic calendar just before the release. <span id="bandTxt"></span></li>
   <li><b>Day 1 move.</b> From the market's last close <i>before</i> the release to its close on release day. US data comes out at 13:30 London (12:30 when the US and UK clocks are out of step), so day 1 covers the reaction and the rest of that session. S&amp;P 500 futures, the dollar index and gold are in %; the 10-year yield is in basis points (1bp = 0.01 percentage points).</li>
   <li><b>The next 10 days.</b> The same starting point, measured to each of the next 10 closes. The dashed line is the median (middle) path of every past release with the same kind of surprise; the shaded band holds the middle half of them.</li>
   <li><b>Held, kept going or faded.</b> We compare the move after 5 trading days with the day 1 move. <b>Kept going</b>: same direction and bigger. <b>Held</b>: same direction and at least half of it still there. <b>Faded</b>: less than half left, or it reversed. Day 1 moves smaller than <span id="minTxt"></span> are left out as too small to call. Same rule as the Earnings Moves page.</li>
@@ -193,10 +191,12 @@ details[open]>summary:before{transform:rotate(45deg)}
 
 <details class="srcd" data-nogloss><summary><h2>Source and updates</h2><span class="sm" id="asof2"></span></summary>
 <div class="srcbox">
- <div><span>Releases and forecasts</span>TradingView economic calendar, since Jan 2015</div>
+ <div><span>Actual figures</span>As first announced on the day, from FRED's ALFRED archive of past data (St. Louis Fed). ISM Services from TradingView (ISM numbers are not on FRED and are rarely revised).</div>
+ <div><span>Forecasts</span>TradingView economic calendar, since Jan 2015</div>
  <div><span>Daily prices</span>TradingView: E-mini S&amp;P 500 front-month futures (roll gaps taken out), US 10-year yield, US dollar index (DXY), spot gold</div>
- <div><span>Release-day replay</span>TradingView 5-minute prices. Free history only reaches back about a month (from <b id="ifrom" style="font-weight:400"></b>), so older releases have no replay. Once live, each release is saved as it happens.</div>
- <div><span>Updates</span>Planned: each evening after the US close (about 22:30 London)</div>
+ <div><span>Release-day replay</span>TradingView 5-minute prices. Free history only reaches back about a month (from <b id="ifrom" style="font-weight:400"></b>), so older releases have no replay. Each new release is saved the evening it comes out, so the replay library grows every month.</div>
+ <div><span>Updates</span>Weekdays after the US close (about 22:40 London), with a backup run the next morning</div>
+ <div><span>Last refreshed</span><b id="asof" style="font-weight:400">–</b></div>
 </div>
 </details>
 </div>
@@ -265,7 +265,7 @@ function sweep(ids,x0,W,ms){var els=ids.map(function(s){return typeof s==="strin
 function render(){
  var R=DATA.releases[REL],Ls=rows(),m=M();
  $("what").textContent=R.what;
- var w=$("warn");if(REL==="nfp"||REL==="rs"){w.hidden=false;w.textContent="Check before launch: for "+(REL==="nfp"?"payrolls":"retail sales")+", TradingView's past actual numbers appear to be the later revised figures, not what was first announced (e.g. October 2026 payrolls shows 60k; Data Surprises recorded 29k on the day). The live page would use first-announced numbers."}else w.hidden=true;
+ var w=$("warn");w.hidden=true;
  var G={above:[],inline:[],below:[]};Ls.forEach(function(r){G[r.g].push(r)});
  var S={above:stats(G.above),inline:stats(G.inline),below:stats(G.below)};
  /* headline: which way the market went on the day after an above / below forecast number */
@@ -286,7 +286,7 @@ function render(){
   CW.d=Math.round($("dayC").clientWidth||560);$("dayC").innerHTML=dayChart(rep,CW.d);
   $("mini").innerHTML=MK.map(function(k){var q=rep[k],a=function(i){for(var j=i;j>=12;j--)if(q[j]!=null)return q[j];return null};return '<div data-k="'+k+'" class="'+(k===MKT?"on":"")+'"><span>'+DATA.markets[k].short+'</span><b class="'+col(a(24),k)+'">'+fm(a(24),k)+'</b><small>after 1 hour</small></div>'}).join("");
   $("play1").hidden=false;
- }else{$("dayCap").textContent="";$("dayC").innerHTML='<div class="none">No 5-minute prices for this date. The free feed only keeps about a month of 5-minute history (from '+ldn(DATA.intraday_from,"12:00",{day:"numeric",month:"short"})+'). Once the page is live, every release is saved as it happens, so this replay library grows each month.</div>';$("mini").innerHTML="";$("play1").hidden=true}
+ }else{$("dayCap").textContent="";$("dayC").innerHTML='<div class="none">No 5-minute prices for this date. The free feed only keeps about a month of 5-minute history (from '+ldn(DATA.intraday_from,"12:00",{day:"numeric",month:"short"})+'). Each new release is saved the evening it comes out, so this replay library grows every month.</div>';$("mini").innerHTML="";$("play1").hidden=true}
  var same=Ls.filter(function(r){return r.g===SEL.g&&r!==SEL&&r.m[MKT].length>=10}),B0=band(same),p=SEL.m[MKT];
  $("nxCap").textContent="Day 1 "+fm(p[0])+(p.length>=5?", after 5 days "+fm(p[4]):"")+(p.length>=10?", after 10 days "+fm(p[9]):" (still filling in)")+". Dashed line: the middle path of "+same.length+" past "+GN[SEL.g].toLowerCase()+" releases.";
  CW.n=Math.round($("nxC").clientWidth||440);$("nxC").innerHTML=nxChart(SEL,B0,CW.n);
@@ -302,7 +302,7 @@ function render(){
   '<div class="fk"><span>After 5 days:</span><span>Kept going <b>'+pc(s.k,s.c)+'</b></span><span>Held <b>'+pc(s.h,s.c)+'</b></span><span>Faded <b>'+pc(s.f,s.c)+'</b></span></div></div>'}).join("");
  /* table */
  $("thD1").textContent="Day 1";$("thD5").innerHTML=innerWidth<560?"Day 5":"After 5 days";
- $("tbody").innerHTML=Ls.map(function(r,i){var p=r.m[MKT],f=fate(r);return '<tr class="rw g-'+r.g+(r===SEL?" sel":"")+'" data-i="'+DATA.releases[REL].rows.indexOf(r)+'"><td>'+ldn(r.d,r.t,{day:"numeric",month:"short",year:"2-digit"})+(r.r?'<span class="i5">5-MIN</span>':'')+'</td><td class="hide-s">'+r.p+'</td><td class="hide-s">'+fv(r.a)+'</td><td class="hide-s">'+fv(r.f)+'</td><td class="show-s">'+fv(r.a)+' vs '+fv(r.f)+'<small>'+GN[r.g]+'</small></td><td class="l hide-s">'+GN[r.g]+'</td><td class="'+col(p[0])+'">'+fm(p[0])+'</td><td class="'+col(p[4])+'">'+(p.length>=5?fm(p[4]):"–")+'</td><td class="l hide-s"><span class="fate '+(f||"s")+'">'+(f?FW[f]:"Not yet")+'</span></td></tr>'}).join("");
+ $("tbody").innerHTML=Ls.map(function(r,i){var p=r.m[MKT],f=fate(r);return '<tr class="rw g-'+r.g+(r===SEL?" sel":"")+'" data-i="'+DATA.releases[REL].rows.indexOf(r)+'"><td>'+ldn(r.d,r.t,{day:"numeric",month:"short",year:"2-digit"})+(r.r?'<span class="i5">5-MIN</span>':'')+'</td><td class="hide-s">'+r.p+'</td><td class="hide-s"'+(r.tv!=null?' title="First announced. Later revised to '+fv(r.tv)+'"':'')+'>'+fv(r.a)+(r.tv!=null?'<sup style="color:var(--muted)">r</sup>':'')+'</td><td class="hide-s">'+fv(r.f)+'</td><td class="show-s">'+fv(r.a)+' vs '+fv(r.f)+'<small>'+GN[r.g]+'</small></td><td class="l hide-s">'+GN[r.g]+'</td><td class="'+col(p[0])+'">'+fm(p[0])+'</td><td class="'+col(p[4])+'">'+(p.length>=5?fm(p[4]):"–")+'</td><td class="l hide-s"><span class="fate '+(f||"s")+'">'+(f?FW[f]:"Not yet")+'</span></td></tr>'}).join("");
  /* explainer bits */
  $("bandTxt").textContent=R.band?"Counted as in line when within "+(R.u==="k"?R.band+"k jobs":R.band+(R.u==="%"?" percentage points":" points"))+" of the forecast.":"Counted as in line only when it matches the forecast to the decimal place published.";
  $("minTxt").textContent="0.4% for S&P 500 futures and gold, 0.15% for the dollar index and 2bp for the 10-year yield (about a third of a typical day for each)";
@@ -313,7 +313,7 @@ function segs(){
  $("mktS").innerHTML=MK.map(function(k){return '<button data-v="'+k+'" class="'+(k===MKT?"on":"")+'">'+DATA.markets[k].name+'</button>'}).join("");
 }
 function on(id,fn){$(id).onclick=function(e){var v=e.target.getAttribute("data-v");if(!v)return;fn(v);[].forEach.call(this.children,function(b){b.classList.toggle("on",b===e.target)});render()}}
-fetch("data.json").then(function(r){return r.json()}).then(function(d){DATA=d;segs();
+fetch("data.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()}).then(function(d){DATA=d;segs();
  on("relS",function(v){REL=v;SEL=null});on("mktS",function(v){MKT=v});on("perS",function(v){PER=v});
  $("mini").onclick=function(e){var c=e.target.closest("[data-k]");if(!c)return;MKT=c.getAttribute("data-k");segs();render()};
  $("tbody").onclick=function(e){var tr=e.target.closest("tr");if(!tr)return;SEL=DATA.releases[REL].rows[+tr.getAttribute("data-i")];SEL.k=REL;render();$("one").scrollIntoView({behavior:"smooth",block:"start"})};
@@ -321,7 +321,7 @@ fetch("data.json").then(function(r){return r.json()}).then(function(d){DATA=d;se
  $("play2").onclick=function(){sweep(["cpNr"],46,CW.n,2500)};
  $("play3").onclick=function(){sweep([document.querySelectorAll(".cpG")],40,CW.g,2500)};
  $("ifrom").textContent=ldn(d.intraday_from,"12:00",{day:"numeric",month:"short",year:"numeric"});
- $("asof2").textContent="Test data from "+ldn(d.asof.slice(0,10),d.asof.slice(11,16),{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})+" London";
+ var lr=ldn(d.asof.slice(0,10),d.asof.slice(11,16),{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})+" London";$("asof2").textContent="Last refreshed "+lr;$("asof").textContent=lr;
  render()});
 $("theme").onclick=function(){var l=document.documentElement.classList.toggle("light");try{localStorage.setItem("ict-theme",l?"light":"dark")}catch(e){}};
 </script>

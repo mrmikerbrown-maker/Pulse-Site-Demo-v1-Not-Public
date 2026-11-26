@@ -60,6 +60,8 @@ AREAS = [
     {"id": "earnings", "name": "Earnings Moves", "page": "earnings-moves/",
      "workflows": ["earnings-moves.yml"]},
     {"id": "surprises", "name": "Data Surprises", "page": "surprises/"},
+    {"id": "release-playback", "name": "Release Playback", "page": "release-playback/",
+     "workflows": ["release-playback.yml"]},
     {"id": "thermometer", "name": "Economy Thermometer", "page": "economy-thermometer/",
      "workflows": ["economy-thermometer.yml"]},
     {"id": "central-banks", "name": "Central banks overview", "page": "central-banks/",
@@ -309,6 +311,11 @@ def data_checks(area_id, problems):
             if d.get("missing"):
                 problems.append(("missing:cross-asset", "Cross-asset prices missing for: "
                                  + ", ".join(map(str, d["missing"]))[:200]))
+    elif area_id == "release-playback":
+        d = get_json("release-playback/data.json", problems, "Release playback data")
+        if d:
+            check_generated(d, "release-playback", "Release playback data", 30, True, problems)
+            check_problem_list(d, "release-playback", "Release playback data", problems)
     elif area_id == "yield-curve":
         d = get_json("yield-curve/data.json", problems, "Yield curve data")
         if d:
