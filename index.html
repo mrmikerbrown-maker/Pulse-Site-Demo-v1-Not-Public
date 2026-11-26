@@ -365,7 +365,7 @@ Promise.all([CA,CAL.catch(function(){return[]})]).then(function(a){
  var parts=[],used={};
  function word(cls,txt){return '<b class="'+cls+'">'+txt+"</b>"}
  function verb(x,v,w){/* w = [small up, up, big up, small down, down, big down] */return x<0.5?(v>0?w[0]:w[3]):x<1.5?(v>0?w[1]:w[4]):(v>0?w[2]:w[5])}
- var STAND={gold:1,silver:1,brent:1,wti:1,btc:1,eurusd:1,gbpusd:1,usdjpy:1,ndx:1,dji:1,ukx:1,dax:1};
+ var STAND={gold:1,silver:1,brent:1,wti:1,eurusd:1,gbpusd:1,usdjpy:1,ndx:1,dji:1,ukx:1,dax:1};
  var st=d.rows.filter(function(r){return STAND[r.id]&&r.id!=="spx"&&r.mv&&ratio(r)>=1.5}).sort(function(a,b){return ratio(b)-ratio(a)})[0];
  var pc=function(r){return mvTxt(r,r.mv[0])},NM={ndx:"the Nasdaq",dji:"the Dow",ukx:"the FTSE",dax:"the DAX"};
  var s=by.spx;if(s){var v=s.mv[0],x=ratio(s);
