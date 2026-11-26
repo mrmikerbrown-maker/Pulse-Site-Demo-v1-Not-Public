@@ -97,6 +97,9 @@ td.l small{color:var(--muted);margin-left:4px}
 .fate{font-size:12px}.fate.k,.fate.h{color:var(--text)}.fate.f{color:var(--muted)}.fate.s{color:var(--dim)}
 .upc{color:var(--up)}.dnc{color:var(--down)}.flc{color:var(--muted)}
 .show-s{display:none}.show-s small{display:block;font-size:10.5px;color:var(--muted)}
+.bz{display:inline-block;width:15px;height:15px;line-height:15px;text-align:center;border-radius:50%;background:var(--down);color:var(--bg);font-size:10px;font-weight:700;margin-left:6px;vertical-align:1px;cursor:help}
+.cau{font-size:13px;color:var(--text2);border-left:3px solid var(--down);padding:4px 10px;margin:-4px 0 12px;max-width:90ch}.cau b{color:var(--text);font-weight:500}
+.note{font-size:13px;color:var(--text2);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:-4px 0 12px;max-width:90ch}.note b{color:var(--text);font-weight:500}
 .i5{font-size:9.5px;font-weight:700;letter-spacing:.05em;border:1px solid var(--line);border-radius:4px;padding:1px 4px;margin-left:6px;color:var(--muted);vertical-align:1px}
 /* explainer + source */
 .how,.srcd{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 18px;margin:0 0 14px;font-size:14px;color:var(--text2)}
@@ -115,7 +118,10 @@ details[open]>summary:before{transform:rotate(45deg)}
 @media (max-width:900px){.two{grid-template-columns:1fr}.g3{grid-template-columns:1fr}}
 @media (max-width:560px){
  .hide-s{display:none}.show-s{display:table-cell}
- .i5{display:block;width:fit-content;margin:3px 0 0}
+ .bz{display:inline-block;width:15px;height:15px;line-height:15px;text-align:center;border-radius:50%;background:var(--down);color:var(--bg);font-size:10px;font-weight:700;margin-left:6px;vertical-align:1px;cursor:help}
+.cau{font-size:13px;color:var(--text2);border-left:3px solid var(--down);padding:4px 10px;margin:-4px 0 12px;max-width:90ch}.cau b{color:var(--text);font-weight:500}
+.note{font-size:13px;color:var(--text2);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:-4px 0 12px;max-width:90ch}.note b{color:var(--text);font-weight:500}
+.i5{display:block;width:fit-content;margin:3px 0 0}
  .ctl .lbl{width:100%}
  .seg button{padding:7px 10px;font-size:12.5px}
  .card{padding:12px 12px}
@@ -145,6 +151,7 @@ details[open]>summary:before{transform:rotate(45deg)}
 <div class="card" id="one" data-nogloss>
  <div class="ch2"><h2 id="oneT">Latest release</h2><small id="oneW"></small></div>
  <div class="rel" id="oneR"></div>
+ <div id="oneX"></div>
  <div class="two">
   <div class="pane">
    <div class="pr"><div><h3>Release day, every 5 minutes</h3><p class="cap" id="dayCap"></p></div><button class="play" id="play1" type="button">Play</button></div>
@@ -178,6 +185,7 @@ details[open]>summary:before{transform:rotate(45deg)}
   <li><b>Day 1 move.</b> From the market's last close <i>before</i> the release to its close on release day. US data comes out at 13:30 London (12:30 when the US and UK clocks are out of step), so day 1 covers the reaction and the rest of that session. S&amp;P 500 futures, the dollar index and gold are in %; the 10-year yield is in basis points (1bp = 0.01 percentage points).</li>
   <li><b>The next 10 days.</b> The same starting point, measured to each of the next 10 closes. The dashed line is the median (middle) path of every past release with the same kind of surprise; the shaded band holds the middle half of them.</li>
   <li><b>Held, kept going or faded.</b> We compare the move after 5 trading days with the day 1 move. <b>Kept going</b>: same direction and bigger. <b>Held</b>: same direction and at least half of it still there. <b>Faded</b>: less than half left, or it reversed. Day 1 moves smaller than <span id="minTxt"></span> are left out as too small to call. Same rule as the Earnings Moves page.</li>
+  <li><b>Busy days.</b> Marked <span class="bz" style="cursor:default">!</span> in the table: a Fed decision later the same day, or another release on this page out at the same time.</li>
   <li><b>Rose on the day.</b> The share of releases where the market closed higher on release day than the close before. For the 10-year yield, "rose" means the yield went up (bond prices went down).</li>
  </ol>
  <p class="ex" id="ex"></p>
@@ -280,6 +288,7 @@ function render(){
  $("oneT").textContent=latest?"Latest release":"Selected release";
  $("oneW").textContent=ldn(SEL.d,SEL.t,{weekday:"short",day:"numeric",month:"short",year:"numeric"})+" · "+ldn(SEL.d,SEL.t,{hour:"2-digit",minute:"2-digit"})+" London";
  $("oneR").innerHTML='<span class="big">'+fv(SEL.a)+' <small>vs '+fv(SEL.f)+' forecast · '+SEL.p+'</small></span><span class="tag '+SEL.g+'">'+GN[SEL.g]+'</span>';
+ $("oneX").innerHTML=(SEL.x?'<p class="cau"><b>Busy day.</b> '+SEL.x.join(". ")+'. The day\'s close includes that too, so this move can\'t be pinned on this release alone.</p>':'');
  var rep=DATA.replays[REL+"|"+SEL.d];
  if(rep){var s=rep[MKT],at=function(i){for(var j=i;j>=12;j--)if(s[j]!=null)return s[j];return null},end=at(s.length-1);
   $("dayCap").textContent=m.name+": "+fm(at(13))+" in the first 5 minutes, "+fm(at(24))+" after an hour, "+fm(end)+" by "+new Date(new Date(SEL.d+"T"+SEL.t+":00Z").getTime()+8*3600e3).toLocaleTimeString("en-GB",{timeZone:"Europe/London",hour:"2-digit",minute:"2-digit"})+".";
@@ -302,7 +311,7 @@ function render(){
   '<div class="fk"><span>After 5 days:</span><span>Kept going <b>'+pc(s.k,s.c)+'</b></span><span>Held <b>'+pc(s.h,s.c)+'</b></span><span>Faded <b>'+pc(s.f,s.c)+'</b></span></div></div>'}).join("");
  /* table */
  $("thD1").textContent="Day 1";$("thD5").innerHTML=innerWidth<560?"Day 5":"After 5 days";
- $("tbody").innerHTML=Ls.map(function(r,i){var p=r.m[MKT],f=fate(r);return '<tr class="rw g-'+r.g+(r===SEL?" sel":"")+'" data-i="'+DATA.releases[REL].rows.indexOf(r)+'"><td>'+ldn(r.d,r.t,{day:"numeric",month:"short",year:"2-digit"})+(r.r?'<span class="i5">5-MIN</span>':'')+'</td><td class="hide-s">'+r.p+'</td><td class="hide-s"'+(r.tv!=null?' title="First announced. Later revised to '+fv(r.tv)+'"':'')+'>'+fv(r.a)+(r.tv!=null?'<sup style="color:var(--muted)">r</sup>':'')+'</td><td class="hide-s">'+fv(r.f)+'</td><td class="show-s">'+fv(r.a)+' vs '+fv(r.f)+'<small>'+GN[r.g]+'</small></td><td class="l hide-s">'+GN[r.g]+'</td><td class="'+col(p[0])+'">'+fm(p[0])+'</td><td class="'+col(p[4])+'">'+(p.length>=5?fm(p[4]):"–")+'</td><td class="l hide-s"><span class="fate '+(f||"s")+'">'+(f?FW[f]:"Not yet")+'</span></td></tr>'}).join("");
+ $("tbody").innerHTML=Ls.map(function(r,i){var p=r.m[MKT],f=fate(r);return '<tr class="rw g-'+r.g+(r===SEL?" sel":"")+'" data-i="'+DATA.releases[REL].rows.indexOf(r)+'"><td>'+ldn(r.d,r.t,{day:"numeric",month:"short",year:"2-digit"})+(r.x?'<span class="bz" title="'+r.x.join(". ")+'">!</span>':'')+(r.r?'<span class="i5">5-MIN</span>':'')+'</td><td class="hide-s">'+r.p+'</td><td class="hide-s"'+(r.tv!=null?' title="First announced. Later revised to '+fv(r.tv)+'"':'')+'>'+fv(r.a)+(r.tv!=null?'<sup style="color:var(--muted)">r</sup>':'')+'</td><td class="hide-s">'+fv(r.f)+'</td><td class="show-s">'+fv(r.a)+' vs '+fv(r.f)+'<small>'+GN[r.g]+'</small></td><td class="l hide-s">'+GN[r.g]+'</td><td class="'+col(p[0])+'">'+fm(p[0])+'</td><td class="'+col(p[4])+'">'+(p.length>=5?fm(p[4]):"–")+'</td><td class="l hide-s"><span class="fate '+(f||"s")+'">'+(f?FW[f]:"Not yet")+'</span></td></tr>'}).join("");
  /* explainer bits */
  $("bandTxt").textContent=R.band?"Counted as in line when within "+(R.u==="k"?R.band+"k jobs":R.band+(R.u==="%"?" percentage points":" points"))+" of the forecast.":"Counted as in line only when it matches the forecast to the decimal place published.";
  $("minTxt").textContent="0.4% for S&P 500 futures and gold, 0.15% for the dollar index and 2bp for the 10-year yield (about a third of a typical day for each)";
