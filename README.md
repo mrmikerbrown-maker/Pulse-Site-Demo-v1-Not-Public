@@ -10,7 +10,7 @@ The site is public to anyone with the link, despite the repo name.
 | Folder | Page |
 |---|---|
 | `/` (index.html) | Home page with live cards for each tool |
-| `calendar/` | This week (economic calendar) |
+| `calendar/` | Economic calendar (last 5 working days to next 5) |
 | `index-contribution-site/` | Index Contribution (S&P 500, Nasdaq 100, Dow); `preview/` is a test copy |
 | `surprises/` | Data Surprises |
 | `economy-thermometer/` | Economy Thermometer |
@@ -31,7 +31,7 @@ All the jobs are free GitHub Actions and need no passwords or keys. Each one can
 
 | Job | When (UK time) | Updates |
 |---|---|---|
-| Calendar: update this week | every 15 min on weekdays, every 30 min overnight for Asia, plus Sat/Sun | `calendar/data/` |
+| Calendar: update (rolling 7 days back to 7 ahead) | every 15 min on weekdays, every 30 min overnight for Asia, plus Sat/Sun | `calendar/data/` |
 | Central banks: update rates | about 06:30 and 20:30 in winter (an hour later in summer) | `central-banks/data.json` |
 | Economy Thermometer: update data | about 06:17 in winter (07:17 in summer) | `economy-thermometer/data.json` |
 | Index Contribution: save SPY weights | 13:15 on weekdays in winter (14:15 in summer) | `index-contribution-site/spy-weights*.csv` |

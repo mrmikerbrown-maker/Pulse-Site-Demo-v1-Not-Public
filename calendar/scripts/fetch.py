@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Fetch this week's economic calendar into data/calendar.json.
+"""Fetch the economic calendar (last 7 days to 7 days ahead) into data/calendar.json.
 
 Runs on GitHub Actions, no API key. Main source: TradingView's public calendar
 feed (actual, consensus, previous). Backup: the ForexFactory weekly feed
-(consensus and previous only). To switch to another provider later (e.g.
+(consensus and previous only, and only for the current Monday-Sunday week). To switch to another provider later (e.g.
 Newsquawk), write one more fetch_xxx() that returns the same event dicts and
 put it first in SOURCES.
 
@@ -27,13 +27,11 @@ def get(url, headers=None):
         return json.loads(r.read().decode("utf-8"))
 
 
-def week_window(now):
-    """Monday 00:00 to next Monday 00:00 UTC. From Saturday on, show the coming week."""
-    d = now.date()
-    if d.weekday() >= 5:
-        d += timedelta(days=7 - d.weekday())
-    mon = datetime(d.year, d.month, d.day, tzinfo=timezone.utc) - timedelta(days=d.weekday())
-    return mon, mon + timedelta(days=7)
+def window(now):
+    """Rolling window: from 7 days ago to 7 days ahead (whole UTC days). That always holds the
+    last 5 weekdays, today and the next 5 weekdays, which is what the calendar page shows."""
+    today = datetime(now.year, now.month, now.day, tzinfo=timezone.utc)
+    return today - timedelta(days=7), today + timedelta(days=8)
 
 
 def short_period(p):
@@ -164,7 +162,7 @@ def save_history(events):
 def main():
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     now = datetime.now(timezone.utc)
-    start, end = week_window(now)
+    start, end = window(now)
     events, used, errors = None, None, []
     for name, fn in SOURCES:
         try:
@@ -181,19 +179,8 @@ def main():
         print("All sources failed; keeping the last saved calendar.")
         return 0
     events.sort(key=lambda e: (e["t"], -e["imp"], e["c"], e["name"]))
-    data = {"week_start": start.strftime("%Y-%m-%d"), "source": used, "countries": COUNTRIES, "events": events}
-    # The following week's releases too (names and times only; most have no consensus yet), so the
-    # homepage "Next big release" tile is never empty late on a Friday. The homepage picks the big ones.
-    # Only TradingView can look ahead; if it fails, keep what was saved before.
-    try:
-        ahead = [e for e in map(tidy, fetch_tradingview(end, end + timedelta(days=7))) if not NOISE.search(e["name"])]
-        ahead.sort(key=lambda e: (e["t"], -e["imp"], e["c"], e["name"]))
-        data["next_week"] = [{k: e[k] for k in ("t", "c", "name", "imp")} for e in ahead]
-    except Exception as ex:
-        print("warning: next week:", ex)
-        if os.path.exists(OUT):
-            with open(OUT) as f:
-                data["next_week"] = json.load(f).get("next_week", [])
+    data = {"window_start": start.strftime("%Y-%m-%d"), "window_end": (end - timedelta(days=1)).strftime("%Y-%m-%d"),
+            "source": used, "countries": COUNTRIES, "events": events}
     old, old_checked, old_fetched = None, None, None
     if os.path.exists(OUT):
         with open(OUT) as f:
@@ -207,7 +194,7 @@ def main():
     # check can still tell "nothing happened" (fine) apart from "the fetch is broken" (a problem).
     if old != data:
         data_out = dict(data, checked=stamp, fetched=stamp)
-        print("Saved %d events from %s (week of %s)" % (len(events), used, data["week_start"]))
+        print("Saved %d events from %s (%s to %s)" % (len(events), used, data["window_start"], data["window_end"]))
     elif not old_fetched or (now - datetime.strptime(old_fetched, "%Y-%m-%dT%H:%M:%SZ").replace(
             tzinfo=timezone.utc)) >= timedelta(hours=HEARTBEAT_HOURS):
         data_out = dict(data, checked=old_checked or stamp, fetched=stamp)
