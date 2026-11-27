@@ -164,3 +164,6 @@ tv1001692990508,2026-11-25T15:30:00Z,US,EIA Gasoline Stocks Change,w/o Nov 16,1.
 tv1001682572201,2026-11-26T07:00:00Z,DE,GfK Consumer Confidence,Dec,-30.2,-29.9,-30.9,,,key
 tv1001663394103,2026-11-26T09:00:00Z,EU,M3 Money Supply Annual Growth,Oct,3.6,3.5,3.5,%,,medium
 tv1001680302501,2026-11-27T07:00:00Z,NO,Registered Jobless Rate,Oct,2,2,2,%,,medium
+tv1001692280201,2026-11-27T08:55:00Z,DE,Unemployed Persons NSA,Nov,2.936,,2.955,,M,key
+tv1001692280204,2026-11-27T08:55:00Z,DE,Unemployment Change,Nov,9,4,4,,K,medium
+tv1001692280203,2026-11-27T08:55:00Z,DE,Unemployment Rate,Nov,6.4,6.4,6.4,%,,medium
